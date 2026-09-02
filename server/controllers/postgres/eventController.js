@@ -1,7 +1,59 @@
+const fs = require("fs");
+const path = require("path");
 const { Op } = require("sequelize");
 const eventModel = require("../../models/postgres/eventModel");
 const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
 const userModel = require("../../models/postgres/userModel");
+
+const getSlug = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+
+const loadEventCatalog = () => {
+  const candidates = [
+    path.resolve(__dirname, '../../data/events.json'),
+    path.resolve(__dirname, '../../../client/src/data/events.json'),
+    path.resolve(__dirname, '../../../data/events.json'),
+  ];
+
+  for (const candidate of candidates) {
+    try {
+      if (fs.existsSync(candidate)) {
+        const raw = fs.readFileSync(candidate, 'utf8');
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch (error) {
+      console.warn('Event catalog load warning:', error.message);
+    }
+  }
+
+  return [];
+};
+
+const eventCatalog = loadEventCatalog();
+const eventCatalogById = new Map(eventCatalog.map((event) => [String(event.id), event]));
+const eventCatalogBySlug = new Map(eventCatalog.map((event) => [getSlug(event.name), event]));
+
+const enrichEvent = (event) => {
+  const plainEvent = event && typeof event.toJSON === 'function' ? event.toJSON() : event;
+  const catalogEntry = eventCatalogById.get(String(plainEvent.id)) || eventCatalogBySlug.get(getSlug(plainEvent.name));
+  const slug = catalogEntry?.slug || getSlug(plainEvent.name);
+
+  return {
+    ...plainEvent,
+    slug,
+    detail: catalogEntry?.detail || {
+      name: plainEvent.name,
+      guardianName: 'GUARDIAN',
+      quote: plainEvent.description || 'Enter the arena.',
+      durationText: `${plainEvent.start_time || 'TBA'} - ${plainEvent.end_time || 'TBA'}`,
+      shortDesc: plainEvent.description || '',
+      fullDesc: plainEvent.description || '',
+      skills: [],
+      briefing: plainEvent.description || 'Enter the arena.'
+    },
+    guardian_asset: catalogEntry?.guardian_asset || plainEvent.guardian_asset || '/assets/login.png',
+  };
+};
 
 const createEvent = async (req, res) => {
   try {
@@ -17,11 +69,11 @@ const getAllEvents = async (req, res) => {
     const events = await eventModel.findAll({
       order: [["date", "ASC"], ["start_time", "ASC"]],
     });
-    const orderedEvents = events.sort((a, b) => {
+    const orderedEvents = [...events].sort((a, b) => {
       const rank = (event) => event.name.toLowerCase().includes("nostos") ? -1 : event.is_flagship || event.name.toLowerCase().includes("star of login") ? 1 : 0;
       return rank(a) - rank(b);
     });
-    return res.json(orderedEvents);
+    return res.json(orderedEvents.map(enrichEvent));
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch events", error: error.message });
   }
@@ -42,9 +94,21 @@ const getAssignedEvents = async (req, res) => {
 
 const getEvent = async (req, res) => {
   try {
-    const event = await eventModel.findByPk(req.params.id);
+    let event = null;
+    const lookup = req.params.id;
+
+    if (lookup && !Number.isNaN(Number(lookup))) {
+      event = await eventModel.findByPk(Number(lookup));
+    }
+
+    if (!event) {
+      const allEvents = await eventModel.findAll();
+      const slug = getSlug(lookup);
+      event = allEvents.find((entry) => getSlug(entry.name) === slug || String(entry.id) === String(lookup));
+    }
+
     if (!event) return res.status(404).json({ message: "Event not found" });
-    return res.json(event);
+    return res.json(enrichEvent(event));
   } catch (error) {
     return res.status(500).json({ message: "Failed to fetch event", error: error.message });
   }

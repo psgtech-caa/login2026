@@ -66,7 +66,7 @@ export const CoordinatorsSection: React.FC<CoordinatorsSectionProps> = ({ isHome
       ]
     },
     {
-      title: 'FACULTY COORDINATORS',
+      title: 'WEB SITE FACULTY COORDINATORS',
       tagline: 'Department faculty mentors guiding LOGIN 2K26.',
       isCore: false,
       items: [

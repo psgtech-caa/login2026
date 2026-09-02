@@ -174,12 +174,13 @@ const startServer = async () => {
     // --- SEED ACCOUNTS ---
     try {
       const { Op } = require('sequelize');
-   const seedPass = process.env.SEED_ADMIN_PASSWORD || 'ChangeMe!Rotate2026';
-   const seeds = [
-     { email: 'login@psgtech.ac.in', name: "login'26", login_id: 'login26admin', pass: seedPass, role: 'super_admin' },
-     { email: '25mx103@psgtech.ac.in', name: 'Barathvikraman S K', login_id: '25mx103', pass: seedPass, role: 'super_admin' },
-     { email: '25mx336@psgtech.ac.in', name: 'nitheeshmuthukrishnan', login_id: '25mx336', pass: seedPass, role: 'super_admin' }
-   ];
+      const seedPass = process.env.SEED_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || 'changeme_rotate_immediately';
+      const seeds = [
+        { email: 'login@psgtech.ac.in', name: "login'26", login_id: 'login26admin', pass: seedPass, role: 'super_admin' },
+        { email: '25mx103@psgtech.ac.in', name: 'Barathvikraman S K', login_id: '25mx103', pass: seedPass, role: 'super_admin' },
+        { email: '25mx127@psgtech.ac.in', name: 'Swarna Rathna', login_id: '25mx127', pass: seedPass, role: 'super_admin' },
+        { email: '25mx125@psgtech.ac.in', name: 'Stephina Smily', login_id: '25mx125', pass: seedPass, role: 'super_admin' }
+      ];
 
       // Remove old static seeds if they exist
       await userModel.destroy({ where: { login_id: { [Op.in]: ['ADMIN', 'COORD'] } } }).catch(() => {});
