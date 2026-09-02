@@ -118,19 +118,11 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
                 <a href="mailto:login@psgtech.ac.in" className="hover:text-[#F7F2F2] transition-colors font-mono">login@psgtech.ac.in</a>
               </li>
               <li className="space-y-1 pt-1 border-t border-[#2A1A1D]/60">
-                <span className="text-[10px] font-mono font-bold text-[#E01B22] uppercase tracking-wider block">SECRETARY</span>
+                <span className="text-[10px] font-mono font-bold text-[#E01B22] uppercase tracking-wider block">SECRETARY & MAIN CONTACT</span>
                 <span className="text-[#F7F2F2] font-semibold text-xs block">Barathvikraman S K</span>
                 <a href="tel:8148251567" className="inline-flex items-center gap-1.5 text-xs text-[#A79798] hover:text-[#E01B22] transition-colors font-mono">
                   <Phone className="w-3.5 h-3.5 shrink-0 text-[#E01B22]" />
                   +91 81482 51567
-                </a>
-              </li>
-              <li className="space-y-1 pt-2 border-t border-[#2A1A1D]/60">
-                <span className="text-[10px] font-mono font-bold text-[#E01B22] uppercase tracking-wider block">TREASURER</span>
-                <span className="text-[#F7F2F2] font-semibold text-xs block">Swarna Rathna A</span>
-                <a href="tel:9952873426" className="inline-flex items-center gap-1.5 text-xs text-[#A79798] hover:text-[#E01B22] transition-colors font-mono">
-                  <Phone className="w-3.5 h-3.5 shrink-0 text-[#E01B22]" />
-                  +91 99528 73426
                 </a>
               </li>
             </ul>

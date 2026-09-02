@@ -942,7 +942,7 @@ export const AdminPage: React.FC = () => {
                       type="text"
                       value={newUserPhone}
                       onChange={(e) => setNewUserPhone(e.target.value)}
-                      placeholder="e.g. 9952873426"
+                      placeholder="e.g. 8148251567"
                       className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] p-2.5 rounded-[2px] outline-none"
                     />
                   </div>

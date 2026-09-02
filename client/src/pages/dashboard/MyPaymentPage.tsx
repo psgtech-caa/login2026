@@ -232,12 +232,12 @@ export const MyPaymentPage: React.FC = () => {
                   <p className="text-[10px] text-[#1FA971] font-bold">NEED HELP?</p>
                   <p className="text-[10px] mt-1">Stuck or facing issues with payment?</p>
                   <a
-                    href="https://wa.me/918148251567"
+                    href="https://wa.me/918148251567?text=Hi%2C%20I%20have%20an%20issue%20with%20LOGIN%202K26%20payment"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-block mt-2 px-4 py-2 bg-[#1FA971]/10 border border-[#1FA971]/30 hover:bg-[#1FA971]/20 text-[#1FA971] font-mono text-[10px] font-bold uppercase rounded-[2px] transition-colors"
                   >
-                    CONTACT US ON WHATSAPP 💬
+                    CONTACT US ON WHATSAPP 💬 (+91 81482 51567)
                   </a>
                 </div>
               </div>

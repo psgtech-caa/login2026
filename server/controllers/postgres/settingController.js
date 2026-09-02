@@ -12,7 +12,7 @@ const getSettings = async (req, res) => {
     if (!map.payment_url) map.payment_url = "https://events.psginstitutions.in/EMS/register/E5294158179";
     if (!map.registration_amount) map.registration_amount = "150";
     if (!map.contact_email) map.contact_email = "login2026@psgtech.ac.in";
-    if (!map.contact_phone) map.contact_phone = "+91 98765 43210";
+    if (!map.contact_phone) map.contact_phone = "+91 81482 51567";
     if (map.show_winners === undefined) map.show_winners = "false";
 
     return res.json(map);

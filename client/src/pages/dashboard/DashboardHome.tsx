@@ -86,6 +86,26 @@ export const DashboardHome: React.FC = () => {
         )}
       </AnimatePresence>
 
+      {/* WhatsApp Support Help Banner */}
+      <motion.div variants={itemVariants} className="bg-[#1FA971]/10 border border-[#1FA971]/30 p-4 rounded-[2px] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-mono">
+        <div className="flex items-center gap-3 text-[#1FA971]">
+          <span className="text-xl">💬</span>
+          <div>
+            <span className="font-bold uppercase tracking-wider block text-[#1FA971]">Need Instant Help or Support?</span>
+            <span className="text-[#A79798] text-[11px]">Chat directly with our symposium coordinator Barathvikraman S K (+91 81482 51567)</span>
+          </div>
+        </div>
+        <a
+          href="https://wa.me/918148251567?text=Hi%2C%20I%20need%20help%20with%20LOGIN%202K26%20dashboard"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="px-4 py-2 bg-[#1FA971] hover:bg-[#158f5c] text-[#0A0607] font-bold text-xs uppercase rounded-[2px] transition-colors shrink-0 flex items-center gap-2"
+        >
+          <span>Chat on WhatsApp</span>
+          <span>↗</span>
+        </a>
+      </motion.div>
+
       {/* 1. Profile Header / ID Card */}
       <motion.div variants={itemVariants} className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] shadow-2xl relative overflow-hidden group hover:border-[#3E2529] transition-colors">
         {/* Cyber Image Overlay */}

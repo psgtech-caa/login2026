@@ -37,7 +37,7 @@ const seedUsers = [
   {
     name: 'Swarna Rathna',
     email: '25mx127@psgtech.ac.in',
-    phone: '9952873426',
+    phone: '8148251567',
     password: defaultAdminPassword,
     college_name: 'PSG College of Technology',
     department: 'Computer Applications',
@@ -50,7 +50,7 @@ const seedUsers = [
   {
     name: 'Stephina Smily',
     email: '25mx125@psgtech.ac.in',
-    phone: '8300526351',
+    phone: '8148251567',
     password: defaultAdminPassword,
     college_name: 'PSG College of Technology',
     department: 'Computer Applications',

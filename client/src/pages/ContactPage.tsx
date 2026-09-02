@@ -125,14 +125,20 @@ export const ContactPage: React.FC = () => {
                     <Phone className="w-5 h-5" />
                   </div>
                   <div className="space-y-2 text-left">
-                    <span className="text-[10px] font-mono text-[#E01B22] font-black uppercase tracking-wider block">COORDINATOR CONTACTS</span>
+                    <span className="text-[10px] font-mono text-[#E01B22] font-black uppercase tracking-wider block">OFFICIAL CONTACT & WHATSAPP SUPPORT</span>
                     <div>
                       <span className="text-[10px] font-mono text-[#6B5A5C] block">SECRETARY: Barathvikraman S K</span>
-                      <a href="tel:8148251567" className="font-mono text-xs text-[#F7F2F2] hover:text-[#E01B22] transition-colors">+91 81482 51567</a>
+                      <a href="tel:8148251567" className="font-mono text-xs text-[#F7F2F2] hover:text-[#E01B22] transition-colors block">+91 81482 51567</a>
                     </div>
-                    <div className="pt-1">
-                      <span className="text-[10px] font-mono text-[#6B5A5C] block">TREASURER: Swarna Rathna A</span>
-                      <a href="tel:9952873426" className="font-mono text-xs text-[#F7F2F2] hover:text-[#E01B22] transition-colors">+91 99528 73426</a>
+                    <div className="pt-2">
+                      <a 
+                        href="https://wa.me/918148251567?text=Hi%2C%20I%20have%20a%20query%20regarding%20LOGIN%202K26" 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#1FA971]/10 border border-[#1FA971]/30 hover:bg-[#1FA971]/20 text-[#1FA971] font-mono text-[10px] font-bold uppercase rounded-[2px] transition-colors"
+                      >
+                        💬 WHATSAPP SUPPORT (+91 81482 51567)
+                      </a>
                     </div>
                   </div>
                 </div>

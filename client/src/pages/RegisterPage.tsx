@@ -454,6 +454,23 @@ END:VCALENDAR`;
             </div>
           )}
 
+          {/* WhatsApp Support Help Banner */}
+          <div className="bg-[#1FA971]/10 border border-[#1FA971]/30 p-3.5 rounded-[2px] flex items-center justify-between gap-3 text-xs font-mono">
+            <div className="flex items-center gap-2 text-[#1FA971]">
+              <span className="text-sm">💬</span>
+              <span className="font-bold">Need assistance while registering?</span>
+            </div>
+            <a
+              href="https://wa.me/918148251567?text=Hi%2C%20I%20need%20help%20with%20LOGIN%202K26%20registration"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-3 py-1.5 bg-[#1FA971] hover:bg-[#158f5c] text-[#0A0607] font-bold text-[11px] uppercase rounded-[2px] transition-colors shrink-0 flex items-center gap-1.5"
+            >
+              <span>WhatsApp Support</span>
+              <span>↗</span>
+            </a>
+          </div>
+
           {/* Server Error */}
           {serverError && (
             <div className="bg-[#4A050A] border border-[#E01B22] p-4 rounded-[2px] flex items-center gap-3 text-xs font-mono text-[#FF2A2A]">
