@@ -229,7 +229,7 @@ export const AdminPage: React.FC = () => {
         name: newUserName.trim(),
         login_id: newUserLoginId.trim() || undefined,
         email: newUserEmail.trim(),
-        phone: newUserPhone.trim() || '9876543210',
+        phone: newUserPhone.trim() || '8148251567',
         password: newUserPassword,
         role: newUserRole.toLowerCase().trim(),
         event_id: requiresEventAssignment ? Number(newUserEventId) : undefined,

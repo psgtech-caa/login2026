@@ -330,7 +330,7 @@ const createUserByAdmin = async (req, res) => {
     const newUser = await userModel.create({
       name: name.trim(),
       email: email.toLowerCase().trim(),
-      phone: phone ? phone.trim() : "9876543210",
+      phone: phone ? phone.trim() : "8148251567",
       password: hashedPassword,
       login_id: login_id ? login_id.trim() : null,
       role: assignedRole,

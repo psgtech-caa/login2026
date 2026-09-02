@@ -509,7 +509,7 @@ END:VCALENDAR`;
                 <input
                   type="text"
                   {...register('phone')}
-                  placeholder="e.g. 9876543210"
+                  placeholder="e.g. 8148251567"
                   className={inputClass}
                 />
                 {errors.phone && <p className={errorClass}>{(errors.phone as any).message}</p>}

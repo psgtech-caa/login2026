@@ -53,6 +53,18 @@ const getStudentRegisteredEvents = async (studentId) => {
   }));
 };
 
+const hasUserPaid = async (studentId) => {
+  const payment = await paymentModel.findOne({
+    where: {
+      student_id: studentId,
+      status: {
+        [Op.in]: ["VERIFIED", "PENDING", "successful", "in_progress", "review"]
+      }
+    }
+  });
+  return Boolean(payment);
+};
+
 const createRegistration = async (req, res) => {
   try {
     const student_id = req.user.id;
@@ -148,19 +160,7 @@ const createRegistration = async (req, res) => {
     const verifiedTeammates = [];
     const pendingTeammates = [];
 
-const hasUserPaid = async (studentId) => {
-  const payment = await paymentModel.findOne({
-    where: {
-      student_id: studentId,
-      status: {
-        [Op.in]: ["VERIFIED", "PENDING", "successful", "in_progress", "review"]
-      }
-    }
-  });
-  return Boolean(payment);
-};
-
-      if (isTeamEvent) {
+    if (isTeamEvent) {
         if (!cleanTeamName) {
           return res.status(400).json({ message: "Team name is required for team events." });
         }
