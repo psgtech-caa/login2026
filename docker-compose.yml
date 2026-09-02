@@ -41,6 +41,7 @@ services:
       SESSION_SECRET: super_secret_session_key_login_2026
       SKIP_DB_SEED: "true"
       DB_SEED_ON_BOOT: "false"
+      DISABLE_DB_SYNC: "true"
     env_file:
       - ./.env
     networks:

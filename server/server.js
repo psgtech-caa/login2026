@@ -28,6 +28,7 @@ const { startSyncCron, syncLocalToNeon } = require("./services/dbSync");
 
 const PORT = process.env.PORT || 5000;
 const shouldSkipDbSeed = ['true', '1', 'yes', 'on'].includes(String(process.env.SKIP_DB_SEED || process.env.DB_SEED_ON_BOOT || '').toLowerCase());
+const shouldDisableDbSync = ['true', '1', 'yes', 'on'].includes(String(process.env.DISABLE_DB_SYNC || '').toLowerCase());
 
 const startServer = async () => {
   try {
@@ -219,13 +220,15 @@ const startServer = async () => {
     // ----------------------
     
     // Start Dual DB Synchronization (Local -> Neon) every 5 minutes (300000 ms)
-    if (neonSequelize) {
+    if (neonSequelize && !shouldDisableDbSync) {
       try {
         syncLocalToNeon().catch(console.error);
         startSyncCron(300000);
       } catch (syncErr) {
         console.warn('Neon sync startup skipped due to connection issue:', syncErr.message);
       }
+    } else if (shouldDisableDbSync) {
+      console.log('Database synchronization is disabled via DISABLE_DB_SYNC=true; preserving database data.');
     }
 
     app.listen(PORT, () => {
