@@ -1,14 +1,18 @@
 require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
 const bcrypt = require('bcryptjs');
+const fs = require('fs');
+const path = require('path');
 const { sequelize } = require('./config/db/postgres');
 const { User, Event, EventCoordinator } = require('./models/postgres');
+
+const defaultAdminPassword = process.env.SEED_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || 'changeme_rotate_immediately';
 
 const seedUsers = [
   {
     name: 'Symposium Administrator',
     email: process.env.ADMIN_EMAIL || 'login@psgtech.ac.in',
     phone: '8148251567',
-    password: process.env.ADMIN_PASSWORD || 'C@@Adminlogin',
+    password: defaultAdminPassword,
     college_name: 'PSG College of Technology',
     department: 'Computer Applications',
     role: 'admin',
@@ -21,7 +25,7 @@ const seedUsers = [
     name: 'Barathvikraman',
     email: '25mx103@psgtech.ac.in',
     phone: '8148251567',
-    password: 'admin123',
+    password: defaultAdminPassword,
     college_name: 'PSG College of Technology',
     department: 'Computer Applications',
     role: 'admin_power',
@@ -34,7 +38,7 @@ const seedUsers = [
     name: 'Swarna Rathna',
     email: '25mx127@psgtech.ac.in',
     phone: '8148251567',
-    password: 'admin123',
+    password: defaultAdminPassword,
     college_name: 'PSG College of Technology',
     department: 'Computer Applications',
     role: 'admin_power',
@@ -47,7 +51,7 @@ const seedUsers = [
     name: 'Stephina Smily',
     email: '25mx125@psgtech.ac.in',
     phone: '8148251567',
-    password: 'admin123',
+    password: defaultAdminPassword,
     college_name: 'PSG College of Technology',
     department: 'Computer Applications',
     role: 'admin_power',
@@ -76,6 +80,62 @@ async function clearNonAlumniTables() {
   console.log('Clearing tables:', tableNames.join(', '));
   await sequelize.query(`TRUNCATE TABLE ${tableNames.map((name) => `"${name}"`).join(', ')} RESTART IDENTITY CASCADE;`);
   console.log('Non-alumni tables cleared successfully.');
+}
+
+async function seedEventsFromCatalog() {
+  const candidates = [
+    path.resolve(__dirname, 'data/events.json'),
+    path.resolve(__dirname, '../client/src/data/events.json'),
+    path.resolve(__dirname, '../data/events.json'),
+  ];
+
+  const eventFile = candidates.find((candidate) => fs.existsSync(candidate));
+  if (!eventFile) {
+    console.warn('No event catalog JSON file found for DB seeding.');
+    return;
+  }
+
+  const eventList = JSON.parse(fs.readFileSync(eventFile, 'utf8'));
+  if (!Array.isArray(eventList) || eventList.length === 0) {
+    return;
+  }
+
+  for (const event of eventList) {
+    const eventPayload = {
+      id: event.id,
+      name: event.name,
+      description: event.description || '',
+      coordinator_name: event.coordinator_name || null,
+      coordinator_phone: event.coordinator_phone || null,
+      date: event.date || '2026-09-18',
+      start_time: event.start_time || '09:00:00',
+      end_time: event.end_time || '11:00:00',
+      venue: event.venue || 'TBA',
+      is_online: Boolean(event.is_online),
+      max_participants: event.max_participants || 0,
+      category: (event.category || 'TECHNICAL').toUpperCase() === 'FLAGSHIP' ? 'FLAGSHIP' : ((event.category || 'TECHNICAL').toUpperCase() === 'NON_TECHNICAL' ? 'NON_TECHNICAL' : 'TECHNICAL'),
+      team_type: (event.team_type || 'INDIVIDUAL').toUpperCase() === 'TEAM' ? 'TEAM' : 'INDIVIDUAL',
+      min_team_size: event.min_team_size || 1,
+      max_team_size: event.max_team_size || 1,
+      day: event.day || 18,
+      registration_deadline: event.registration_deadline || null,
+      is_flagship: Boolean(event.is_flagship || event.category === 'FLAGSHIP'),
+      guardian_asset: event.guardian_asset || null,
+      entry_fee: event.entry_fee || 0,
+      rules_url: event.rules_url || null,
+      is_results_locked: Boolean(event.is_results_locked),
+      status: event.status || 'open',
+    };
+
+    const existingEvent = await Event.findOne({ where: { name: eventPayload.name } });
+    if (existingEvent) {
+      await existingEvent.update(eventPayload);
+    } else {
+      await Event.create(eventPayload);
+    }
+  }
+
+  console.log(`Seeded ${eventList.length} events into the database.`);
 }
 
 async function seedUsersList() {
@@ -124,6 +184,7 @@ async function main() {
     await sequelize.query("ALTER TYPE \"enum_users_user_type\" ADD VALUE IF NOT EXISTS 'STAFF';");
     await clearNonAlumniTables();
     await seedUsersList();
+    await seedEventsFromCatalog();
     const firstEvent = await Event.findOne({ order: [['id', 'ASC']] });
     if (firstEvent) {
       const admin = await User.findOne({ where: { email: 'login@psgtech.ac.in' } });

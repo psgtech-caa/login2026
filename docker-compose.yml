@@ -39,6 +39,8 @@ services:
       NEON_DATABASE_URL: postgresql://neondb_owner:npg_1zF9ySCxZfAv@ep-small-waterfall-axaac8kn-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
       JWT_SECRET: super_secret_jwt_key_login_2026
       SESSION_SECRET: super_secret_session_key_login_2026
+      SKIP_DB_SEED: "true"
+      DB_SEED_ON_BOOT: "false"
     env_file:
       - ./.env
     networks:
