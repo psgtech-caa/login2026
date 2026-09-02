@@ -664,7 +664,7 @@ export const AdminPage: React.FC = () => {
                       <td className="p-3.5">
                         <div className="font-bold text-[#F7F2F2]">{p.student?.name || p.user?.name || 'Participant'}</div>
                         <div className="text-[10px] text-[#A79798] font-mono">{p.student?.email || p.user?.email || '-'}</div>
-                        <div className="text-[10px] font-mono text-[#1FA971] font-bold mt-0.5">{p.student?.student_id_code || p.user?.student_id_code || '-'}</div>
+                        <div className="text-[10px] font-mono text-[#1FA971] font-bold mt-0.5">{p.student?.login_id || p.user?.login_id || '-'}</div>
                       </td>
                       <td className="p-3.5 font-mono text-[#E08A17] font-bold">{p.transaction_reference}</td>
                       <td className="p-3.5 font-mono text-[10px]">
@@ -1235,7 +1235,7 @@ export const AdminPage: React.FC = () => {
                       let statusColor = isPaid ? 'text-[#1FA971]' : isPending ? 'text-[#E08A17]' : 'text-[#E01B22]';
                       return (
                         <tr key={u.id} className="hover:bg-[#1A1114] transition-colors">
-                          <td className="p-3.5 font-mono text-[#6B5A5C]">#{u.student_id_code || u.id}</td>
+                          <td className="p-3.5 font-mono text-[#6B5A5C]">#{u.login_id || u.id}</td>
                           <td className="p-3.5">
                             <div className="font-bold text-[#F7F2F2]">{u.name}</div>
                             <div className="text-[10px] text-[#A79798] font-mono">{u.email}</div>

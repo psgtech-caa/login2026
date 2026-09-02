@@ -282,7 +282,7 @@ export const CoordinatorPage: React.FC = () => {
                         {evt.registrations.slice(0, 10).map((r: any, j: number) => (
                           <tr key={j} className="border-t border-[#2A1A1D]">
                             <td className="py-2">{r.student?.name || r.user?.name}</td>
-                            <td className="py-2 text-[#A79798]">{r.student?.student_id_code || r.user?.student_id_code}</td>
+                            <td className="py-2 text-[#A79798]">{r.student?.login_id || r.user?.login_id}</td>
                             <td className="py-2 truncate max-w-[150px]">{r.student?.college_name || r.user?.college_name}</td>
                             <td className="py-2">{r.team?.name || r.team_name || '-'}</td>
                             <td className="py-2 font-mono text-[#A79798]">
@@ -580,7 +580,7 @@ export const CoordinatorPage: React.FC = () => {
                           </span>
                         </div>
                         <div className="space-y-1 mb-4">
-                          <p className="text-[10px] font-mono text-[#E08A17]">{student?.student_id_code || 'No ID'}</p>
+                          <p className="text-[10px] font-mono text-[#E08A17]">{student?.login_id || 'No ID'}</p>
                           <p className="text-[10px] font-mono text-[#A79798] truncate" title={student?.college_name}>
                             {student?.college_name || 'N/A'}
                           </p>
