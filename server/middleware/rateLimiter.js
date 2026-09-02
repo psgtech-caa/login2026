@@ -22,6 +22,7 @@ const otpLimiter = rateLimit({
   max: 3,
   standardHeaders: true,
   legacyHeaders: false,
+  validate: { keyGeneratorIpFallback: false },
   message: { message: "Too many OTP requests from your IP address. Please try again after 15 minutes." },
   keyGenerator: (req) => {
     const forwarded = req.headers["x-forwarded-for"];

@@ -179,14 +179,23 @@ export const DashboardLayout: React.FC = () => {
         ))}
       </nav>
 
-      {/* Bottom: section label + logout */}
+      {/* Bottom: section label + support + logout */}
       <div className="p-3 border-t border-[#2A1A1D] space-y-1">
-        <p className="text-[9px] font-mono text-[#3E2529] uppercase tracking-widest px-4 pb-1">
+        <a
+          href="https://wa.me/918148251567?text=Hi%2C%20I%20need%20help%20with%20LOGIN%202K26"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="flex items-center gap-2.5 w-full px-4 py-2.5 rounded-[2px] text-xs font-mono text-[#1FA971] bg-[#1FA971]/10 border border-[#1FA971]/30 hover:bg-[#1FA971]/20 transition-all font-bold"
+        >
+          <span>💬</span>
+          <span>WhatsApp Support</span>
+        </a>
+        <p className="text-[9px] font-mono text-[#3E2529] uppercase tracking-widest px-4 pt-1 pb-0.5">
           {isAdmin || isDesk ? 'Admin Portal' : isCoord ? 'Coordinator Portal' : 'Participant Portal'}
         </p>
         <button
           onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-4 py-3 rounded-[2px] text-xs font-mono text-[#A79798] hover:text-[#FF2A2A] hover:bg-[#1A1114] transition-all"
+          className="flex items-center gap-3 w-full px-4 py-2.5 rounded-[2px] text-xs font-mono text-[#A79798] hover:text-[#FF2A2A] hover:bg-[#1A1114] transition-all"
         >
           <LogOut className="w-4 h-4" />
           <span>Logout</span>
@@ -212,9 +221,18 @@ export const DashboardLayout: React.FC = () => {
 
         {/* Minimal Dashboard Footer */}
         <footer className="border-t border-[#2A1A1D] p-4 text-center mt-auto hidden md:block">
-          <p className="text-[10px] font-mono text-[#6B5A5C] uppercase tracking-widest">
-            LOGIN 2K26 © 2026 • SUPPORT • PRIVACY
-          </p>
+          <div className="flex items-center justify-between max-w-6xl mx-auto px-4 text-[10px] font-mono text-[#6B5A5C] uppercase tracking-widest">
+            <span>LOGIN 2K26 © 2026</span>
+            <a
+              href="https://wa.me/918148251567?text=Hi%2C%20I%20need%20help%20with%20LOGIN%202K26"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#1FA971] hover:underline font-bold flex items-center gap-1"
+            >
+              <span>💬 WHATSAPP SUPPORT (+91 81482 51567)</span>
+            </a>
+            <span>PRIVACY & TERMS</span>
+          </div>
         </footer>
       </main>
 
