@@ -27,6 +27,7 @@ const eventModel = require("./models/postgres/eventModel");
 const { startSyncCron, syncLocalToNeon } = require("./services/dbSync");
 
 const PORT = process.env.PORT || 5000;
+const shouldSkipDbSeed = ['true', '1', 'yes', 'on'].includes(String(process.env.SKIP_DB_SEED || process.env.DB_SEED_ON_BOOT || '').toLowerCase());
 
 const startServer = async () => {
   try {
@@ -149,7 +150,12 @@ const startServer = async () => {
       console.log(`Seeded ${eventList.length} events into the database.`);
     };
 
-    await seedEventCatalog();
+    if (!shouldSkipDbSeed) {
+      await seedEventCatalog();
+    } else {
+      console.log('Database seeding is disabled via SKIP_DB_SEED=true; skipping event catalog seed.');
+    }
+
     await safeAddColumn('payments', 'payment_date', { type: DataTypes.STRING(255) });
     await safeAddColumn('payments', 'payment_method', { type: DataTypes.STRING(255), defaultValue: 'UPI' });
     await safeAddColumn('users', 'login_id', { type: DataTypes.STRING(20), unique: true });
@@ -172,40 +178,43 @@ const startServer = async () => {
     console.log("Database schema synchronized");
 
     // --- SEED ACCOUNTS ---
-    try {
-      const { Op } = require('sequelize');
-      const seedPass = process.env.SEED_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || 'changeme_rotate_immediately';
-      const seeds = [
-        { email: 'login@psgtech.ac.in', name: "login'26", login_id: 'login26admin', pass: seedPass, role: 'super_admin' },
-        { email: '25mx103@psgtech.ac.in', name: 'Barathvikraman S K', login_id: '25mx103', pass: seedPass, role: 'super_admin' },
-        { email: '25mx127@psgtech.ac.in', name: 'Swarna Rathna', login_id: '25mx127', pass: seedPass, role: 'super_admin' },
-        { email: '25mx125@psgtech.ac.in', name: 'Stephina Smily', login_id: '25mx125', pass: seedPass, role: 'super_admin' }
-      ];
+    if (!shouldSkipDbSeed) {
+      try {
+        const { Op } = require('sequelize');
+        const seedPass = process.env.SEED_ADMIN_PASSWORD || process.env.ADMIN_PASSWORD || 'changeme_rotate_immediately';
+        const seeds = [
+          { email: 'login@psgtech.ac.in', name: "login'26", login_id: 'login26admin', pass: seedPass, role: 'super_admin' },
+          { email: '25mx103@psgtech.ac.in', name: 'Barathvikraman S K', login_id: '25mx103', pass: seedPass, role: 'super_admin' },
+          { email: '25mx127@psgtech.ac.in', name: 'Swarna Rathna', login_id: '25mx127', pass: seedPass, role: 'super_admin' },
+          { email: '25mx125@psgtech.ac.in', name: 'Stephina Smily', login_id: '25mx125', pass: seedPass, role: 'super_admin' }
+        ];
 
-      // Remove old static seeds if they exist
-      await userModel.destroy({ where: { login_id: { [Op.in]: ['ADMIN', 'COORD'] } } }).catch(() => {});
+        await userModel.destroy({ where: { login_id: { [Op.in]: ['ADMIN', 'COORD'] } } }).catch(() => {});
 
-      for (const s of seeds) {
-        const hashedPw = await bcrypt.hash(s.pass, 10);
-        const user = await userModel.findOne({ where: { email: s.email } });
-        if (!user) {
-          await userModel.create({
-            name: s.name,
-            email: s.email,
-            password: hashedPw,
-            role: s.role,
-            user_type: 'STAFF',
-            login_id: s.login_id,
-            accommodation_required: false,
-          });
-          console.log(`Seeded account: ${s.login_id}`);
-        } else {
-          await user.update({ login_id: s.login_id, password: hashedPw, role: s.role, name: s.name });
-          console.log(`Updated seed account: ${s.login_id}`);
+        for (const s of seeds) {
+          const hashedPw = await bcrypt.hash(s.pass, 10);
+          const user = await userModel.findOne({ where: { email: s.email } });
+          if (!user) {
+            await userModel.create({
+              name: s.name,
+              email: s.email,
+              password: hashedPw,
+              role: s.role,
+              user_type: 'STAFF',
+              login_id: s.login_id,
+              accommodation_required: false,
+            });
+            console.log(`Seeded account: ${s.login_id}`);
+          } else {
+            await user.update({ login_id: s.login_id, password: hashedPw, role: s.role, name: s.name });
+            console.log(`Updated seed account: ${s.login_id}`);
+          }
         }
+      } catch (seedErr) {
+        console.warn('Account seeding failed:', seedErr.message);
       }
-    } catch (seedErr) {
-      console.warn('Account seeding failed:', seedErr.message);
+    } else {
+      console.log('Database account seeding is disabled via SKIP_DB_SEED=true; preserving existing database data.');
     }
     // ----------------------
     
