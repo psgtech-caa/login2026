@@ -2,11 +2,13 @@ const express = require("express");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const sharp = require("sharp");
 const { verifyJwt } = require("../../middleware/auth");
+const { uploadToCloudinary } = require("../../config/cloudinary");
 
 const router = express.Router();
 
-// Ensure uploads directory exists
+// Ensure temporary uploads directory exists
 const isVercel = process.env.VERCEL || process.env.VERCEL_ENV;
 const baseUploadDir = isVercel ? "/tmp/uploads" : path.join(__dirname, "../../public/uploads");
 const uploadDir = path.join(baseUploadDir, "receipts");
@@ -18,7 +20,7 @@ if (!fs.existsSync(uploadDir)) {
   }
 }
 
-// Configure Multer storage
+// Configure Multer disk storage for temporary handling
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, uploadDir);
@@ -29,7 +31,6 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter to only allow images/PDF
 const fileFilter = (req, file, cb) => {
   const allowedMimeTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "application/pdf"];
   if (allowedMimeTypes.includes(file.mimetype)) {
@@ -47,41 +48,69 @@ const upload = multer({
   fileFilter: fileFilter,
 });
 
-const sharp = require("sharp");
-
 router.post("/receipt", verifyJwt, upload.single("receipt"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded or invalid file format" });
   }
-  
+
+  const filePath = req.file.path;
+
   try {
     let fileUrl = "";
 
-    // If it's a PDF, we might not want to process with sharp, but the user said "add image processing"
-    // We can just base64 encode PDF directly, and use Sharp for images.
-    if (req.file.mimetype === "application/pdf") {
-      const fileData = fs.readFileSync(req.file.path);
-      fileUrl = `data:application/pdf;base64,${fileData.toString("base64")}`;
+    // Check if Cloudinary is configured
+    const isCloudinaryConfigured = Boolean(
+      process.env.CLOUDINARY_URL ||
+        (process.env.CLOUDINARY_CLOUD_NAME &&
+          process.env.CLOUDINARY_API_KEY &&
+          process.env.CLOUDINARY_API_SECRET)
+    );
+
+    if (isCloudinaryConfigured) {
+      try {
+        const cloudinaryResult = await uploadToCloudinary(filePath, "login2k26/receipts");
+        fileUrl = cloudinaryResult.url;
+      } catch (cloudinaryErr) {
+        console.warn("Cloudinary upload failed, falling back to local processing:", cloudinaryErr.message || cloudinaryErr);
+        if (req.file.mimetype === "application/pdf") {
+          const fileData = fs.readFileSync(filePath);
+          fileUrl = `data:application/pdf;base64,${fileData.toString("base64")}`;
+        } else {
+          const processedBuffer = await sharp(filePath)
+            .resize(800, null, { withoutEnlargement: true })
+            .webp({ quality: 70 })
+            .toBuffer();
+          fileUrl = `data:image/webp;base64,${processedBuffer.toString("base64")}`;
+        }
+      }
     } else {
-      const processedBuffer = await sharp(req.file.path)
-        .resize(800, null, { withoutEnlargement: true })
-        .webp({ quality: 70 })
-        .toBuffer();
-      fileUrl = `data:image/webp;base64,${processedBuffer.toString("base64")}`;
+      // Local fallback (Base64 data URL)
+      if (req.file.mimetype === "application/pdf") {
+        const fileData = fs.readFileSync(filePath);
+        fileUrl = `data:application/pdf;base64,${fileData.toString("base64")}`;
+      } else {
+        const processedBuffer = await sharp(filePath)
+          .resize(800, null, { withoutEnlargement: true })
+          .webp({ quality: 70 })
+          .toBuffer();
+        fileUrl = `data:image/webp;base64,${processedBuffer.toString("base64")}`;
+      }
     }
 
-    // Optionally delete the temporary file
-    fs.unlink(req.file.path, (err) => {
+    // Clean up local temp file
+    fs.unlink(filePath, (err) => {
       if (err) console.error("Failed to delete temp file:", err);
     });
 
-    res.status(200).json({
+    return res.status(200).json({
       message: "File uploaded successfully",
       url: fileUrl,
     });
   } catch (error) {
-    console.error("Processing error:", error);
-    res.status(500).json({ message: "Failed to process receipt" });
+    console.error("Receipt upload error:", error);
+    // Ensure temp file is cleaned up on error
+    fs.unlink(filePath, () => {});
+    return res.status(500).json({ message: "Failed to process receipt" });
   }
 });
 
@@ -112,17 +141,48 @@ const uploadBonafide = multer({
   fileFilter: fileFilter,
 });
 
-router.post("/bonafide", verifyJwt, uploadBonafide.single("bonafide"), (req, res) => {
+router.post("/bonafide", verifyJwt, uploadBonafide.single("bonafide"), async (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded or invalid file format" });
   }
-  
-  const fileUrl = `/uploads/bonafides/${req.file.filename}`;
-  
-  res.status(200).json({
-    message: "File uploaded successfully",
-    url: fileUrl,
-  });
+
+  const filePath = req.file.path;
+
+  try {
+    let fileUrl = "";
+
+    const isCloudinaryConfigured = Boolean(
+      process.env.CLOUDINARY_URL ||
+        (process.env.CLOUDINARY_CLOUD_NAME &&
+          process.env.CLOUDINARY_API_KEY &&
+          process.env.CLOUDINARY_API_SECRET)
+    );
+
+    if (isCloudinaryConfigured) {
+      try {
+        const cloudinaryResult = await uploadToCloudinary(filePath, "login2k26/bonafides");
+        fileUrl = cloudinaryResult.url;
+        fs.unlink(filePath, (err) => {
+          if (err) console.error("Failed to delete temp file:", err);
+        });
+      } catch (cloudinaryErr) {
+        console.warn("Cloudinary bonafide upload failed, falling back to local storage:", cloudinaryErr.message || cloudinaryErr);
+        fileUrl = `/uploads/bonafides/${req.file.filename}`;
+      }
+    } else {
+      fileUrl = `/uploads/bonafides/${req.file.filename}`;
+    }
+
+    return res.status(200).json({
+      message: "File uploaded successfully",
+      url: fileUrl,
+    });
+  } catch (error) {
+    console.error("Bonafide upload error:", error);
+    fs.unlink(filePath, () => {});
+    return res.status(500).json({ message: "Failed to process bonafide" });
+  }
 });
 
 module.exports = router;
+

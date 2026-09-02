@@ -102,6 +102,14 @@ const createRegistration = async (req, res) => {
       return res.status(409).json({ message: "You are already registered for this event." });
     }
 
+    // 5.5 Mandatory Payment Check
+    const userPaid = await hasUserPaid(student_id);
+    if (!userPaid) {
+      return res.status(403).json({
+        message: "Payment required. Please upload your registration payment details on the dashboard before registering for events.",
+      });
+    }
+
     // 6. Overlap Collision Guard & Max 5 Events Limit
     const currentRegistrations = await getStudentRegisteredEvents(student_id);
 
