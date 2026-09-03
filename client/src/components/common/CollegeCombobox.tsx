@@ -88,27 +88,48 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
     onChange(val);
   };
 
-  // Filter colleges based on search query
-  const query = searchQuery.trim().toLowerCase();
+  const normalizeSearchText = (text: string) =>
+    text
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '')
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '');
+
+  // Ignore punctuation and spacing so searches match the college name naturally.
+  const query = normalizeSearchText(searchQuery);
   const filteredColleges = CATEGORIZED_COLLEGES.filter(
     (c) =>
-      c.name.toLowerCase().includes(query) ||
-      (c.shortName && c.shortName.toLowerCase().includes(query)) ||
-      (c.city && c.city.toLowerCase().includes(query))
+      normalizeSearchText(c.name).includes(query) ||
+      (c.shortName && normalizeSearchText(c.shortName).includes(query)) ||
+      (c.city && normalizeSearchText(c.city).includes(query))
   );
 
-  // Function to highlight matching text substring
+  // Highlight the original text range that contains the normalized query.
   const highlightMatch = (text: string) => {
     if (!query) return text;
-    const index = text.toLowerCase().indexOf(query);
-    if (index === -1) return text;
+    let normalizedText = '';
+    const originalIndexes: number[] = [];
+
+    for (let index = 0; index < text.length; index += 1) {
+      const normalizedCharacter = normalizeSearchText(text[index]);
+      if (normalizedCharacter) {
+        normalizedText += normalizedCharacter;
+        originalIndexes.push(index);
+      }
+    }
+
+    const normalizedIndex = normalizedText.indexOf(query);
+    if (normalizedIndex === -1) return text;
+
+    const startIndex = originalIndexes[normalizedIndex];
+    const endIndex = originalIndexes[normalizedIndex + query.length - 1] + 1;
     return (
       <>
-        {text.slice(0, index)}
+        {text.slice(0, startIndex)}
         <span className="bg-[#E01B22]/30 text-[#FF2A2A] font-bold px-0.5 rounded-[1px]">
-          {text.slice(index, index + query.length)}
+          {text.slice(startIndex, endIndex)}
         </span>
-        {text.slice(index + query.length)}
+        {text.slice(endIndex)}
       </>
     );
   };
