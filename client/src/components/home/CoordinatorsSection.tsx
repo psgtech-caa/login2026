@@ -15,12 +15,12 @@ const getInitials = (name: string): string => {
 
 export const CoordinatorsSection: React.FC<CoordinatorsSectionProps> = ({ isHomePage = false }) => {
   const websiteTeam = [
-    { name: 'NITHEESH MUTHU KRISHNAN C', role: 'FULL STACK DEVELOPER', url: 'https://www.linkedin.com/in/nitheeshmk5/' },
-    { name: 'CHINNAYA K', role: 'FRONTEND DEVELOPER', url: 'https://www.linkedin.com/search/results/all/?keywords=CHINNAYA%20K' },
-    { name: 'TAMILINI S', role: 'UI/UX & FRONTEND', url: 'https://www.linkedin.com/search/results/all/?keywords=TAMILINI%20S' },
-    { name: 'BARATHVIKRAMAN S K', role: 'BACKEND & LOGISTICS', url: 'https://www.linkedin.com/search/results/all/?keywords=BARATHVIKRAMAN%20S%20K' },
-    { name: 'SABARISH', role: 'DEVELOPER', url: 'https://www.linkedin.com/search/results/all/?keywords=SABARISH' },
-    { name: 'KARTHEESVARAN', role: 'DEVELOPER', url: 'https://www.linkedin.com/search/results/all/?keywords=KARTHEESVARAN' }
+    { name: 'NITHEESH MUTHU KRISHNAN C', role: 'MORAL SUPPORT', url: 'https://www.linkedin.com/in/nitheeshmk5/' },
+    { name: 'CHINNAYA K', role: 'FULL STACK DEVELOPER', url: 'https://www.linkedin.com/in/chinnaya-k-4b7819274/' },
+    { name: 'TINO BRITTY J', role: 'EMOTIONAL SUPPORT', url: 'https://www.linkedin.com/in/brittytino/' },
+    { name: 'BARATHVIKRAMAN S K', role: 'DEVOPS SUPPORT', url: 'https://www.linkedin.com/in/barathvikraman2662/' },
+    { name: 'SABARISH', role: 'DEVELOPER', url: 'https://www.linkedin.com/in/sabarish-s-0a7725261/' },
+    { name: 'KARTHEESVARAN', role: 'DEVELOPER', url: 'https://www.linkedin.com/in/karthik25mx354/' }
   ];
 
   const allGroups = [
@@ -29,8 +29,8 @@ export const CoordinatorsSection: React.FC<CoordinatorsSectionProps> = ({ isHome
       tagline: 'Key executive team steering the overall vision and symposium operations.',
       isCore: true,
       items: [
-        { role: 'TREASURER', name: 'SWARNA RATHNA A' },
         { role: 'SECRETARY', name: 'BARATHVIKRAMAN S K', highlight: true },
+        { role: 'TREASURER', name: 'SWARNA RATHNA A' },
         { role: 'PLACEMENT REPRESENTATIVE', name: 'TINO BRITTY J' }
       ]
     },
@@ -64,44 +64,44 @@ export const CoordinatorsSection: React.FC<CoordinatorsSectionProps> = ({ isHome
         { role: 'EXECUTIVE MEMBER', name: 'SURIYA G V' },
         { role: 'EXECUTIVE MEMBER', name: 'DIVYADHARSHINI K' }
       ]
-    },
-    {
-      title: 'WEB SITE FACULTY COORDINATORS',
-      tagline: 'Department faculty mentors guiding LOGIN 2K26.',
-      isCore: false,
-      items: [
-        { role: 'FACULTY COORDINATOR', name: 'MR. SUNDAR C' },
-        { role: 'FACULTY COORDINATOR', name: 'MS A MANORANJITHAM' }
-      ]
-    },
-    {
-      title: 'VERTICAL COORDINATORS',
-      tagline: 'Vertical domain specialists ensuring arena-specific excellence.',
-      isCore: false,
-      items: [
-        { role: 'VERTICAL COORDINATOR', name: 'SAMPLE NAME 1' },
-        { role: 'VERTICAL COORDINATOR', name: 'SAMPLE NAME 2' }
-      ]
-    },
-    {
-      title: 'EVENTS COORDINATORS',
-      tagline: 'On-ground organizers for competitive event arenas.',
-      isCore: false,
-      items: [
-        { role: 'EVENT COORDINATOR', name: 'SAMPLE NAME 3' },
-        { role: 'EVENT COORDINATOR', name: 'SAMPLE NAME 4' }
-      ]
-    },
-    {
-      title: 'VOLUNTEERS LIST',
-      tagline: 'Dedicated student team supporting symposium operations.',
-      isCore: false,
-      items: [
-        { role: 'VOLUNTEER', name: 'SAMPLE NAME 5' },
-        { role: 'VOLUNTEER', name: 'SAMPLE NAME 6' },
-        { role: 'VOLUNTEER', name: 'SAMPLE NAME 7' }
-      ]
     }
+    // {
+    //   title: 'WEB SITE FACULTY COORDINATORS',
+    //   tagline: 'Department faculty mentors guiding LOGIN 2K26.',
+    //   isCore: false,
+    //   items: [
+    //     { role: 'FACULTY COORDINATOR', name: 'MR. SUNDAR C' },
+    //     { role: 'FACULTY COORDINATOR', name: 'MS A MANORANJITHAM' }
+    //   ]
+    // }
+    // {
+    //   title: 'VERTICAL COORDINATORS',
+    //   tagline: 'Vertical domain specialists ensuring arena-specific excellence.',
+    //   isCore: false,
+    //   items: [
+    //     { role: 'VERTICAL COORDINATOR', name: 'SAMPLE NAME 1' },
+    //     { role: 'VERTICAL COORDINATOR', name: 'SAMPLE NAME 2' }
+    //   ]
+    // },
+    // {
+    //   title: 'EVENTS COORDINATORS',
+    //   tagline: 'On-ground organizers for competitive event arenas.',
+    //   isCore: false,
+    //   items: [
+    //     { role: 'EVENT COORDINATOR', name: 'SAMPLE NAME 3' },
+    //     { role: 'EVENT COORDINATOR', name: 'SAMPLE NAME 4' }
+    //   ]
+    // },
+    // {
+    //   title: 'VOLUNTEERS LIST',
+    //   tagline: 'Dedicated student team supporting symposium operations.',
+    //   isCore: false,
+    //   items: [
+    //     { role: 'VOLUNTEER', name: 'SAMPLE NAME 5' },
+    //     { role: 'VOLUNTEER', name: 'SAMPLE NAME 6' },
+    //     { role: 'VOLUNTEER', name: 'SAMPLE NAME 7' }
+    //   ]
+    // }
   ];
 
   const displayGroups = isHomePage

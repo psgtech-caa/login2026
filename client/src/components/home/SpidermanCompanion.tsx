@@ -122,13 +122,13 @@ export const SpidermanCompanion: React.FC = () => {
               title="Click to open Transmission"
             >
               {/* Flare */}
-              <div className="absolute top-16 left-1/2 -translate-x-1/2 w-20 h-20 rounded-full bg-[radial-gradient(circle,_rgba(224,27,34,0.4)_0%,_transparent_70%)] pointer-events-none animate-pulse" />
+              <div className="absolute top-16 left-1/2 -translate-x-1/2 w-28 h-28 rounded-full bg-[radial-gradient(circle,_rgba(224,27,34,0.45)_0%,_transparent_70%)] pointer-events-none animate-pulse" />
 
-              {/* Desktop Asset */}
+              {/* Desktop Asset (Larger Medium-Large Scaling) */}
               <img 
                 src="/assets/spiderman1.png" 
                 alt="Transmission" 
-                className="hidden md:block w-24 lg:w-28 h-auto object-contain filter drop-shadow-[0_4px_16px_rgba(224,27,34,0.85)] group-hover:brightness-110 transition-all"
+                className="hidden md:block w-32 lg:w-40 xl:w-44 h-auto object-contain filter drop-shadow-[0_6px_22px_rgba(224,27,34,0.9)] group-hover:brightness-115 transition-all"
                 loading="eager"
               />
 
@@ -156,12 +156,12 @@ export const SpidermanCompanion: React.FC = () => {
                 soundFx.click();
                 toggleCompanion();
               }}
-              className="cursor-pointer mt-12 sm:mt-16 bg-[#120507]/95 hover:bg-[#1E090D] border border-[#E01B22]/70 hover:border-[#FF2A2A] rounded-[2px] px-3 py-1.5 shadow-xl backdrop-blur-md flex flex-col text-left max-w-[170px] transition-all"
+              className="cursor-pointer mt-16 sm:mt-24 bg-[#120507]/95 hover:bg-[#1E090D] border border-[#E01B22]/70 hover:border-[#FF2A2A] rounded-[2px] px-3.5 py-2 shadow-xl backdrop-blur-md flex flex-col text-left max-w-[190px] transition-all"
             >
-              <span className="font-mono text-[7.5px] font-black text-[#FF5555] tracking-widest uppercase leading-none">
+              <span className="font-mono text-[8px] font-black text-[#FF5555] tracking-widest uppercase leading-none">
                 TRANSMISSION
               </span>
-              <span className="font-mono text-[10px] font-bold text-[#F7F2F2] leading-tight mt-0.5">
+              <span className="font-mono text-[11px] font-bold text-[#F7F2F2] leading-tight mt-1">
                 {speechBubbleText}
               </span>
             </motion.div>
@@ -278,7 +278,7 @@ export const SpidermanCompanion: React.FC = () => {
                       // CLASSIFIED CTF OVERRIDE
                     </span>
                     <p>
-                      "The Extraction CTF has a <strong className="text-[#FFD700]">₹16,000+ bounty</strong> with cryptographic bypasses and forensic payloads. 94% of teams will fail in the first 30 minutes."
+                      "The Extraction CTF has a <strong className="text-[#FFD700]">₹13,000+ bounty</strong> with cryptographic bypasses and forensic payloads. 94% of teams will fail in the first 30 minutes."
                     </p>
                   </div>
 
@@ -292,7 +292,7 @@ export const SpidermanCompanion: React.FC = () => {
                       onClick={() => handleRoute('/events/the-extraction')}
                       className="w-full py-3 px-3.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-white text-xs font-black uppercase tracking-wider rounded-[2px] shadow-[0_0_20px_rgba(224,27,34,0.7)] transition-all flex items-center justify-between"
                     >
-                      <span>TAKE THE ₹16,000 BOUNTY (ENTER CTF)</span>
+                      <span>TAKE THE ₹13,000 BOUNTY (ENTER CTF)</span>
                       <span className="text-white font-bold">&rarr;</span>
                     </button>
 

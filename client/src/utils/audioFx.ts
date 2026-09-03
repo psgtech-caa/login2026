@@ -1,9 +1,11 @@
-// Cyberpunk Web Audio Synthesizer for NØVA-26 UI SFX
+// Cyberpunk Web Audio Synthesizer & Soundtrack Controller for LOGIN 2K26
 
 let audioCtx: AudioContext | null = null;
 let isMuted = false;
+let bgAudio: HTMLAudioElement | null = null;
+let isMusicPlaying = false;
 
-// Initialize on first user gesture
+// Initialize Web Audio API on gesture
 function getAudioContext(): AudioContext | null {
   if (typeof window === 'undefined') return null;
   if (!audioCtx) {
@@ -18,12 +20,51 @@ function getAudioContext(): AudioContext | null {
   return audioCtx;
 }
 
+export const bgMusic = {
+  isPlaying: () => isMusicPlaying,
+  play: () => {
+    if (typeof window === 'undefined') return;
+    if (!bgAudio) {
+      bgAudio = new Audio('/sound.mp3');
+      bgAudio.loop = true;
+      bgAudio.volume = 0.45;
+    }
+    bgAudio.play()
+      .then(() => {
+        isMusicPlaying = true;
+      })
+      .catch(() => {
+        // Autoplay policy prevented playback until gesture
+      });
+  },
+  pause: () => {
+    if (bgAudio) {
+      bgAudio.pause();
+      isMusicPlaying = false;
+    }
+  },
+  toggle: () => {
+    if (isMusicPlaying) {
+      bgMusic.pause();
+      return false;
+    } else {
+      bgMusic.play();
+      return true;
+    }
+  },
+  setVolume: (vol: number) => {
+    if (bgAudio) {
+      bgAudio.volume = Math.max(0, Math.min(1, vol));
+    }
+  }
+};
+
 export const soundFx = {
   isMuted: () => isMuted,
   setMuted: (muted: boolean) => {
     isMuted = muted;
     try {
-      localStorage.setItem('nova_sfx_muted', String(muted));
+      localStorage.setItem('login_sfx_muted', String(muted));
     } catch {
       // ignore
     }
@@ -31,15 +72,18 @@ export const soundFx = {
   toggleMute: () => {
     isMuted = !isMuted;
     try {
-      localStorage.setItem('nova_sfx_muted', String(isMuted));
+      localStorage.setItem('login_sfx_muted', String(isMuted));
     } catch {
       // ignore
+    }
+    if (isMuted) {
+      bgMusic.pause();
     }
     return isMuted;
   },
   initMuteState: () => {
     try {
-      const saved = localStorage.getItem('nova_sfx_muted');
+      const saved = localStorage.getItem('login_sfx_muted');
       if (saved !== null) {
         isMuted = saved === 'true';
       }
