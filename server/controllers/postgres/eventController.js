@@ -81,6 +81,13 @@ const getAllEvents = async (req, res) => {
 
 const getAssignedEvents = async (req, res) => {
   try {
+    if (String(req.user?.role || '').trim().toLowerCase() === 'registration_desk') {
+      const events = await eventModel.findAll({
+        order: [["date", "ASC"], ["start_time", "ASC"]],
+      });
+      return res.json(events.map(enrichEvent));
+    }
+
     const assignments = await eventCoordinatorModel.findAll({
       where: { user_id: req.user.id },
       include: [{ model: eventModel, as: "event" }],

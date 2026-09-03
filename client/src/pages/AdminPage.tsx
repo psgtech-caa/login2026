@@ -150,7 +150,7 @@ export const AdminPage: React.FC = () => {
 
   // Auto-generate Login ID based on event selection
   useEffect(() => {
-    if (['coordinator', 'registration_desk'].includes(newUserRole) && newUserEventId) {
+    if (newUserRole === 'coordinator' && newUserEventId) {
       const ev = eventOptions.find(e => String(e.id) === String(newUserEventId));
       if (ev) {
         const cleanName = ev.name.replace(/\[.*?\]\s*/, '').trim();
@@ -226,7 +226,7 @@ export const AdminPage: React.FC = () => {
 
     try {
       setCreatingUser(true);
-      const requiresEventAssignment = ['coordinator', 'registration_desk'].includes(newUserRole);
+      const requiresEventAssignment = newUserRole === 'coordinator';
       if (requiresEventAssignment && !newUserEventId) {
         alert('Please select an assigned event for this role.');
         return;
@@ -980,7 +980,7 @@ export const AdminPage: React.FC = () => {
                       <option value="participant">PARTICIPANT</option>
                     </select>
                   </div>
-                  {['coordinator', 'registration_desk'].includes(newUserRole) && (
+                  {newUserRole === 'coordinator' && (
                     <div>
                       <label className="block text-[#A79798] mb-1 font-semibold">Assigned Event *</label>
                       <select
