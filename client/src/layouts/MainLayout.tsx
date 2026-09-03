@@ -6,6 +6,7 @@ import { UnpaidBanner } from '../components/UnpaidBanner';
 import { Footer } from '../components/Footer';
 import { IntroVideo } from '../components/IntroVideo';
 import { CommandSearchModal } from '../components/CommandSearchModal';
+import { SpidermanCompanion } from '../components/home/SpidermanCompanion';
 import { useAuthStore } from '../store/authStore';
 import { api } from '../services/api';
 
@@ -76,6 +77,9 @@ export const MainLayout: React.FC = () => {
             isOpen={commandSearchOpen}
             onClose={() => setCommandSearchOpen(false)}
           />
+
+          {/* Spider-Man Protocol Companion on Scroll (Desktop & Mobile) */}
+          <SpidermanCompanion />
         </>
       )}
     </div>

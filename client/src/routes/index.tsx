@@ -16,6 +16,8 @@ import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { ChangePasswordPage } from '../pages/ChangePasswordPage';
 
+import { TheExtractionPage } from '../pages/TheExtractionPage';
+
 // Shared dashboard layout (role-aware sidebar)
 import { ProtectedRoute } from '../components/ProtectedRoute';
 import { DashboardLayout } from '../layouts/DashboardLayout';
@@ -45,6 +47,8 @@ export const router = createBrowserRouter([
       { path: 'home', element: <HomePage /> },
       { path: 'about', element: <AboutPage /> },
       { path: 'events', element: <EventsPage /> },
+      { path: 'events/the-extraction', element: <TheExtractionPage /> },
+      { path: 'the-extraction', element: <TheExtractionPage /> },
       { path: 'events/:id', element: <EventDetailsPage /> },
       { path: 'winners', element: <WinnersPage /> },
       { path: 'timeline', element: <TimelinePage /> },
