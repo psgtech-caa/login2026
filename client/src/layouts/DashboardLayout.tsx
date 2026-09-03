@@ -41,6 +41,7 @@ const registrationDeskNavItems = [
   { to: '/dashboard/admin', icon: LayoutDashboard, label: 'Overview', end: true },
   { to: '/dashboard/admin/participants', icon: Users, label: 'Participants' },
   { to: '/dashboard/admin/registrations', icon: ClipboardList, label: 'Registrations' },
+  { to: '/dashboard/admin/alumni', icon: GraduationCap, label: 'Alumni' },
   { to: '/dashboard/admin/payments', icon: CreditCard, label: 'Payments' },
   { to: '/dashboard/admin/csv-upload', icon: Upload, label: 'Upload Payment CSV' },
   { to: '/dashboard/admin/events', icon: Calendar, label: 'Events' },

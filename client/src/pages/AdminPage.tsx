@@ -16,7 +16,7 @@ export const AdminPage: React.FC = () => {
   type AdminTab = 'PAYMENTS' | 'REGISTRATIONS' | 'ALUMNI' | 'USERS' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS' | 'CSV_UPLOAD' | 'SETTINGS' | 'COORDINATORS' | 'PARTICIPANTS';
 
   const sectionToTab = (s?: string): AdminTab => {
-    if (isDesk && ['users', 'coordinators', 'alumni', 'settings'].includes(s || '')) {
+    if (isDesk && ['users', 'coordinators', 'settings'].includes(s || '')) {
       return 'PARTICIPANTS';
     }
     switch (s) {
@@ -24,7 +24,7 @@ export const AdminPage: React.FC = () => {
       case 'coordinators': return isDesk ? 'PARTICIPANTS' : 'COORDINATORS';
       case 'participants': return 'PARTICIPANTS';
       case 'registrations': return 'REGISTRATIONS';
-      case 'alumni': return isDesk ? 'PARTICIPANTS' : 'ALUMNI';
+      case 'alumni': return 'ALUMNI';
       case 'payments': return 'PAYMENTS';
       case 'events': return 'EVENTS';
       case 'csv-upload': return 'CSV_UPLOAD';
@@ -89,6 +89,7 @@ export const AdminPage: React.FC = () => {
   const filteredUsers = useMemo(() => {
     return users
       .filter(u => u.user_type !== 'ALUMNI')
+      .filter(u => ['admin', 'coordinator', 'registration_desk'].includes(String(u.role || '').toLowerCase()))
       .filter(u => userRoleFilter === 'ALL' || u.role === userRoleFilter)
       .filter(u => {
         if (!userSearch) return true;
@@ -841,12 +842,12 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* TAB 3: ALUMNI ROSTER */}
-        {!isDesk && activeTab === 'ALUMNI' && (
+        {activeTab === 'ALUMNI' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
                 <h2 className="text-lg font-display font-bold text-[#F7F2F2]">REGISTERED ALUMNI</h2>
-                <p className="text-xs text-[#A79798] font-mono mt-0.5">Alumni RSVP records only. This roster is restricted to administrators.</p>
+                <p className="text-xs text-[#A79798] font-mono mt-0.5">Alumni RSVP records only. Available to administrators and registration desk officials.</p>
               </div>
               <button
                 onClick={exportAlumniCSV}
@@ -1031,7 +1032,7 @@ export const AdminPage: React.FC = () => {
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
               <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                 <h2 className="text-lg font-display font-bold text-[#F7F2F2]">
-                  ALL USERS & AUTHORIZED PERSONNEL ({filteredUsers.length})
+                  STAFF ACCOUNTS ({filteredUsers.length})
                 </h2>
                 <div className="flex items-center gap-2">
                   <input
@@ -1047,7 +1048,6 @@ export const AdminPage: React.FC = () => {
                     className="bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] px-3 py-1.5 rounded-[2px] text-xs font-mono outline-none"
                   >
                     <option value="ALL">ALL ROLES</option>
-                    <option value="participant">Participant</option>
                     <option value="admin">Admin</option>
                     <option value="coordinator">Coordinator</option>
                     <option value="registration_desk">Registration Desk</option>
