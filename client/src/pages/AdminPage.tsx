@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { ENV } from '../services/env';
+import { useAuthStore, isRegistrationDeskRole } from '../store/authStore';
 import staticEventsData from '../data/events.json';
 import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil, Upload, CheckCircle2, XCircle, FileText } from 'lucide-react';
 
@@ -9,21 +10,26 @@ const STATIC_EVENTS = Array.isArray(staticEventsData) ? staticEventsData : [];
 
 export const AdminPage: React.FC = () => {
   const { section } = useParams<{ section?: string }>();
+  const { user } = useAuthStore();
+  const isDesk = isRegistrationDeskRole(user?.role);
 
   type AdminTab = 'PAYMENTS' | 'REGISTRATIONS' | 'ALUMNI' | 'USERS' | 'DASHBOARD' | 'ANNOUNCEMENTS' | 'EVENTS' | 'CSV_UPLOAD' | 'SETTINGS' | 'COORDINATORS' | 'PARTICIPANTS';
 
   const sectionToTab = (s?: string): AdminTab => {
+    if (isDesk && ['users', 'coordinators', 'alumni', 'settings'].includes(s || '')) {
+      return 'PARTICIPANTS';
+    }
     switch (s) {
-      case 'users': return 'USERS';
-      case 'coordinators': return 'COORDINATORS';
+      case 'users': return isDesk ? 'PARTICIPANTS' : 'USERS';
+      case 'coordinators': return isDesk ? 'PARTICIPANTS' : 'COORDINATORS';
       case 'participants': return 'PARTICIPANTS';
       case 'registrations': return 'REGISTRATIONS';
-      case 'alumni': return 'ALUMNI';
+      case 'alumni': return isDesk ? 'PARTICIPANTS' : 'ALUMNI';
       case 'payments': return 'PAYMENTS';
       case 'events': return 'EVENTS';
       case 'csv-upload': return 'CSV_UPLOAD';
       case 'announcements': return 'ANNOUNCEMENTS';
-      case 'settings': return 'SETTINGS';
+      case 'settings': return isDesk ? 'PARTICIPANTS' : 'SETTINGS';
       default: return 'DASHBOARD';
     }
   };
@@ -573,7 +579,7 @@ export const AdminPage: React.FC = () => {
       </div>
 
         {/* TAB: SYSTEM FEATURE SETTINGS */}
-        {activeTab === 'SETTINGS' && (
+        {!isDesk && activeTab === 'SETTINGS' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
             <div>
               <h2 className="text-lg font-display font-bold text-[#F7F2F2]">
@@ -835,7 +841,7 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* TAB 3: ALUMNI ROSTER */}
-        {activeTab === 'ALUMNI' && (
+        {!isDesk && activeTab === 'ALUMNI' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
             <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
               <div>
@@ -895,7 +901,7 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* TAB 4: USER MANAGEMENT (All Users & Roster Creation) */}
-        {activeTab === 'USERS' && (
+        {!isDesk && activeTab === 'USERS' && (
           <div className="space-y-8">
             {/* Create Official / Power User Form */}
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
@@ -1125,7 +1131,7 @@ export const AdminPage: React.FC = () => {
         )}
 
         {/* NEW TAB: COORDINATORS */}
-        {activeTab === 'COORDINATORS' && (
+        {!isDesk && activeTab === 'COORDINATORS' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
             <h2 className="text-lg font-display font-bold text-[#F7F2F2]">
               STAFF & EVENT COORDINATORS
@@ -1273,7 +1279,7 @@ export const AdminPage: React.FC = () => {
         {activeTab === 'DASHBOARD' && (
           <div className="space-y-6">
             {/* Top KPI Metrics Cards */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <div className={`grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 ${isDesk ? 'xl:grid-cols-5' : 'xl:grid-cols-6'} gap-4`}>
               <div className="bg-[#130C0E] border border-[#2A1A1D] p-4 rounded-[2px]">
                 <span className="mono-label text-[#A79798] block text-[10px]">PARTICIPANTS</span>
                 <strong className="text-xl font-mono text-[#F7F2F2] mt-1 block">{totalStudents}</strong>
@@ -1284,11 +1290,13 @@ export const AdminPage: React.FC = () => {
                 <strong className="text-xl font-mono text-[#FF2A2A] mt-1 block">{accommodationCount}</strong>
                 <span className="text-[9px] text-[#A79798] font-mono">Hostel requests</span>
               </div>
-              <div className="bg-[#130C0E] border border-[#E08A17]/60 p-4 rounded-[2px]">
-                <span className="mono-label text-[#E08A17] block text-[10px]">ALUMNI RSVPs</span>
-                <strong className="text-xl font-mono text-[#E08A17] mt-1 block">{alumniCount}</strong>
-                <span className="text-[9px] text-[#A79798] font-mono">Reunion guests</span>
-              </div>
+              {!isDesk && (
+                <div className="bg-[#130C0E] border border-[#E08A17]/60 p-4 rounded-[2px]">
+                  <span className="mono-label text-[#E08A17] block text-[10px]">ALUMNI RSVPs</span>
+                  <strong className="text-xl font-mono text-[#E08A17] mt-1 block">{alumniCount}</strong>
+                  <span className="text-[9px] text-[#A79798] font-mono">Reunion guests</span>
+                </div>
+              )}
               <div className="bg-[#130C0E] border border-[#1FA971]/40 p-4 rounded-[2px]">
                 <span className="mono-label text-[#1FA971] block text-[10px]">PAYMENTS VERIFIED</span>
                 <strong className="text-xl font-mono text-[#1FA971] mt-1 block">{verifiedPaymentsCount}</strong>
