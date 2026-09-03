@@ -8,42 +8,42 @@ const router = express.Router();
 router.get(
   "/event/:eventId/students",
   verifyJwt,
-  allowRoles("coordinator", "admin"),
+  allowRoles("coordinator", "admin", "registration_desk"),
   exportController.exportEventStudents
 );
 
 router.get(
   "/attendance",
   verifyJwt,
-  allowRoles("coordinator", "admin"),
+  allowRoles("coordinator", "admin", "registration_desk"),
   exportController.exportAttendance
 );
 
 router.get(
   "/users",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("admin", "registration_desk"),
   exportController.exportUsers
 );
 
 router.get(
   "/registrations",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("admin", "registration_desk"),
   exportController.exportRegistrations
 );
 
 router.get(
   "/payments",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("admin", "registration_desk"),
   exportController.exportPayments
 );
 
 router.get(
   "/teams",
   verifyJwt,
-  allowRoles("admin"),
+  allowRoles("admin", "registration_desk"),
   exportController.exportTeams
 );
 

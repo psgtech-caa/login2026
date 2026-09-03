@@ -37,6 +37,16 @@ const adminNavItems = [
   { to: '/dashboard/admin/settings', icon: Settings, label: 'System Settings' },
 ];
 
+const registrationDeskNavItems = [
+  { to: '/dashboard/admin', icon: LayoutDashboard, label: 'Overview', end: true },
+  { to: '/dashboard/admin/participants', icon: Users, label: 'Participants' },
+  { to: '/dashboard/admin/registrations', icon: ClipboardList, label: 'Registrations' },
+  { to: '/dashboard/admin/payments', icon: CreditCard, label: 'Payments' },
+  { to: '/dashboard/admin/csv-upload', icon: Upload, label: 'Upload Payment CSV' },
+  { to: '/dashboard/admin/events', icon: Calendar, label: 'Events' },
+  { to: '/dashboard/admin/announcements', icon: Megaphone, label: 'Announcements' },
+];
+
 const coordinatorNavItems = [
   { to: '/dashboard/coordinator', icon: LayoutDashboard, label: 'Overview', end: true },
   { to: '/dashboard/coordinator/events', icon: Calendar, label: 'My Events' },
@@ -66,7 +76,9 @@ export const DashboardLayout: React.FC = () => {
   const isCoord = isCoordinatorRole(user?.role);
 
   // Determine which nav set to show
-  const rawNavItems = isAdmin || isDesk
+  const rawNavItems = isDesk
+    ? registrationDeskNavItems
+    : isAdmin
     ? adminNavItems
     : isCoord
     ? coordinatorNavItems
@@ -121,7 +133,7 @@ export const DashboardLayout: React.FC = () => {
         <h1 className="text-xl font-display font-bold text-[#E01B22] tracking-widest">LOGIN 2K26</h1>
         <div className="h-px bg-[#2A1A1D] my-2" />
         <p className="text-[10px] font-mono text-[#A79798] uppercase tracking-widest">
-          {isAdmin || isDesk ? 'ADMIN PANEL' : isCoord ? 'COORDINATOR PANEL' : 'PARTICIPANT PANEL'}
+          {isDesk ? 'REGISTRATION DESK' : isAdmin ? 'ADMIN PANEL' : isCoord ? 'COORDINATOR PANEL' : 'PARTICIPANT PANEL'}
         </p>
       </div>
 

@@ -29,44 +29,44 @@ const csvUpload = multer({
 router.get('/my', verifyJwt, allowRoles('participant'), paymentController.getMyPayment);
 router.post('/', verifyJwt, allowRoles('participant'), paymentController.createPayment);
 
-// ── Admin + Coordinator (read all payments) ──────────
+// ── Admin + Coordinator + Registration Desk (read all payments) ──────────
 router.get(
   '/',
   verifyJwt,
-  allowRoles('admin', 'coordinator'),
+  allowRoles('admin', 'coordinator', 'registration_desk'),
   paymentController.getAllPayments
 );
 
-// ── Admin + Coordinator (manual verify / reject) ─────
+// ── Admin + Coordinator + Registration Desk (manual verify / reject) ─────
 router.put(
   '/:id/verify',
   verifyJwt,
-  allowRoles('admin', 'coordinator'),
+  allowRoles('admin', 'coordinator', 'registration_desk'),
   paymentController.verifyPayment
 );
 
-// ── Admin + Coordinator (CSV upload → match) ─────────
+// ── Admin + Coordinator + Registration Desk (CSV upload → match) ─────────
 router.post(
   '/upload-csv',
   verifyJwt,
-  allowRoles('admin', 'coordinator'),
+  allowRoles('admin', 'coordinator', 'registration_desk'),
   csvUpload.single('csv'),
   paymentController.uploadAndMatchCsv
 );
 
-// ── Admin + Coordinator (bulk verify from CSV match) ──
+// ── Admin + Coordinator + Registration Desk (bulk verify from CSV match) ──
 router.post(
   '/bulk-verify',
   verifyJwt,
-  allowRoles('admin', 'coordinator'),
+  allowRoles('admin', 'coordinator', 'registration_desk'),
   paymentController.bulkVerify
 );
 
-// ── Admin only (refund) ───────────────────────────────
+// ── Admin + Registration Desk (refund) ───────────────────────────────
 router.put(
   '/:id/refund',
   verifyJwt,
-  allowRoles('admin'),
+  allowRoles('admin', 'registration_desk'),
   paymentController.initiateRefund
 );
 
