@@ -30,10 +30,11 @@ const otpLimiter = rateLimit({
   },
 });
 
-// Registration limiter — 5 registrations per 30 minutes per IP
+// Registration limiter — allow legitimate retries while retaining IP-based abuse protection.
+const registrationMax = Number.parseInt(process.env.REGISTRATION_ATTEMPTS_MAX || "20", 10);
 const registrationLimiter = rateLimit({
   windowMs: 30 * 60 * 1000,
-  max: 5,
+  max: Number.isFinite(registrationMax) && registrationMax > 0 ? registrationMax : 20,
   standardHeaders: true,
   legacyHeaders: false,
   message: { message: "Too many registration attempts. Please try again later." },
