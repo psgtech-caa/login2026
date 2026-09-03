@@ -321,7 +321,7 @@ export const EventsPage: React.FC = () => {
                         <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#E01B22] animate-pulse" title="Flagship Event" />
                       )}
                       <img
-                        src={event.guardian_asset || '/assets/login.png'}
+                        src={event.guardian_asset || '/assets/login.webp'}
                         alt={`${detail.guardianName} Guardian`}
                         className="max-h-16 w-auto object-contain drop-shadow-[0_0_10px_rgba(224,27,34,0.3)]"
                       />
@@ -370,7 +370,7 @@ export const EventsPage: React.FC = () => {
                         </span>
                       )}
                       <img
-                        src={event.guardian_asset || '/assets/login.png'}
+                        src={event.guardian_asset || '/assets/login.webp'}
                         alt={`${detail.guardianName} Guardian`}
                         className="max-h-36 w-auto object-contain animate-float-slow drop-shadow-[0_0_20px_rgba(224,27,34,0.2)]"
                       />

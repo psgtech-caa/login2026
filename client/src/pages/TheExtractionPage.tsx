@@ -102,7 +102,7 @@ export const TheExtractionPage: React.FC = () => {
       name: 'VEERA RAGHAVAN',
       role: 'Former RAW Field Agent',
       status: 'Inside East Coast Mall',
-      image: '/characters/veera_determined.png',
+      image: '/characters/veera_determined.webp',
       quote: "I've taken out the perimeter guards, but Saif locked the entire mall grid with triple-layer ciphers and biometric vaults. If you don't breach their network from CAT Lab, the hostages won't make it out. Move fast. I don't like waiting.",
       tag: 'ALPHA OPERATIVE',
     },
@@ -111,7 +111,7 @@ export const TheExtractionPage: React.FC = () => {
       name: 'DEPUTY NSA ALTHAF HUSSAIN',
       role: 'Crisis Command Lead',
       status: 'Joint Operations Command Center',
-      image: '/characters/althaf_commanding.png',
+      image: '/characters/althaf_commanding.webp',
       quote: "Listen up, Operatives! The government cannot launch a frontal assault without mass casualties. Veera is our lone wolf on the inside. You are CERT-In's finest cyber strike unit. Crack Saif's JWT tokens, expose the traitorous Home Minister, and feed Veera live bypass codes!",
       tag: 'CRISIS COMMAND',
     },
@@ -120,7 +120,7 @@ export const TheExtractionPage: React.FC = () => {
       name: 'UMAR SAIF',
       role: 'Terror Cell Mastermind',
       status: 'Atrium Command Post // Armed Sleeper Cells',
-      image: '/characters/umar_threatening.png',
+      image: '/characters/umar_threatening.webp',
       quote: "Listen to me carefully. We have wired every corner of East Coast Mall with C4. Release my brother Umar Farooq immediately, or the logic bomb triggers. You think your little cyber team can bypass my killswitch? Try it.",
       tag: 'HOSTILE THREAT',
     },
@@ -129,7 +129,7 @@ export const TheExtractionPage: React.FC = () => {
       name: 'PREETHI',
       role: 'Tactical Relay Agency',
       status: 'Comms Relay Coordinator',
-      image: '/characters/preethi_hopeful.png',
+      image: '/characters/preethi_hopeful.webp',
       quote: "Veera is fighting on the frontlines while we patch your terminal directly into the mall's maintenance network. We have 9 encrypted security checkpoints. Unlock them one by one!",
       tag: 'COMMS RELAY',
     },
@@ -217,7 +217,7 @@ export const TheExtractionPage: React.FC = () => {
           <div className="flex flex-col justify-between relative group h-full">
             <div className="relative rounded-[4px] overflow-hidden border-2 border-[#E01B22] shadow-[0_0_50px_rgba(224,27,34,0.5)] bg-[#120507] flex-1 flex items-center justify-center min-h-[380px] sm:min-h-[440px] lg:min-h-[500px]">
               <img
-                src="/assets/events/extraction_hero.png"
+                src="/assets/events/extraction_hero.webp"
                 alt="Operation: The Extraction Poster"
                 className="w-full h-full object-cover transform group-hover:scale-[1.02] transition-transform duration-500"
                 loading="eager"

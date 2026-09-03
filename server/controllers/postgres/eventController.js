@@ -51,7 +51,7 @@ const enrichEvent = (event) => {
       skills: [],
       briefing: plainEvent.description || 'Enter the arena.'
     },
-    guardian_asset: catalogEntry?.guardian_asset || plainEvent.guardian_asset || '/assets/login.png',
+    guardian_asset: catalogEntry?.guardian_asset || plainEvent.guardian_asset || '/assets/login.webp',
   };
 };
 

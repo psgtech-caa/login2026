@@ -106,7 +106,7 @@ export const EventDetailsPage: React.FC = () => {
               </div>
 
               <img
-                src={selectedEvent.guardian_asset || '/assets/login.png'}
+                src={selectedEvent.guardian_asset || '/assets/login.webp'}
                 alt={detail.guardianName || 'Guardian Art'}
                 className="max-h-64 w-auto object-contain my-4 animate-float-slow drop-shadow-[0_0_35px_rgba(224,27,34,0.35)]"
               />

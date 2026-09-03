@@ -255,7 +255,7 @@ export const NovaMobileChatbot: React.FC<NovaMobileChatbotProps> = ({
 
               {/* Spider-Man Asset */}
               <img 
-                src="/assets/spiderman.png" 
+                src="/assets/spiderman.webp"
                 alt="Spider-Man Companion Trigger" 
                 className="w-14 sm:w-16 h-auto object-contain filter drop-shadow-[0_4px_16px_rgba(224,27,34,0.85)]"
                 loading="eager"
@@ -307,7 +307,7 @@ export const NovaMobileChatbot: React.FC<NovaMobileChatbotProps> = ({
             <div className="px-4 py-3 bg-[#16080B] border-b border-[#2A1A1D] flex items-center justify-between">
               <div className="flex items-center gap-2.5">
                 <div className="w-9 h-9 rounded-full bg-black border border-[#E01B22]/70 p-0.5 flex items-center justify-center overflow-hidden">
-                  <img src="/assets/spiderman.png" alt="Spider-Man" className="w-7 h-auto object-contain" />
+                  <img src="/assets/spiderman.webp" alt="Spider-Man" className="w-7 h-auto object-contain" />
                 </div>
                 <div>
                   <div className="font-mono text-xs font-bold text-[#F7F2F2] tracking-wider uppercase">

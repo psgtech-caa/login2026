@@ -34,7 +34,7 @@ const GALLERY_DATA: GalleryItem[] = [
   { id: 13, image: '/login_gallery/13.webp', thumbnail: '/login_gallery/thumbs/13.webp', title: 'SPECIAL GUEST TALK & Q&A', category: 'KEYNOTES' },
   { id: 14, image: '/login_gallery/14.webp', thumbnail: '/login_gallery/thumbs/14.webp', title: 'REGISTRATION DESK OPERATIONS', category: 'COORDINATION' },
   { id: 15, image: '/login_gallery/15.webp', thumbnail: '/login_gallery/thumbs/15.webp', title: 'OVERNIGHT HACKATHON ZONE', category: 'COMPETITIONS' },
-  { id: 17, image: '/login_gallery/17.JPG', thumbnail: '/login_gallery/thumbs/17.webp', title: 'ALUMNI NETWORKING PANELS', category: 'KEYNOTES' },
+  { id: 17, image: '/login_gallery/17.webp', thumbnail: '/login_gallery/thumbs/17.webp', title: 'ALUMNI NETWORKING PANELS', category: 'KEYNOTES' },
   { id: 18, image: '/login_gallery/18.webp', thumbnail: '/login_gallery/thumbs/18.webp', title: 'TROPHY & MEDAL PRESENTATION', category: 'CEREMONIES' },
   { id: 19, image: '/login_gallery/19.webp', thumbnail: '/login_gallery/thumbs/19.webp', title: 'ORGANIZING TEAM MEMORIES', category: 'COORDINATION' },
   { id: 20, image: '/login_gallery/20.webp', thumbnail: '/login_gallery/thumbs/20.webp', title: 'LOGIN SYMPOSIUM CLOSING', category: 'CEREMONIES' },

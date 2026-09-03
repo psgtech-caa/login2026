@@ -314,7 +314,7 @@ export const TimelinePage: React.FC = () => {
                 >
                   <div className="flex items-center gap-4">
                     <img
-                      src={evt.guardian_asset || '/assets/login.png'}
+                      src={evt.guardian_asset || '/assets/login.webp'}
                       alt={evt.name}
                       className="w-12 h-12 object-contain drop-shadow-[0_0_10px_rgba(224,27,34,0.3)] shrink-0"
                     />

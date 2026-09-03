@@ -77,8 +77,8 @@ export const SpidermanCompanion: React.FC = () => {
     <>
       {/* ═══════════════════════════════════════════════════════════════════
           01. ON-SCROLL HANGING TRIGGER
-          - Desktop (>= md): spiderman1.png
-          - Mobile (< md): spiderman.png
+          - Desktop (>= md): spiderman1.webp
+          - Mobile (< md): spiderman.webp
          ═══════════════════════════════════════════════════════════════════ */}
       <AnimatePresence>
         {isScrolledPastHero && !isCompanionOpen && (
@@ -126,7 +126,7 @@ export const SpidermanCompanion: React.FC = () => {
 
               {/* Desktop Asset (Larger Medium-Large Scaling) */}
               <img 
-                src="/assets/spiderman1.png" 
+                src="/assets/spiderman1.webp"
                 alt="Transmission" 
                 className="hidden md:block w-32 lg:w-40 xl:w-44 h-auto object-contain filter drop-shadow-[0_6px_22px_rgba(224,27,34,0.9)] group-hover:brightness-115 transition-all"
                 loading="eager"
@@ -134,7 +134,7 @@ export const SpidermanCompanion: React.FC = () => {
 
               {/* Mobile Asset */}
               <img 
-                src="/assets/spiderman.png" 
+                src="/assets/spiderman.webp"
                 alt="Transmission" 
                 className="block md:hidden w-14 sm:w-16 h-auto object-contain filter drop-shadow-[0_4px_14px_rgba(224,27,34,0.85)] group-hover:brightness-110 transition-all"
                 loading="eager"
@@ -191,7 +191,7 @@ export const SpidermanCompanion: React.FC = () => {
                 {/* Profile Image */}
                 <div className="relative w-9 h-9 rounded-full p-[1.5px] bg-gradient-to-tr from-[#FF2A2A] to-[#2A060A] shadow-[0_0_10px_rgba(224,27,34,0.6)] shrink-0">
                   <img 
-                    src="/assets/spiderman_profile.jpg" 
+                    src="/assets/spiderman_profile.webp"
                     alt="Transmission Avatar" 
                     className="w-full h-full object-cover object-top rounded-full"
                   />
