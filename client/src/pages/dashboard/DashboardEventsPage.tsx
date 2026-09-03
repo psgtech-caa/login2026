@@ -84,7 +84,13 @@ export const DashboardEventsPage: React.FC = () => {
     queryFn: async () => { const res = await api.registrations.getMyRegistrations(); return res.data || []; },
   });
 
-  const registeredEventIds = new Set(myRegistrations.map((r: any) => r.event_id));
+  const registeredEventIds = new Set(
+    myRegistrations.filter((r: any) => r.status === 'registered').map((r: any) => r.event_id)
+  );
+  const rejectedEventIds = new Set(
+    myRegistrations.filter((r: any) => r.status === 'rejected').map((r: any) => r.event_id)
+  );
+  const activeRegistrations = myRegistrations.filter((r: any) => r.status === 'registered');
 
   const pStatus = paymentData?.status || 'NOT_SUBMITTED';
   const canRegister = pStatus === 'PENDING' || pStatus === 'VERIFIED';
@@ -143,8 +149,8 @@ export const DashboardEventsPage: React.FC = () => {
 
   // Schedule Clash Detection Helper
   const checkScheduleClash = (newEvent: Event): Event | null => {
-    if (!newEvent || !Array.isArray(myRegistrations)) return null;
-    for (const reg of myRegistrations) {
+    if (!newEvent || !Array.isArray(activeRegistrations)) return null;
+    for (const reg of activeRegistrations) {
       const existing = reg?.event;
       if (!existing || existing.id === newEvent.id) continue;
 
@@ -207,11 +213,11 @@ export const DashboardEventsPage: React.FC = () => {
         <div className="flex items-center gap-2 text-xs font-mono">
           <span className="text-[#A79798]">Registrations Limit:</span>
           <span className={`px-2.5 py-1 rounded-[2px] font-bold border ${
-            myRegistrations.length >= 5 
+            activeRegistrations.length >= 5
               ? 'bg-[#E08A17]/20 border-[#E08A17] text-[#E08A17]' 
               : 'bg-[#E01B22]/20 border-[#E01B22]/40 text-[#F7F2F2]'
           }`}>
-            {myRegistrations.length} / 5 EVENTS USED
+            {activeRegistrations.length} / 5 EVENTS USED
           </span>
         </div>
       </div>
@@ -280,6 +286,7 @@ export const DashboardEventsPage: React.FC = () => {
             const imageUrl = getEventImage(event.name);
             const guardian = getEventGuardian(event.name);
             const isRegistered = registeredEventIds.has(event.id);
+            const isRejected = rejectedEventIds.has(event.id);
 
             return (
               <motion.div
@@ -367,6 +374,13 @@ export const DashboardEventsPage: React.FC = () => {
                     <div className="w-full py-2.5 bg-[#E08A17]/15 border border-[#E08A17]/60 text-[#E08A17] font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 text-center">
                       🏆 INVITE-ONLY FLAGSHIP EVENT
                     </div>
+                  ) : isRejected ? (
+                    <button
+                      onClick={() => navigate('/dashboard/payment')}
+                      className="w-full py-2.5 bg-[#9B0A12]/20 hover:bg-[#9B0A12]/40 border border-[#FF2A2A] text-[#FF2A2A] font-mono text-xs font-bold rounded-[2px] flex items-center justify-center gap-2 transition-colors"
+                    >
+                      <AlertTriangle className="w-4 h-4" /> REJECTED - UPDATE PAYMENT
+                    </button>
                   ) : isRegistered ? (
                     <div className="flex items-center gap-2">
                       <div className="flex-1 py-2.5 bg-[#1FA971]/20 border border-[#1FA971] text-[#1FA971] font-mono text-xs font-bold rounded-[2px] flex items-center justify-center gap-2">
@@ -387,7 +401,7 @@ export const DashboardEventsPage: React.FC = () => {
                     >
                       PAYMENT REQUIRED TO REGISTER
                     </button>
-                  ) : myRegistrations.length >= 5 ? (
+                  ) : activeRegistrations.length >= 5 ? (
                     <button
                       disabled
                       className="w-full py-2.5 bg-[#1A1114] text-[#E08A17] border border-[#E08A17]/40 font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 cursor-not-allowed opacity-90"

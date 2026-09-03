@@ -380,7 +380,7 @@ const createRegistration = async (req, res) => {
 const getMyRegistrations = async (req, res) => {
   try {
     const registrations = await registrationModel.findAll({
-      where: { student_id: req.user.id, status: "registered" },
+      where: { student_id: req.user.id, status: { [Op.in]: ["registered", "rejected"] } },
       include: [{ model: eventModel, as: "event" }],
       order: [["createdAt", "DESC"]],
     });

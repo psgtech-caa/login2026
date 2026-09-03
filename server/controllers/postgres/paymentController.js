@@ -167,6 +167,12 @@ const verifyPayment = async (req, res) => {
         verified_by: req.user.id,
         verified_at: new Date(),
       });
+
+      const registrationModel = require("../../models/postgres/registrationModel");
+      await registrationModel.update(
+        { status: "rejected" },
+        { where: { student_id: payment.student_id, status: "registered" } }
+      );
       
       return res.json({ message: "Payment rejected. Participant can resubmit details." });
     } else {

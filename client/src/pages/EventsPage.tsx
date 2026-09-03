@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { CheckCircle2, Filter } from 'lucide-react';
@@ -261,8 +261,16 @@ export const EventsPage: React.FC = () => {
             ))}
           </div>
 
-          <div className="mono-label text-[#6B5A5C] text-[10px] sm:text-xs text-right sm:text-left shrink-0">
-            SHOWING {filteredEvents.length} OF 11 EVENTS
+          <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
+            <Link
+              to="/timeline"
+              className="px-3 py-1.5 border border-[#E01B22]/60 text-[#E01B22] hover:bg-[#E01B22] hover:text-[#F7F2F2] rounded-[2px] font-mono text-[10px] sm:text-xs font-bold transition-colors whitespace-nowrap"
+            >
+              VIEW TIMELINE
+            </Link>
+            <div className="mono-label text-[#6B5A5C] text-[10px] sm:text-xs text-right sm:text-left">
+              SHOWING {filteredEvents.length} OF 11 EVENTS
+            </div>
           </div>
         </div>
 

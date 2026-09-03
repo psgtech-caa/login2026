@@ -33,7 +33,7 @@ const registrationModel = sequelize.define(
     },
 
     status: {
-      type: DataTypes.ENUM("registered", "cancelled", "attended", "disqualified"),
+      type: DataTypes.ENUM("registered", "rejected", "cancelled", "attended", "disqualified"),
       allowNull: false,
       defaultValue: "registered",
     },

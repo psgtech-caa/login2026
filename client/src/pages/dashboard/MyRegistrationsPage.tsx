@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
-import { Calendar, MapPin, Clock, Trash2, ClipboardList, QrCode } from 'lucide-react';
+import { Calendar, MapPin, Clock, Trash2, ClipboardList, QrCode, AlertTriangle, CheckCircle2 } from 'lucide-react';
 import { QrScannerModal } from '../../components/dashboard/QrScannerModal';
 
 export const MyRegistrationsPage: React.FC = () => {
@@ -23,7 +23,7 @@ export const MyRegistrationsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#2A1A1D] pb-4">
         <div>
           <h1 className="text-xl font-display font-bold text-[#F7F2F2]">My Registrations</h1>
-          <p className="text-xs text-[#6B5A5C] font-mono mt-1">{registrations.length} event{registrations.length !== 1 ? 's' : ''} registered</p>
+          <p className="text-xs text-[#6B5A5C] font-mono mt-1">{registrations.filter((reg: any) => reg.status === 'registered').length} active event{registrations.filter((reg: any) => reg.status === 'registered').length !== 1 ? 's' : ''}</p>
         </div>
         <button
           onClick={() => setIsQrModalOpen(true)}
@@ -64,6 +64,12 @@ export const MyRegistrationsPage: React.FC = () => {
                       }`}>
                         {reg.event?.category || 'EVENT'}
                       </span>
+                      <span className={`inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 text-[8px] font-mono font-bold rounded-[2px] ${
+                        reg.status === 'rejected' ? 'bg-[#9B0A12]/20 text-[#FF2A2A]' : 'bg-[#1FA971]/15 text-[#1FA971]'
+                      }`}>
+                        {reg.status === 'rejected' ? <AlertTriangle className="w-2.5 h-2.5" /> : <CheckCircle2 className="w-2.5 h-2.5" />}
+                        {reg.status === 'rejected' ? 'REJECTED' : 'REGISTERED'}
+                      </span>
                     </td>
                     <td className="p-4 font-mono text-[#A79798]">
                       <div className="flex items-center gap-1.5"><Calendar className="w-3 h-3" />{(Number(reg.event?.day) === 2 || Number(reg.event?.day) === 19 || Number(reg.event?.day) === 15) ? 'Day 2' : 'Day 1'}</div>
@@ -94,13 +100,15 @@ export const MyRegistrationsPage: React.FC = () => {
                       <div className="flex items-center gap-1.5"><MapPin className="w-3 h-3" />{reg.event?.venue || 'TBA'}</div>
                     </td>
                     <td className="p-4">
-                      <button
-                        onClick={() => { if (confirm('Cancel this registration?')) cancelMutation.mutate(reg.id); }}
-                        className="text-[#6B5A5C] hover:text-[#FF2A2A] p-1.5 transition-colors rounded-[2px] hover:bg-[#4A050A]/30"
-                        title="Cancel Registration"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {reg.status === 'registered' && (
+                        <button
+                          onClick={() => { if (confirm('Cancel this registration?')) cancelMutation.mutate(reg.id); }}
+                          className="text-[#6B5A5C] hover:text-[#FF2A2A] p-1.5 transition-colors rounded-[2px] hover:bg-[#4A050A]/30"
+                          title="Cancel Registration"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}

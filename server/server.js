@@ -37,6 +37,11 @@ const startServer = async () => {
     const ensureSchema = async (dbInstance, label) => {
       if (!dbInstance) return;
       await dbInstance.sync({ force: false, alter: false, logging: false });
+      if (dbInstance.getDialect() === "postgres") {
+        await dbInstance.query(
+          'ALTER TYPE "enum_registrations_status" ADD VALUE IF NOT EXISTS \'rejected\''
+        );
+      }
       console.log(`Schema check complete for ${label}`);
     };
 
