@@ -300,7 +300,10 @@ export const EventsPage: React.FC = () => {
               return (
                 <div
                   key={event.id}
-                  onClick={() => navigate(`/events/${(event as any).slug}`)}
+                  onClick={() => {
+                    const isExtraction = event.name.toLowerCase().includes('extraction') || (event as any).slug === 'the-extraction';
+                    navigate(isExtraction ? '/events/the-extraction' : `/events/${(event as any).slug || event.id}`);
+                  }}
                   className={`group bg-[#130C0E] rounded-[2px] flex flex-col card-hover-lift corner-bracket-container border animate-fade-in-up cursor-pointer transition-all duration-300 ${
                     event.is_flagship
                       ? 'border-[#E01B22] shadow-[0_0_25px_rgba(224,27,34,0.25)] hover:shadow-[0_0_35px_rgba(224,27,34,0.4)]'
