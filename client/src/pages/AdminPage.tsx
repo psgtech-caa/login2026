@@ -746,7 +746,7 @@ export const AdminPage: React.FC = () => {
                       </td>
                       <td className="p-3.5 font-mono text-[#E08A17] font-bold">{p.transaction_reference}</td>
                       <td className="p-3.5 font-mono text-[10px]">
-                        <div className="text-[#F7F2F2]">₹{p.amount || '150'}</div>
+                        <div className="text-[#F7F2F2]">₹{p.amount || '100'}</div>
                         <div className="text-[#A79798]">{p.payment_date || '-'}</div>
                         <div className="text-[#A79798]">{p.payment_method || 'UPI'}</div>
                       </td>
@@ -1384,7 +1384,7 @@ export const AdminPage: React.FC = () => {
               <div className="bg-[#130C0E] border border-[#1FA971]/40 p-4 rounded-[2px]">
                 <span className="mono-label text-[#1FA971] block text-[10px]">PAYMENTS VERIFIED</span>
                 <strong className="text-xl font-mono text-[#1FA971] mt-1 block">{verifiedPaymentsCount}</strong>
-                <span className="text-[9px] text-[#A79798] font-mono">₹{verifiedPaymentsCount * 150} INR</span>
+                <span className="text-[9px] text-[#A79798] font-mono">₹{verifiedPaymentsCount * 100} INR</span>
               </div>
               <div className="bg-[#130C0E] border border-[#2A1A1D] p-4 rounded-[2px]">
                 <span className="mono-label text-[#A79798] block text-[10px]">ARENA ENROLLMENTS</span>
