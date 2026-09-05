@@ -83,7 +83,7 @@ async function flushEventNotifications(eventId) {
         const html = `
           <div style="font-family: Arial, sans-serif; background: #F4EFE9; color: #16090B; padding: 24px; border: 1px solid #6B5A58;">
             <h2 style="color: #E01B22;">Event Details Update Notice</h2>
-            <p>Hello <strong>${reg.User.name}</strong> (Student ID: ${reg.User.student_id_code || 'LGN26-REGISTERED'}),</p>
+            <p>Hello <strong>${reg.User.name}</strong> (Login ID: ${reg.User.login_id || 'LOGIN-USER'}),</p>
             <p>The organizing team has updated the schedule/venue details for your registered competition:</p>
             <div style="background: #E9E1D8; padding: 16px; border-left: 4px solid #E01B22; font-family: monospace; font-size: 13px;">
               ${changeSummary}

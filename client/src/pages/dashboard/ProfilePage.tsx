@@ -279,11 +279,11 @@ export const ProfilePage: React.FC = () => {
         </form>
       )}
 
-      {/* Official Student ID Badge */}
-      {user?.student_id_code && (
+      {/* Official Login ID Badge */}
+      {user?.login_id && (
         <div className="bg-[#0A0607] border border-[#1FA971] p-6 rounded-[2px] text-center space-y-2 shadow-xl">
-          <p className="text-[10px] font-mono text-[#A79798] uppercase tracking-[3px]">Official Student ID</p>
-          <p className="text-3xl font-mono font-extrabold text-[#1FA971] tracking-[4px]">{user.student_id_code}</p>
+          <p className="text-[10px] font-mono text-[#A79798] uppercase tracking-[3px]">Official Login ID</p>
+          <p className="text-3xl font-mono font-extrabold text-[#1FA971] tracking-[4px]">{user.login_id}</p>
         </div>
       )}
     </div>

@@ -157,7 +157,7 @@ const verifyPayment = async (req, res) => {
           user.student_id_code = studentIdCode;
           await user.save();
         }
-        sendPaymentVerificationEmail(user, user.student_id_code);
+        sendPaymentVerificationEmail(user);
       }
       return res.json({ message: "Payment verified successfully", payment });
     } else if (targetStatus === "REJECTED") {
@@ -315,7 +315,7 @@ const bulkVerify = async (req, res) => {
           await user.save();
         }
         if (user) {
-          sendPaymentVerificationEmail(user, user.student_id_code).catch(() => {});
+          sendPaymentVerificationEmail(user).catch(() => {});
         }
 
         results.verified.push(id);

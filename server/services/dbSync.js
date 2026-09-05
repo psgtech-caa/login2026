@@ -1,15 +1,41 @@
-const { sequelize, neonSequelize } = require('../config/db/postgres');
+const { sequelize } = require('../config/db/postgres');
+const { neon } = require('@neondatabase/serverless');
+
+let syncInProgress = null;
 
 /**
  * Basic Dual DB Synchronization Mechanism
  * This function can be run periodically to synchronize the local Postgres DB to Neon Postgres DB.
  */
 async function syncLocalToNeon() {
-  if (!neonSequelize) return;
+  if (!process.env.NEON_DATABASE_URL) {
+    throw new Error('Neon database is not configured.');
+  }
+
+  if (syncInProgress) return syncInProgress;
+
+  syncInProgress = runSync();
+  try {
+    return await syncInProgress;
+  } finally {
+    syncInProgress = null;
+  }
+}
+
+async function runSync() {
 
   console.log('[DB Sync] Starting synchronization between Local and Neon...');
+  let syncedRows = 0;
+  let skippedTables = 0;
 
   try {
+    if (!process.env.NEON_DATABASE_URL) {
+      throw new Error('Neon database is not configured.');
+    }
+
+    const neonSql = neon(process.env.NEON_DATABASE_URL);
+    await neonSql.query('SELECT 1 AS connection_check');
+
     // 1. Get all table names
     const [tables] = await sequelize.query(`
       SELECT tablename
@@ -47,21 +73,27 @@ async function syncLocalToNeon() {
           
           // NOTE: Only tables with primary key 'id' will support this ON CONFLICT strategy natively in this basic script.
           // If a table lacks an 'id' column, it might fail, which is caught below.
-          await neonSequelize.query(query).catch(() => {});
+          await neonSql.query(query);
+          syncedRows += 1;
         }
       } catch (err) {
         // Skip tables that don't conform to the simple sync strategy
+        skippedTables += 1;
+        const detail = err.original?.message || err.parent?.message || err.message || err.name;
+        console.warn(`[DB Sync] Skipped table ${tablename}:`, detail);
       }
     }
     
-    console.log('[DB Sync] Synchronization completed successfully.');
+    console.log(`[DB Sync] Synchronization completed successfully. Synced ${syncedRows} rows.`);
+    return { syncedRows, skippedTables };
   } catch (error) {
     console.error('[DB Sync] Failed to synchronize:', error);
+    throw error;
   }
 }
 
 function startSyncCron(intervalMs = 5 * 60 * 1000) {
-  if (!neonSequelize) {
+  if (!process.env.NEON_DATABASE_URL) {
     console.log('[DB Sync] Neon DB not configured, skipping sync cron.');
     return;
   }

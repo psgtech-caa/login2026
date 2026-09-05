@@ -19,26 +19,26 @@ interface GalleryItem {
 }
 
 const GALLERY_DATA: GalleryItem[] = [
-  { id: 1, image: '/login_gallery/1.webp', thumbnail: '/login_gallery/thumbs/1.webp', title: 'SYMPOSIUM OPENING KEYNOTE', category: 'KEYNOTES' },
-  { id: 2, image: '/login_gallery/2.webp', thumbnail: '/login_gallery/thumbs/2.webp', title: 'ALGORITHM HACKATHON ARENA', category: 'COMPETITIONS' },
-  { id: 3, image: '/login_gallery/3.webp', thumbnail: '/login_gallery/thumbs/3.webp', title: 'CYBERSECURITY DEFENSE LAB', category: 'COMPETITIONS' },
-  { id: 4, image: '/login_gallery/4.webp', thumbnail: '/login_gallery/thumbs/4.webp', title: 'STUDENT COORDINATOR HUBS', category: 'COORDINATION' },
-  { id: 5, image: '/login_gallery/5.webp', thumbnail: '/login_gallery/thumbs/5.webp', title: 'DATA SCIENCE CHALLENGE', category: 'COMPETITIONS' },
-  { id: 6, image: '/login_gallery/6.webp', thumbnail: '/login_gallery/thumbs/6.webp', title: 'EXECUTIVE COMMITTEE CEREMONY', category: 'CEREMONIES' },
-  { id: 7, image: '/login_gallery/7.webp', thumbnail: '/login_gallery/thumbs/7.webp', title: 'SYMPO DELEGATE BRIEFING', category: 'COORDINATION' },
-  { id: 8, image: '/login_gallery/8.webp', thumbnail: '/login_gallery/thumbs/8.webp', title: 'HARDWARE CIRCUIT SHOWCASE', category: 'COMPETITIONS' },
-  { id: 9, image: '/login_gallery/9.webp', thumbnail: '/login_gallery/thumbs/9.webp', title: 'ROBOTICS ARENA FINALS', category: 'COMPETITIONS' },
-  { id: 10, image: '/login_gallery/10.webp', thumbnail: '/login_gallery/thumbs/10.webp', title: 'VALEDICTORY AWARDS NIGHT', category: 'CEREMONIES' },
-  { id: 11, image: '/login_gallery/11.webp', thumbnail: '/login_gallery/thumbs/11.webp', title: 'INTER-COLLEGE CODE DUEL', category: 'COMPETITIONS' },
-  { id: 12, image: '/login_gallery/12.webp', thumbnail: '/login_gallery/thumbs/12.webp', title: 'CAMPUS AUDITORIUM OVERVIEW', category: 'CEREMONIES' },
-  { id: 13, image: '/login_gallery/13.webp', thumbnail: '/login_gallery/thumbs/13.webp', title: 'SPECIAL GUEST TALK & Q&A', category: 'KEYNOTES' },
-  { id: 14, image: '/login_gallery/14.webp', thumbnail: '/login_gallery/thumbs/14.webp', title: 'REGISTRATION DESK OPERATIONS', category: 'COORDINATION' },
-  { id: 15, image: '/login_gallery/15.webp', thumbnail: '/login_gallery/thumbs/15.webp', title: 'OVERNIGHT HACKATHON ZONE', category: 'COMPETITIONS' },
-  { id: 17, image: '/login_gallery/17.webp', thumbnail: '/login_gallery/thumbs/17.webp', title: 'ALUMNI NETWORKING PANELS', category: 'KEYNOTES' },
-  { id: 18, image: '/login_gallery/18.webp', thumbnail: '/login_gallery/thumbs/18.webp', title: 'TROPHY & MEDAL PRESENTATION', category: 'CEREMONIES' },
-  { id: 19, image: '/login_gallery/19.webp', thumbnail: '/login_gallery/thumbs/19.webp', title: 'ORGANIZING TEAM MEMORIES', category: 'COORDINATION' },
-  { id: 20, image: '/login_gallery/20.webp', thumbnail: '/login_gallery/thumbs/20.webp', title: 'LOGIN SYMPOSIUM CLOSING', category: 'CEREMONIES' },
-  { id: 21, image: '/Group_pic.webp', thumbnail: '/login_gallery/thumbs/Group_pic.webp', title: 'LOGIN 2K26 OFFICIAL GROUP PHOTOGRAPH', category: 'TEAM' },
+  { id: 1, image: '/login_gallery/1.webp', thumbnail: '/login_gallery/thumbs/1.webp', title: '', category: 'KEYNOTES' },
+  { id: 2, image: '/login_gallery/2.webp', thumbnail: '/login_gallery/thumbs/2.webp', title: '', category: 'COMPETITIONS' },
+  { id: 3, image: '/login_gallery/3.webp', thumbnail: '/login_gallery/thumbs/3.webp', title: '', category: 'COMPETITIONS' },
+  { id: 4, image: '/login_gallery/4.webp', thumbnail: '/login_gallery/thumbs/4.webp', title: '', category: 'COORDINATION' },
+  { id: 5, image: '/login_gallery/5.webp', thumbnail: '/login_gallery/thumbs/5.webp', title: '', category: 'COMPETITIONS' },
+  { id: 6, image: '/login_gallery/6.webp', thumbnail: '/login_gallery/thumbs/6.webp', title: '', category: 'CEREMONIES' },
+  { id: 7, image: '/login_gallery/7.webp', thumbnail: '/login_gallery/thumbs/7.webp', title: '', category: 'COORDINATION' },
+  { id: 8, image: '/login_gallery/8.webp', thumbnail: '/login_gallery/thumbs/8.webp', title: '', category: 'COMPETITIONS' },
+  { id: 9, image: '/login_gallery/9.webp', thumbnail: '/login_gallery/thumbs/9.webp', title: '', category: 'COMPETITIONS' },
+  { id: 10, image: '/login_gallery/10.webp', thumbnail: '/login_gallery/thumbs/10.webp', title: '', category: 'CEREMONIES' },
+  { id: 11, image: '/login_gallery/11.webp', thumbnail: '/login_gallery/thumbs/11.webp', title: '', category: 'COMPETITIONS' },
+  { id: 12, image: '/login_gallery/12.webp', thumbnail: '/login_gallery/thumbs/12.webp', title: '', category: 'CEREMONIES' },
+  { id: 13, image: '/login_gallery/13.webp', thumbnail: '/login_gallery/thumbs/13.webp', title: '', category: 'KEYNOTES' },
+  { id: 14, image: '/login_gallery/14.webp', thumbnail: '/login_gallery/thumbs/14.webp', title: '', category: 'COORDINATION' },
+  { id: 15, image: '/login_gallery/15.webp', thumbnail: '/login_gallery/thumbs/15.webp', title: '', category: 'COMPETITIONS' },
+  { id: 17, image: '/login_gallery/17.webp', thumbnail: '/login_gallery/thumbs/17.webp', title: '', category: 'KEYNOTES' },
+  { id: 18, image: '/login_gallery/18.webp', thumbnail: '/login_gallery/thumbs/18.webp', title: '', category: 'CEREMONIES' },
+  { id: 19, image: '/login_gallery/19.webp', thumbnail: '/login_gallery/thumbs/19.webp', title: '', category: 'COORDINATION' },
+  { id: 20, image: '/login_gallery/20.webp', thumbnail: '/login_gallery/thumbs/20.webp', title: '', category: 'CEREMONIES' },
+  { id: 21, image: '/Group_pic.webp', thumbnail: '/login_gallery/thumbs/Group_pic.webp', title: '', category: 'TEAM' },
 ];
 
 export const GalleryPage: React.FC = () => {
@@ -146,7 +146,7 @@ export const GalleryPage: React.FC = () => {
                 ✦ OFFICIAL SYMPOSIUM ARCHIVE
               </span>
               <h2 className="text-xl sm:text-2xl font-display font-black text-[#F7F2F2] tracking-wider uppercase">
-                LOGIN 2K26 ORGANIZING TEAM & DELEGATES
+                LOGIN 2K25 ORGANIZING TEAM & DELEGATES
               </h2>
             </div>
             <span className="font-mono text-[11px] text-[#A79798] bg-[#130C0E] border border-[#2A1A1D] px-3 py-1 rounded-[2px]">
@@ -174,7 +174,7 @@ export const GalleryPage: React.FC = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-display font-black text-base sm:text-lg text-[#F7F2F2] uppercase tracking-wide">
-                    LOGIN 2K26 OFFICIAL GROUP PHOTOGRAPH
+                    LOGIN 2K25 OFFICIAL GROUP PHOTOGRAPH
                   </h3>
                   <p className="font-mono text-xs text-[#A79798] mt-0.5">
                     Student Coordinators, Staff Advisors & Symposium Organizers

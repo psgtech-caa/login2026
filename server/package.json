@@ -11,6 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@neondatabase/serverless": "^1.1.0",
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.11.0",
     "cookie-parser": "^1.4.7",
@@ -23,7 +24,6 @@
     "express-rate-limit": "^8.7.0",
     "express-session": "^1.19.0",
     "jsonwebtoken": "^9.0.3",
-    "login-2k26-client": "file:../client",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",
     "pg": "^8.23.0",

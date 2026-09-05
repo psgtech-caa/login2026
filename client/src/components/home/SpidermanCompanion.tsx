@@ -33,7 +33,7 @@ export const SpidermanCompanion: React.FC = () => {
   useEffect(() => {
     const hints = [
       "Think you can survive?",
-      "94% of teams will fail.",
+      "Only less than 10% succeed.",
       "Are you fast enough?",
       "Unlock classified arena",
     ];
@@ -278,7 +278,7 @@ export const SpidermanCompanion: React.FC = () => {
                       // CLASSIFIED CTF OVERRIDE
                     </span>
                     <p>
-                      "The Extraction CTF has a <strong className="text-[#FFD700]">₹13,000+ bounty</strong> with cryptographic bypasses and forensic payloads. 94% of teams will fail in the first 30 minutes."
+                      "The Extraction CTF has a <strong className="text-[#FFD700]">₹13,000+ bounty</strong> with cryptographic bypasses and forensic payloads. less than 10% of teams will succeed in the first 30 minutes."
                     </p>
                   </div>
 

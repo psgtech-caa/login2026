@@ -252,8 +252,8 @@ const sendPaymentPendingEmail = async ({ to, name, eventName, portalUrl = `${fro
   return sendEmail({ to, subject, html });
 };
 
-const sendPaymentVerifiedEmail = async ({ to, name, studentIdCode, portalUrl = `${frontendUrl}/dashboard` }) => {
-  const subject = `[LOGIN 2026] Payment Verified! Your Student ID is ${studentIdCode}`;
+const sendPaymentVerifiedEmail = async ({ to, name, loginId, portalUrl = `${frontendUrl}/dashboard` }) => {
+  const subject = `[LOGIN 2026] Payment Verified! Your Login ID is ${loginId}`;
   const html = renderBrandTemplate({
     title: 'PAYMENT VERIFIED',
     subtitle: 'Your registration is now fully approved',
@@ -266,8 +266,8 @@ const sendPaymentVerifiedEmail = async ({ to, name, studentIdCode, portalUrl = `
         Your LOGIN 2026 payment has been verified by the organizing committee.
       </p>
       <div style="background:rgba(31,169,113,0.12);border:1px solid ${BRAND.green};padding:20px;border-radius:6px;text-align:center;margin:20px 0;">
-        <div style="font-size:11px;letter-spacing:2px;color:${BRAND.gold};text-transform:uppercase;font-family:monospace;">Official Student ID</div>
-        <div style="font-size:28px;letter-spacing:3px;font-weight:800;color:${BRAND.text};font-family:monospace;margin-top:10px;">${escapeHtml(studentIdCode)}</div>
+        <div style="font-size:11px;letter-spacing:2px;color:${BRAND.gold};text-transform:uppercase;font-family:monospace;">Official Login ID</div>
+        <div style="font-size:28px;letter-spacing:3px;font-weight:800;color:${BRAND.text};font-family:monospace;margin-top:10px;">${escapeHtml(loginId)}</div>
       </div>
       <p style="margin:0; font-size:14px; line-height:1.7; color:${BRAND.muted};">
         You can now continue with event registration and portal access without any blockers.
@@ -328,7 +328,7 @@ const sendEventReminderEmail = async (user, event) => {
       <div style="background:${BRAND.panel};border:1px solid ${BRAND.red};padding:18px;border-radius:6px;">
         <div>Venue: <strong style="color:${BRAND.text};">${escapeHtml(event.venue)}</strong></div>
         <div style="margin-top:8px;">Time: <strong style="color:${BRAND.text};">${escapeHtml(event.start_time)} IST</strong></div>
-        <div style="margin-top:8px;">Student ID: <strong style="color:${BRAND.text};">${escapeHtml(user.student_id_code)}</strong></div>
+        <div style="margin-top:8px;">Login ID: <strong style="color:${BRAND.text};">${escapeHtml(user.login_id)}</strong></div>
       </div>
     `,
   });
@@ -336,11 +336,11 @@ const sendEventReminderEmail = async (user, event) => {
   return sendEmail({ to: user.email, subject, html });
 };
 
-const sendPaymentVerificationEmail = async (user, studentIdCode) => {
+const sendPaymentVerificationEmail = async (user) => {
   return sendPaymentVerifiedEmail({
     to: user.email,
     name: user.name,
-    studentIdCode,
+    loginId: user.login_id,
     portalUrl: `${frontendUrl}/dashboard`,
   });
 };

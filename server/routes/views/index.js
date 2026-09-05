@@ -158,10 +158,10 @@ router.get('/coordinator/export-csv', async (req, res) => {
       include: [{ model: User, as: 'student' }]
     });
 
-    let csvContent = 'STUDENT_ID,NAME,EMAIL,PHONE,COLLEGE,ATTENDANCE\n';
+    let csvContent = 'LOGIN_ID,NAME,EMAIL,PHONE,COLLEGE,ATTENDANCE\n';
     roster.forEach((r) => {
       const u = r.student || {};
-      csvContent += `"${u.student_id_code || '-'}","${u.name || '-'}","${u.email || '-'}","${u.phone || '-'}","${u.college_name || '-'}","${r.attendance_status || 'UNMARKED'}"\n`;
+      csvContent += `"${u.login_id || '-'}","${u.name || '-'}","${u.email || '-'}","${u.phone || '-'}","${u.college_name || '-'}","${r.attendance_status || 'UNMARKED'}"\n`;
     });
 
     res.setHeader('Content-Type', 'text/csv');

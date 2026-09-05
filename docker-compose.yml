@@ -36,12 +36,14 @@ services:
       APP_ENV: production
       DATABASE_URL: postgresql://postgres:postgres@db:5432/login2026
       LOCAL_DATABASE_URL: postgresql://postgres:postgres@db:5432/login2026
-      NEON_DATABASE_URL: postgresql://neondb_owner:npg_1zF9ySCxZfAv@ep-small-waterfall-axaac8kn-pooler.c-4.us-east-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require
+      NEON_DATABASE_URL: ${NEON_DATABASE_URL}
       JWT_SECRET: super_secret_jwt_key_login_2026
       SESSION_SECRET: super_secret_session_key_login_2026
       SKIP_DB_SEED: "true"
       DB_SEED_ON_BOOT: "false"
       DISABLE_DB_SYNC: "true"
+      DB_STARTUP_MUTATIONS: "false"
+      CONNECT_NEON_ON_BOOT: "false"
     env_file:
       - ./.env
     networks:

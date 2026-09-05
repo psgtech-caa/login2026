@@ -312,7 +312,7 @@ export const TheExtractionPage: React.FC = () => {
                 <div className="text-[8.5px] text-[#8C8283] uppercase flex items-center gap-1">
                   <Clock className="w-3 h-3 text-[#FF2A2A]" /> TIMING
                 </div>
-                <div className="text-xs font-bold text-white mt-0.5">09:30 AM (Sept 19)</div>
+                <div className="text-xs font-bold text-white mt-0.5">01:30 PM (Sept 18)</div>
               </div>
 
               <div className="p-2.5 bg-[#130609] border border-[#2A1A1D] rounded-[2px]">

@@ -45,13 +45,19 @@ const connectPostgres = async () => {
     await sequelize.authenticate();
     console.log(`Local Database connected successfully using ${sequelize.getDialect()}`);
 
-    if (neonSequelize) {
+    const connectNeonOnBoot = ['true', '1', 'yes', 'on'].includes(
+      String(process.env.CONNECT_NEON_ON_BOOT || '').toLowerCase()
+    );
+
+    if (neonSequelize && connectNeonOnBoot) {
       try {
         await neonSequelize.authenticate();
         console.log(`Neon Database connected successfully using postgres`);
       } catch (neonError) {
         console.warn("Neon Database connection failed; continuing with local Docker Postgres.", neonError.message);
       }
+    } else if (neonSequelize) {
+      console.log('Neon connection on startup is disabled; Neon is available for manual sync only.');
     }
   } catch (error) {
     if (forceSqlite) {

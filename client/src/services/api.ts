@@ -145,6 +145,10 @@ export const api = {
     update: async (data: any) => await axiosInstance.put('/settings/', data),
   },
 
+  dbSync: {
+    syncToNeon: async () => await axiosInstance.post('/db-sync/neon'),
+  },
+
   // Stats Telemetry
   stats: {
     getParticipantStats: async () => await axiosInstance.get('/stats/participants'),

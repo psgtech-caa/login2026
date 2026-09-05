@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { ENV } from '../services/env';
 import { useAuthStore, isRegistrationDeskRole } from '../store/authStore';
 import staticEventsData from '../data/events.json';
-import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil, Upload, CheckCircle2, XCircle, FileText } from 'lucide-react';
+import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil, Upload, CheckCircle2, XCircle, FileText, RefreshCw } from 'lucide-react';
 
 const STATIC_EVENTS = Array.isArray(staticEventsData) ? staticEventsData : [];
 
@@ -44,6 +44,7 @@ export const AdminPage: React.FC = () => {
   const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
   const [showWinnersSetting, setShowWinnersSetting] = useState<boolean>(false);
   const [updatingSetting, setUpdatingSetting] = useState<boolean>(false);
+  const [syncingToNeon, setSyncingToNeon] = useState(false);
 
   // CSV Upload state
   const [csvFile, setCsvFile] = useState<File | null>(null);
@@ -424,7 +425,7 @@ export const AdminPage: React.FC = () => {
       `"${p.student?.college_name || p.user?.college_name || '-'}"`,
       `"${p.transaction_reference || '-'}"`,
       `"${p.status}"`,
-      `"${p.student?.student_id_code || p.user?.student_id_code || '-'}"`,
+      `"${p.student?.login_id || p.user?.login_id || '-'}"`,
       `"${p.createdAt ? new Date(p.createdAt).toLocaleString() : '-'}"`,
     ]);
 
@@ -448,7 +449,7 @@ export const AdminPage: React.FC = () => {
         rows.push([
           `"${eventGroup.eventName}"`,
           `"${reg.student?.name || reg.user?.name || 'Student'}"`,
-          `"${reg.student?.student_id_code || reg.user?.student_id_code || '-'}"`,
+          `"${reg.student?.login_id || reg.user?.login_id || '-'}"`,
           `"${reg.student?.email || reg.user?.email || '-'}"`,
           `"${reg.student?.phone || reg.user?.phone || '-'}"`,
           `"${reg.student?.college_name || reg.user?.college_name || '-'}"`,
@@ -510,7 +511,7 @@ export const AdminPage: React.FC = () => {
     const csvRows = [
       ['ID_CODE', 'NAME', 'EMAIL', 'PHONE', 'COLLEGE', 'DEPARTMENT', 'ROLL_NO', 'USER_TYPE', 'ROLE'],
       ...list.map((u) => [
-        u.student_id_code || u.login_id || u.id,
+        u.login_id || u.id,
         u.name || '',
         u.email || '',
         u.phone || '',
@@ -527,6 +528,40 @@ export const AdminPage: React.FC = () => {
     const link = document.createElement('a');
     link.setAttribute('href', encodedUri);
     link.setAttribute('download', `LOGIN_2K26_Accommodation_Requests_${new Date().toISOString().slice(0, 10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const exportParticipantsCSV = () => {
+    const participantList = users.filter((u) => u.role === 'participant');
+    if (!participantList.length) {
+      alert('No participants found.');
+      return;
+    }
+    const csvRows = [
+      ['LOGIN_ID', 'NAME', 'EMAIL', 'PHONE', 'COLLEGE', 'DEPARTMENT', 'ROLL_NO', 'ACCOMMODATION', 'PAYMENT_STATUS'],
+      ...participantList.map((u) => {
+        const paymentStatus = u.payments?.some((p: any) => p.status === 'VERIFIED') ? 'PAID' : u.payments?.some((p: any) => p.status === 'PENDING') ? 'PENDING' : 'UNPAID';
+        return [
+          u.login_id || u.id,
+          u.name || '',
+          u.email || '',
+          u.phone || '',
+          u.college_name || '',
+          u.department || '',
+          u.roll_no || '',
+          u.accommodation_required ? 'YES' : 'NO',
+          paymentStatus
+        ];
+      })
+    ];
+
+    const csvContent = 'data:text/csv;charset=utf-8,' + csvRows.map((e) => e.map((cell) => `"${cell}"`).join(',')).join('\n');
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement('a');
+    link.setAttribute('href', encodedUri);
+    link.setAttribute('download', `LOGIN_2K26_All_Participants_${new Date().toISOString().slice(0, 10)}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
@@ -557,6 +592,18 @@ export const AdminPage: React.FC = () => {
       alert(err.response?.data?.message || 'Failed to update system setting.');
     } finally {
       setUpdatingSetting(false);
+    }
+  };
+
+  const handleSyncToNeon = async () => {
+    try {
+      setSyncingToNeon(true);
+      const response = await api.dbSync.syncToNeon();
+      alert(`${response.data.message} Synced rows: ${response.data.syncedRows}.`);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to synchronize with Neon.');
+    } finally {
+      setSyncingToNeon(false);
     }
   };
 
@@ -614,6 +661,30 @@ export const AdminPage: React.FC = () => {
                 }`}
               >
                 {showWinnersSetting ? '✓ ENABLED (Visible)' : 'OFF (Hidden)'}
+              </button>
+            </div>
+
+            <div className="bg-[#0A0607] border border-[#2A1A1D] p-6 rounded-[2px] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <div className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <RefreshCw className="w-5 h-5 text-[#E08A17]" />
+                  <h3 className="font-display font-bold text-sm text-[#F7F2F2]">
+                    SYNCHRONIZE TO NEON
+                  </h3>
+                </div>
+                <p className="text-xs font-mono text-[#A79798] max-w-xl">
+                  Push the current local database records to the configured Neon cloud database.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleSyncToNeon}
+                disabled={syncingToNeon}
+                className="px-5 py-2.5 rounded-[2px] bg-[#E01B22] hover:bg-[#FF2A2A] disabled:opacity-50 disabled:cursor-not-allowed text-[#F7F2F2] font-mono text-xs font-bold transition-all flex items-center gap-2 shrink-0"
+              >
+                <RefreshCw className={`w-4 h-4 ${syncingToNeon ? 'animate-spin' : ''}`} />
+                {syncingToNeon ? 'SYNCING...' : 'SYNC NOW'}
               </button>
             </div>
           </div>
@@ -786,7 +857,7 @@ export const AdminPage: React.FC = () => {
                             {eventGroup.registrations.map((reg: any) => (
                               <tr key={reg.id} className="hover:bg-[#130C0E]">
                                 <td className="py-2 px-3 font-mono text-[#1FA971] font-bold">
-                                  {reg.student?.student_id_code || reg.user?.student_id_code || '-'}
+                                  {reg.student?.login_id || reg.user?.login_id || '-'}
                                 </td>
                                 <td className="py-2 px-3">
                                   <div className="font-bold text-[#F7F2F2]">{reg.student?.name || reg.user?.name || 'Participant'}</div>
@@ -1210,6 +1281,12 @@ export const AdminPage: React.FC = () => {
                 >
                   <Download className="w-3.5 h-3.5 text-[#E01B22]" /> EXPORT ACCOMMODATION CSV
                 </button>
+                <button
+                  onClick={exportParticipantsCSV}
+                  className="px-3.5 py-1.5 bg-[#1A1114] hover:bg-[#2A1A1D] border border-[#3E2529] hover:border-[#1FA971] text-[#1FA971] font-mono text-xs font-bold rounded-[2px] flex items-center gap-1.5 transition-colors"
+                >
+                  <Download className="w-3.5 h-3.5 text-[#1FA971]" /> EXPORT ALL PARTICIPANTS CSV
+                </button>
               </div>
             </div>
 
@@ -1295,6 +1372,13 @@ export const AdminPage: React.FC = () => {
                   <span className="mono-label text-[#E08A17] block text-[10px]">ALUMNI RSVPs</span>
                   <strong className="text-xl font-mono text-[#E08A17] mt-1 block">{alumniCount}</strong>
                   <span className="text-[9px] text-[#A79798] font-mono">Reunion guests</span>
+                </div>
+              )}
+              {isDesk && (
+                <div className="bg-[#130C0E] border border-[#E08A17]/60 p-4 rounded-[2px]">
+                  <span className="mono-label text-[#E08A17] block text-[10px]">ALUMNI RSVPs</span>
+                  <strong className="text-xl font-mono text-[#E08A17] mt-1 block">{alumniCount}</strong>
+                  <span className="text-[9px] text-[#A79798] font-mono">Registered alumni</span>
                 </div>
               )}
               <div className="bg-[#130C0E] border border-[#1FA971]/40 p-4 rounded-[2px]">

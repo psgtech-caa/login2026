@@ -173,7 +173,7 @@ export const CoordinatorPage: React.FC = () => {
     const matchesSearch =
       !search ||
       (r.user?.name && r.user.name.toLowerCase().includes(search.toLowerCase())) ||
-      (r.user?.student_id_code && r.user.student_id_code.toLowerCase().includes(search.toLowerCase())) ||
+      (r.user?.login_id && r.user.login_id.toLowerCase().includes(search.toLowerCase())) ||
       (r.user?.college_name && r.user.college_name.toLowerCase().includes(search.toLowerCase())) ||
       (r.team_name && r.team_name.toLowerCase().includes(search.toLowerCase()));
 
@@ -337,7 +337,7 @@ export const CoordinatorPage: React.FC = () => {
                     </td>
                     <td className="px-4 py-3">{p.transaction_reference}</td>
                     <td className="px-4 py-3">{p.student?.name || '-'}</td>
-                    <td className="px-4 py-3 text-[#A79798]">{p.student?.student_id_code || '-'}</td>
+                    <td className="px-4 py-3 text-[#A79798]">{p.student?.login_id || '-'}</td>
                     <td className="px-4 py-3">₹{p.amount}</td>
                     <td className="px-4 py-3">
                       {p.status === 'VERIFIED' ? (
