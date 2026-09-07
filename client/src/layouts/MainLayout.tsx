@@ -43,45 +43,39 @@ export const MainLayout: React.FC = () => {
   }, [token, user, setUser, resetAuth, setInitialized]);
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#0A0607] text-[#F7F2F2] selection:bg-[#E01B22] selection:text-[#F7F2F2]">
-      
-      {/* Intro Video Overlay */}
+    <div className="flex flex-col min-h-screen bg-[#0A0607] text-[#F7F2F2] selection:bg-[#E01B22] selection:text-[#F7F2F2] relative">
+      {/* Intro Video Overlay (Accessible overlay; does not unmount semantic DOM for crawlers) */}
       {showIntro && <IntroVideo onComplete={() => setShowIntro(false)} />}
 
-      {/* Main App Shell */}
-      {!showIntro && (
+      {/* Header & Navigation */}
+      <Navbar onOpenCommandSearch={() => setCommandSearchOpen(true)} />
+
+      {/* Announcements Ticker (Renders ONLY if active announcements exist) */}
+      <Ticker />
+
+      {/* Main Content Area */}
+      <main className="flex-grow">
+        <div className="h-full">
+          <Outlet />
+        </div>
+      </main>
+
+      {/* Conditionally hide public footer and global unpaid banner on dashboard routes */}
+      {!location.pathname.startsWith('/dashboard') && (
         <>
-          {/* Header & Navigation */}
-          <Navbar onOpenCommandSearch={() => setCommandSearchOpen(true)} />
-
-          {/* Announcements Ticker (Renders ONLY if active announcements exist) */}
-          <Ticker />
-
-          {/* Main Content Area */}
-          <main className="flex-grow">
-            <div className="h-full">
-              <Outlet />
-            </div>
-          </main>
-
-          {/* Conditionally hide public footer and global unpaid banner on dashboard routes */}
-          {!location.pathname.startsWith('/dashboard') && (
-            <>
-              <UnpaidBanner />
-              <Footer onReplayIntro={() => setShowIntro(true)} />
-            </>
-          )}
-
-          {/* Command Search Modal (Ctrl+K) */}
-          <CommandSearchModal
-            isOpen={commandSearchOpen}
-            onClose={() => setCommandSearchOpen(false)}
-          />
-
-          {/* Spider-Man Protocol Companion on Scroll (Desktop & Mobile) */}
-          <SpidermanCompanion />
+          <UnpaidBanner />
+          <Footer onReplayIntro={() => setShowIntro(true)} />
         </>
       )}
+
+      {/* Command Search Modal (Ctrl+K) */}
+      <CommandSearchModal
+        isOpen={commandSearchOpen}
+        onClose={() => setCommandSearchOpen(false)}
+      />
+
+      {/* Spider-Man Protocol Companion on Scroll (Desktop & Mobile) */}
+      <SpidermanCompanion />
     </div>
   );
 };

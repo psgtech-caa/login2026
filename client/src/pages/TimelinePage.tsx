@@ -4,6 +4,9 @@ import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { motion } from 'framer-motion';
 import { CheckCircle2, Clock, MapPin, Calendar, LayoutGrid, BarChart3, ChevronRight, Trophy } from 'lucide-react';
+import defaultEvents from '../data/events.json';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema } from '../data/seoConfig';
 
 interface Event {
   id: number;
@@ -43,7 +46,7 @@ export const TimelinePage: React.FC = () => {
   const { isAuthenticated, user } = useAuthStore();
   const navigate = useNavigate();
 
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>(() => (defaultEvents as any[]) || []);
   const [selectedDay, setSelectedDay] = useState<number>(18);
   const [viewMode, setViewMode] = useState<'GANTT' | 'CARDS'>('GANTT');
   const [categoryFilter, setCategoryFilter] = useState<'ALL' | 'TECHNICAL' | 'NON_TECHNICAL'>('ALL');
@@ -51,8 +54,8 @@ export const TimelinePage: React.FC = () => {
 
   useEffect(() => {
     api.events.getAll().then((res) => {
-      if (Array.isArray(res.data)) setEvents(res.data);
-    }).catch(() => setEvents([]));
+      if (Array.isArray(res.data) && res.data.length > 0) setEvents(res.data);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -75,8 +78,28 @@ export const TimelinePage: React.FC = () => {
   // Star of Login Flagship Event
   const starOfLoginEvt = events.find((e) => e.is_flagship || e.name.toLowerCase().includes('star of login'));
 
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Timeline & Schedule', url: '/timeline' },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#0A0607] py-12 px-4 sm:px-6 lg:px-8 text-[#F7F2F2]">
+      <SEOHead
+        title="Event Schedule & Timeline 2026 | LOGIN 2026 PSG Tech Coimbatore"
+        description="Official schedule and timeline for LOGIN 2026 at PSG College of Technology, Coimbatore. Day-wise event timings, venues, and clash-free schedule planning for Sept 18 & 19, 2026."
+        keywords={[
+          'LOGIN 2026 timeline',
+          'LOGIN 2026 schedule',
+          'PSG Tech event schedule',
+          'Coimbatore technical symposium timings',
+          'college event timeline Tamil Nadu',
+        ]}
+        canonicalUrl="/timeline"
+        structuredData={structuredData}
+      />
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* Page Header */}

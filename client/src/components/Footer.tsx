@@ -71,36 +71,49 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
 
           {/* Column 3: Quick Navigation */}
           <div className="space-y-3">
-            <h4 className="font-display text-xs font-bold text-[#F7F2F2] uppercase tracking-wider">Quick Links</h4>
-            <ul className="space-y-2 text-xs font-mono">
+            <h4 className="font-display text-xs font-bold text-[#F7F2F2] uppercase tracking-wider">Key Portals & Arenas</h4>
+            <ul className="space-y-1.5 text-xs font-mono">
               <li>
                 <Link to="/events" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
-                  <span>All 11 Events</span>
+                  <span>All 11 Arenas</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E01B22]">&rarr;</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/ctf" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
+                  <span>The Extraction CTF</span>
                   <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E01B22]">&rarr;</span>
                 </Link>
               </li>
               <li>
                 <Link to="/timeline" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
-                  <span>Symposium Timeline</span>
+                  <span>Event Timeline</span>
                   <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E01B22]">&rarr;</span>
                 </Link>
               </li>
               <li>
-                <Link to="/dashboard" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
-                  <span>Participant Portal</span>
+                <Link to="/gallery" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
+                  <span>Photo Gallery</span>
                   <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E01B22]">&rarr;</span>
                 </Link>
               </li>
               <li>
-                <a
-                  href="https://events.psginstitutions.in/EMS/register/E5294158179"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group flex items-center justify-between hover:text-[#E08A17] transition-colors py-0.5 text-[#E08A17]"
-                >
-                  <span>Payment Portal</span>
-                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E08A17]">&nearr;</span>
-                </a>
+                <Link to="/coordinators" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
+                  <span>Coordinators</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E01B22]">&rarr;</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/winners" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
+                  <span>Winners & Hall of Fame</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E01B22]">&rarr;</span>
+                </Link>
+              </li>
+              <li>
+                <Link to="/about" className="group flex items-center justify-between hover:text-[#E01B22] transition-colors py-0.5">
+                  <span>About PSG Tech MCA</span>
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-[#E01B22]">&rarr;</span>
+                </Link>
               </li>
             </ul>
           </div>

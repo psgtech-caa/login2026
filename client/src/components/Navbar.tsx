@@ -63,7 +63,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
               <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-[#2A1A1D] bg-white flex items-center justify-center p-0.5 shadow-md transition-transform group-hover:scale-105 duration-300">
                 <img 
                   src="/assets/login.webp" 
-                  alt="LOGIN Logo" 
+                  alt="LOGIN 2026 Logo - PSG Tech MCA National Technical Symposium" 
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -71,7 +71,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
               <div className="w-7 h-7 sm:w-9 sm:h-9 rounded-full border border-[#2A1A1D] bg-white flex items-center justify-center p-0.5 shadow-md transition-transform group-hover:scale-105 duration-300">
                 <img 
                   src="/assets/logos/caa.webp" 
-                  alt="CAA Logo" 
+                  alt="Computer Applications Association (CAA) PSG College of Technology Logo" 
                   className="w-full h-full object-contain"
                 />
               </div>
@@ -89,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-4 lg:space-x-8 font-mono text-xs tracking-widest font-bold uppercase">
+          <nav className="hidden md:flex items-center space-x-3 lg:space-x-6 font-mono text-xs tracking-wider font-bold uppercase">
             <Link
               to="/home"
               className={`relative py-1 px-2 transition-colors font-bold ${

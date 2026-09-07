@@ -1,6 +1,8 @@
 import React from 'react';
 import { CoordinatorsSection } from '../components/home/CoordinatorsSection';
 import { GraduationCap, Phone } from 'lucide-react';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema } from '../data/seoConfig';
 
 interface AdvisorCardProps {
   name: string;
@@ -58,8 +60,27 @@ const AdvisorCard: React.FC<AdvisorCardProps> = ({ name, role, designation, node
 };
 
 export const CoordinatorsPage: React.FC = () => {
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Coordinators & Leadership', url: '/coordinators' },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#0A0607] pt-24 pb-16 relative overflow-hidden">
+      <SEOHead
+        title="Student Leadership & Faculty Advisors | LOGIN 2026 PSG Tech"
+        description="Meet the student office bearers, event coordinators, and faculty advisors of the Computer Applications Association (CAA), Department of Computer Applications, PSG College of Technology, Coimbatore."
+        keywords={[
+          'LOGIN 2026 coordinators',
+          'PSG Tech MCA coordinators',
+          'Computer Applications Association office bearers',
+          'PSG Tech faculty advisors',
+        ]}
+        canonicalUrl="/coordinators"
+        structuredData={structuredData}
+      />
       {/* Background Cyber Grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#130c0e_1px,transparent_1px),linear-gradient(to_bottom,#130c0e_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-20 pointer-events-none" />
 

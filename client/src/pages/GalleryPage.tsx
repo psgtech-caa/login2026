@@ -9,6 +9,8 @@ import {
   Eye,
   Maximize2
 } from 'lucide-react';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema } from '../data/seoConfig';
 
 interface GalleryItem {
   id: number;
@@ -81,8 +83,28 @@ export const GalleryPage: React.FC = () => {
     setLightboxIndex(foundIndex >= 0 ? foundIndex : 0);
   };
 
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Photo Gallery & Archive', url: '/gallery' },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#0A0607] pt-24 pb-20 px-4 sm:px-6 relative overflow-hidden">
+      <SEOHead
+        title="Photo Gallery & Archive | LOGIN 2026 PSG Tech Coimbatore"
+        description="Explore the visual archive and gallery of LOGIN 2026, the National Level Technical Symposium at PSG College of Technology, Coimbatore. Photographs of coding hackathons, cybersecurity labs, and ceremonies."
+        keywords={[
+          'LOGIN 2026 gallery',
+          'PSG Tech symposium photos',
+          'Coimbatore technical symposium gallery',
+          'MCA symposium archive',
+        ]}
+        canonicalUrl="/gallery"
+        ogImage="/Group_pic.webp"
+        structuredData={structuredData}
+      />
       {/* Radiant Background */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#130c0e_1px,transparent_1px),linear-gradient(to_bottom,#130c0e_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none" />
       <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[750px] h-[380px] bg-[radial-gradient(circle,_rgba(224,27,34,0.09)_0%,_transparent_70%)] pointer-events-none filter blur-3xl z-0" />
@@ -177,7 +199,7 @@ export const GalleryPage: React.FC = () => {
                     LOGIN 2K25 OFFICIAL GROUP PHOTOGRAPH
                   </h3>
                   <p className="font-mono text-xs text-[#A79798] mt-0.5">
-                    Student Coordinators, Staff Advisors & Symposium Organizers
+                    Student Coordinators & Symposium Organizers
                   </p>
                 </div>
                 <button className="px-4 py-2 bg-[#E01B22] text-white font-mono text-xs font-bold rounded-[2px] shadow-lg flex items-center gap-2">

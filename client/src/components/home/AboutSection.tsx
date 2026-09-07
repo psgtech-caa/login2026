@@ -23,7 +23,7 @@ export const AboutSection: React.FC = () => {
               <div className="aspect-[4/5] sm:aspect-[3/4] md:aspect-[4/5] overflow-hidden relative">
                 <img
                   src="/hero_image_about.webp"
-                  alt="LOGIN History Archive"
+                  alt="LOGIN 2026 35 Years Legacy Archive - PSG College of Technology Coimbatore"
                   className="w-full h-full object-cover filter grayscale-[40%] contrast-[1.15] brightness-[0.8] group-hover:grayscale-0 group-hover:brightness-95 group-hover:scale-105 transition-all duration-700 ease-out"
                 />
                 {/* Dark Vignette Overlay */}

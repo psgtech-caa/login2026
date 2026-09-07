@@ -22,6 +22,8 @@ import {
 } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
 import { soundFx, bgMusic } from '../utils/audioFx';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema, SITE_CONFIG } from '../data/seoConfig';
 
 import type { Variants } from 'framer-motion';
 
@@ -135,8 +137,61 @@ export const TheExtractionPage: React.FC = () => {
     },
   ];
 
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Events', url: '/events' },
+      { name: 'The Extraction CTF', url: '/the-extraction' },
+    ]),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'Event',
+      name: 'The Extraction: Cybersecurity CTF Mission — LOGIN 2026',
+      description:
+        'Operation BLACKOUT — collegiate cybersecurity Capture The Flag arena at PSG College of Technology, Coimbatore. Cryptographic vault breaches, reverse engineering, forensics, and authentication bypass challenges.',
+      startDate: '2026-09-18T13:30:00+05:30',
+      endDate: '2026-09-18T16:00:00+05:30',
+      eventStatus: 'https://schema.org/EventScheduled',
+      eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
+      location: {
+        '@type': 'Place',
+        name: 'CAT Lab, PSG College of Technology',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Avinashi Road, Peelamedu',
+          addressLocality: 'Coimbatore',
+          addressRegion: 'Tamil Nadu',
+          postalCode: '641004',
+          addressCountry: 'IN',
+        },
+      },
+      organizer: {
+        '@type': 'EducationalOrganization',
+        name: 'Computer Applications Association (CAA), PSG College of Technology',
+        url: SITE_CONFIG.baseUrl,
+      },
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#070204] text-[#F7F2F2] font-mono selection:bg-[#E01B22] selection:text-white pb-24 overflow-x-hidden">
+      <SEOHead
+        title="The Extraction CTF 2026 | Operation BLACKOUT Cybersecurity Arena | PSG Tech Coimbatore"
+        description="Engage in The Extraction — LOGIN 2026 story-driven cybersecurity CTF competition at PSG College of Technology. Crack hashes, bypass authentication gates, solve digital forensics puzzles, and neutralize Operation BLACKOUT."
+        keywords={[
+          'The Extraction CTF',
+          'Operation BLACKOUT CTF',
+          'CTF competition Coimbatore',
+          'cybersecurity CTF Tamil Nadu',
+          'ethical hacking competition',
+          'PSG Tech CTF',
+          'LOGIN 2026 CTF',
+        ]}
+        canonicalUrl="/the-extraction"
+        ogImage="/assets/events/the_extraction.webp"
+        ogType="event"
+        structuredData={structuredData}
+      />
 
       {/* ── BACKGROUND AMBIENCE & CYBER GRID ── */}
       <div className="fixed inset-0 pointer-events-none bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(224,27,34,0.22),rgba(0,0,0,0))] z-0" />

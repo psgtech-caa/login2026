@@ -3,6 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { api } from '../services/api';
 import { Trophy, Award, Search, Sparkles, ShieldCheck, Calendar, RefreshCw } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema } from '../data/seoConfig';
 
 export const WinnersPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>('ALL');
@@ -50,8 +52,27 @@ export const WinnersPage: React.FC = () => {
 
   const categories = ['ALL', 'TECHNICAL', 'GENERAL', 'FLAGSHIP'];
 
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Winners & Hall of Fame', url: '/winners' },
+    ]),
+  ];
+
   return (
     <div className="min-h-screen bg-[#0A0607] text-[#F7F2F2] py-12 px-4 sm:px-6 lg:px-8 space-y-10">
+      <SEOHead
+        title="Winners & Hall of Fame | LOGIN 2026 PSG Tech Coimbatore"
+        description="Official results, leaderboard, and hall of fame for LOGIN 2026. Celebrate top student coders, hackathon winners, and CTF champions from PSG College of Technology, Coimbatore."
+        keywords={[
+          'LOGIN 2026 winners',
+          'PSG Tech symposium results',
+          'Coimbatore hackathon winners',
+          'Star of LOGIN champion',
+        ]}
+        canonicalUrl="/winners"
+        structuredData={structuredData}
+      />
       {/* Header Banner */}
       <div className="max-w-7xl mx-auto text-center space-y-4">
         <motion.div
