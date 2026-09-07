@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Mail, Phone, MapPin, Send, ShieldAlert } from 'lucide-react';
 import { api } from '../services/api';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema } from '../data/seoConfig';
 
 export const ContactPage: React.FC = () => {
   const [name, setName] = useState('');
@@ -53,8 +55,49 @@ export const ContactPage: React.FC = () => {
     }
   };
 
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Contact & Support', url: '/contact' },
+    ]),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ContactPage',
+      name: 'Contact LOGIN 2026 Organizing Committee',
+      description:
+        'Official contact information and support helpdesk for LOGIN 2026 at PSG College of Technology, Coimbatore.',
+      mainEntity: {
+        '@type': 'Organization',
+        name: 'Computer Applications Association (CAA), PSG Tech',
+        email: 'login@psgtech.ac.in',
+        telephone: '+91 81482 51567',
+        address: {
+          '@type': 'PostalAddress',
+          streetAddress: 'Avinashi Road, Peelamedu',
+          addressLocality: 'Coimbatore',
+          addressRegion: 'Tamil Nadu',
+          postalCode: '641004',
+          addressCountry: 'IN',
+        },
+      },
+    },
+  ];
+
   return (
     <div className="min-h-screen bg-[#0A0607] pt-28 pb-20 px-4 relative overflow-hidden">
+      <SEOHead
+        title="Contact Organizing Committee | LOGIN 2026 PSG Tech Coimbatore"
+        description="Get in touch with the student coordinators, faculty advisors, and organizing committee of LOGIN 2026, Department of Computer Applications, PSG College of Technology, Coimbatore."
+        keywords={[
+          'Contact LOGIN 2026',
+          'PSG Tech symposium contact',
+          'LOGIN 2026 coordinators phone number',
+          'PSG Tech MCA contact',
+          'Coimbatore technical symposium helpdesk',
+        ]}
+        canonicalUrl="/contact"
+        structuredData={structuredData}
+      />
       {/* Background cyber grid */}
       <div className="absolute inset-0 bg-[linear-gradient(to_right,#130c0e_1px,transparent_1px),linear-gradient(to_bottom,#130c0e_1px,transparent_1px)] bg-[size:4rem_4rem] opacity-30 pointer-events-none" />
 

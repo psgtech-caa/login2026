@@ -78,7 +78,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border border-[#2A1A1D]/60 flex items-center justify-center p-1.5 shadow-lg">
                 <img 
                   src="/assets/logos/psg-main.webp" 
-                  alt="PSG Main" 
+                  alt="PSG College of Technology Emblem - Coimbatore" 
                   className="w-full h-full object-contain"
                   loading="eager"
                   fetchPriority="high"
@@ -87,7 +87,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border border-[#2A1A1D]/60 flex items-center justify-center p-1.5 shadow-lg">
                 <img 
                   src="/assets/logos/psg-100.webp" 
-                  alt="PSG Centenary" 
+                  alt="PSG & Sons and Charities Centenary Celebration Emblem" 
                   className="w-full h-full object-contain"
                   loading="eager"
                 />
@@ -95,7 +95,7 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
               <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-white border border-[#2A1A1D]/60 flex items-center justify-center p-1.5 shadow-lg">
                 <img 
                   src="/assets/logos/psg-75.webp" 
-                  alt="PSG 75" 
+                  alt="PSG College of Technology 75 Years Milestone Emblem" 
                   className="w-full h-full object-contain"
                   loading="eager"
                 />

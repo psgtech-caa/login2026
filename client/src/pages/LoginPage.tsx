@@ -3,6 +3,7 @@ import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { ArrowRight, AlertCircle, ShieldCheck, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { SEOHead } from '../components/common/SEOHead';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
@@ -62,6 +63,12 @@ export const LoginPage: React.FC = () => {
 
   return (
     <div className="min-h-[85vh] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-[#0A0607] relative overflow-hidden">
+      <SEOHead
+        title="Participant Portal Sign In | LOGIN 2026 PSG Tech"
+        description="Sign in to your LOGIN 2026 participant dashboard to view event registrations, schedule, certificates, and scores."
+        canonicalUrl="/login"
+        noIndex={true}
+      />
       {/* Background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#4A050A]/20 via-transparent to-transparent pointer-events-none" />
 

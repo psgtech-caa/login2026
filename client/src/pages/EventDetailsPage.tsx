@@ -2,7 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { api } from '../services/api';
-import { Monitor, ArrowLeft, Clock, ShieldAlert, CheckCircle2, MapPin, Users, Phone, Sparkles, Terminal, Check } from 'lucide-react';
+import { Monitor, ArrowLeft, Clock, ShieldAlert, CheckCircle2, MapPin, Users, Phone, Sparkles, Terminal, Check, ChevronRight } from 'lucide-react';
+import defaultEvents from '../data/events.json';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema, getEventDetailSchema, SITE_CONFIG } from '../data/seoConfig';
 
 export const EventDetailsPage: React.FC = () => {
   const { id: slug } = useParams();
@@ -10,15 +13,21 @@ export const EventDetailsPage: React.FC = () => {
   const { isAuthenticated, user, survivor } = useAuthStore();
   
   const [userRegistrations, setUserRegistrations] = useState<number[]>([]);
-  const [selectedEvent, setSelectedEvent] = useState<any>(null);
+  
+  // Initialize with static defaultEvents data synchronously for crawler optimization
+  const [selectedEvent, setSelectedEvent] = useState<any>(() => {
+    return defaultEvents.find((e: any) => e.slug === slug || String(e.id) === String(slug)) || null;
+  });
 
   useEffect(() => {
     api.events.getAll().then((res) => {
       if (Array.isArray(res.data)) {
         const match = res.data.find((e: any) => e.slug === slug || String(e.id) === String(slug));
-        setSelectedEvent(match || null);
+        if (match) setSelectedEvent(match);
       }
-    }).catch(() => setSelectedEvent(null));
+    }).catch(() => {
+      // Fallback already handled
+    });
   }, [slug]);
 
   useEffect(() => {
@@ -34,6 +43,11 @@ export const EventDetailsPage: React.FC = () => {
   if (!selectedEvent) {
     return (
       <div className="min-h-screen bg-[#0A0607] py-20 px-4 flex flex-col items-center justify-center text-center text-[#F7F2F2]">
+        <SEOHead
+          title="Arena Not Found | LOGIN 2026 PSG Tech"
+          description="The requested event or competition arena at LOGIN 2026 could not be found."
+          noIndex={true}
+        />
         <div className="w-16 h-16 rounded-full bg-[#E01B22]/10 border border-[#E01B22] flex items-center justify-center mb-4">
           <ShieldAlert className="w-8 h-8 text-[#E01B22]" />
         </div>
@@ -66,8 +80,37 @@ export const EventDetailsPage: React.FC = () => {
   const coordinatorNames = (selectedEvent.coordinator_name || '').split(';').map((s: string) => s.trim()).filter(Boolean);
   const coordinatorPhones = (selectedEvent.coordinator_phone || '').split(';').map((s: string) => s.trim()).filter(Boolean);
 
+  const eventSlug = selectedEvent.slug || selectedEvent.id;
+
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Events', url: '/events' },
+      { name: selectedEvent.name, url: `/events/${eventSlug}` },
+    ]),
+    getEventDetailSchema(selectedEvent),
+  ];
+
   return (
-    <div className="min-h-screen bg-[#0A0607] pt-24 pb-16 px-4 sm:px-6 lg:px-8 text-[#F7F2F2] relative overflow-hidden">
+    <article className="min-h-screen bg-[#0A0607] pt-24 pb-16 px-4 sm:px-6 lg:px-8 text-[#F7F2F2] relative overflow-hidden">
+      <SEOHead
+        title={`${selectedEvent.name} 2026 | Technical Event & Hackathon | PSG Tech Coimbatore`}
+        description={`${selectedEvent.description || detail.shortDesc} Compete in ${selectedEvent.name} at LOGIN 2026, Department of Computer Applications, PSG College of Technology, Coimbatore.`}
+        keywords={[
+          `${selectedEvent.name}`,
+          `${selectedEvent.name} PSG Tech`,
+          `${selectedEvent.name} LOGIN 2026`,
+          'LOGIN 2026 events',
+          'PSG Tech MCA competitions',
+          'Coimbatore intercollegiate technical events',
+          'technical events Tamil Nadu',
+          'coding hackathon Coimbatore',
+        ]}
+        canonicalUrl={`/events/${eventSlug}`}
+        ogImage={selectedEvent.guardian_asset || SITE_CONFIG.defaultOgImage}
+        ogType="event"
+        structuredData={structuredData}
+      />
       
       {/* Background ambient accents */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-[radial-gradient(ellipse_at_center,_rgba(224,27,34,0.08)_0%,_transparent_70%)] pointer-events-none filter blur-3xl z-0" />
@@ -76,7 +119,7 @@ export const EventDetailsPage: React.FC = () => {
       <div className="max-w-6xl mx-auto space-y-8 relative z-10">
         
         {/* Navigation Breadcrumb */}
-        <div className="flex items-center justify-between border-b border-[#2A1A1D] pb-4 font-mono text-xs">
+        <nav aria-label="Breadcrumb" className="flex items-center justify-between border-b border-[#2A1A1D] pb-4 font-mono text-xs">
           <button
             onClick={() => navigate('/events')}
             className="inline-flex items-center gap-2 text-[#A79798] hover:text-[#E01B22] font-bold uppercase transition-colors"
@@ -86,14 +129,16 @@ export const EventDetailsPage: React.FC = () => {
           </button>
           
           <div className="flex items-center gap-2 text-[10px] text-[#A79798] uppercase tracking-widest">
+            <Link to="/" className="hover:text-white">HOME</Link>
+            <span>/</span>
             <Link to="/events" className="hover:text-white">EVENTS</Link>
             <span>/</span>
             <span className="text-[#E01B22] font-bold">{selectedEvent.category}</span>
           </div>
-        </div>
+        </nav>
 
         {/* HERO CARD */}
-        <div className="bg-[#130C0E]/90 border border-[#2A1A1D] rounded-[2px] shadow-2xl overflow-hidden relative corner-bracket-container">
+        <header className="bg-[#130C0E]/90 border border-[#2A1A1D] rounded-[2px] shadow-2xl overflow-hidden relative corner-bracket-container">
           <div className="corner-bracket-tl" />
           <div className="corner-bracket-br" />
 
@@ -106,9 +151,10 @@ export const EventDetailsPage: React.FC = () => {
               </div>
 
               <img
-                src={selectedEvent.guardian_asset || '/assets/login.png'}
-                alt={detail.guardianName || 'Guardian Art'}
+                src={selectedEvent.guardian_asset || '/assets/login.webp'}
+                alt={`${selectedEvent.name} Arena Guardian Artwork`}
                 className="max-h-64 w-auto object-contain my-4 animate-float-slow drop-shadow-[0_0_35px_rgba(224,27,34,0.35)]"
+                loading="eager"
               />
 
               <div className="bg-[#0A0607]/90 border border-[#2A1A1D] p-3.5 rounded-[2px] w-full max-w-sm mt-2">
@@ -182,7 +228,7 @@ export const EventDetailsPage: React.FC = () => {
                     <span className="text-[10px] text-[#A79798] block mb-1">VENUE</span>
                     <span className="font-bold text-[#F7F2F2] flex items-start gap-1.5">
                       <MapPin className="w-3.5 h-3.5 text-[#E01B22] shrink-0" />
-                      <span className="leading-tight">{selectedEvent.is_online ? 'ONLINE' : (selectedEvent.venue || 'TBA')}</span>
+                      <span className="leading-tight">{selectedEvent.is_online ? 'ONLINE' : (selectedEvent.venue || 'Campus Labs')}</span>
                     </span>
                   </div>
 
@@ -242,13 +288,13 @@ export const EventDetailsPage: React.FC = () => {
 
             </div>
           </div>
-        </div>
+        </header>
 
         {/* DETAILED CONTENT SECTION GRID */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* Main Overview & Briefing (Col 8) */}
-          <div className="lg:col-span-8 space-y-8">
+          <section className="lg:col-span-8 space-y-8">
             
             {/* Overview Card */}
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 sm:p-8 rounded-[2px] space-y-4">
@@ -289,10 +335,21 @@ export const EventDetailsPage: React.FC = () => {
               </div>
             )}
 
-          </div>
+            {/* Local Context & Location Note */}
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-3 font-mono text-xs">
+              <h3 className="text-xs font-bold text-[#F7F2F2] uppercase tracking-wider flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-[#E01B22]" />
+                <span>VENUE & SYMPOSIUM DETAILS</span>
+              </h3>
+              <p className="text-[#A79798] text-[11px] leading-relaxed">
+                Conducted at PSG College of Technology, Avinashi Road, Peelamedu, Coimbatore, Tamil Nadu 641004 as part of the 35th Edition National Level Technical Symposium organized by the Computer Applications Association (Department of Computer Applications).
+              </p>
+            </div>
+
+          </section>
 
           {/* Sidebar / Coordinators (Col 4) */}
-          <div className="lg:col-span-4 space-y-6">
+          <aside className="lg:col-span-4 space-y-6">
             
             {/* Event Coordinators Card */}
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
@@ -350,12 +407,23 @@ export const EventDetailsPage: React.FC = () => {
               </ul>
             </div>
 
-          </div>
+            {/* Cross Navigation Link */}
+            <div className="p-4 bg-[#0A0607] border border-[#2A1A1D] rounded-[2px] text-xs font-mono">
+              <Link
+                to="/events"
+                className="inline-flex items-center gap-1 text-[#E01B22] hover:text-[#FF2A2A] font-bold"
+              >
+                <span>Browse other 10 arenas</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+
+          </aside>
 
         </div>
 
       </div>
-    </div>
+    </article>
   );
 };
 

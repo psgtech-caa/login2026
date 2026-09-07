@@ -8,6 +8,7 @@ import { ArrowRight, ShieldCheck, ShieldAlert, AlertCircle, Eye, EyeOff, Copy, C
 import confetti from 'canvas-confetti';
 import { PG_DEPARTMENTS } from '../constants/departments';
 import { CollegeCombobox } from '../components/common/CollegeCombobox';
+import { SEOHead } from '../components/common/SEOHead';
 
 // ──────────────────────────────────────────────
 // Zod Validation Schemas
@@ -341,7 +342,17 @@ END:VCALENDAR`;
 
   return (
     <div className="min-h-screen py-12 px-4 sm:px-6 lg:px-8 bg-[#0A0607] relative overflow-hidden text-[#F7F2F2]">
-      
+      <SEOHead
+        title="Participant & College Registration | LOGIN 2026 PSG Tech Coimbatore"
+        description="Register for LOGIN 2026 — 35th Edition National Level Technical Symposium at PSG College of Technology, Coimbatore. Online registration for hackathons, CTF, and coding competitions on Sept 18 & 19, 2026."
+        keywords={[
+          'LOGIN 2026 registration',
+          'PSG Tech symposium registration',
+          'Coimbatore hackathon registration',
+          'college technical event registration Tamil Nadu',
+        ]}
+        canonicalUrl="/register"
+      />
       {/* Background Accent */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#4A050A]/20 via-transparent to-transparent pointer-events-none" />
 

@@ -2,8 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { CheckCircle2, Filter } from 'lucide-react';
+import { CheckCircle2, Filter, Zap, Terminal } from 'lucide-react';
 import { TimelineSection } from '../components/home/TimelineSection';
+import { SEOHead } from '../components/common/SEOHead';
+import { getBreadcrumbSchema, SITE_CONFIG } from '../data/seoConfig';
+import defaultEvents from '../data/events.json';
 
 interface Event {
   id: number;
@@ -186,15 +189,15 @@ export const EventsPage: React.FC = () => {
   const navigate = useNavigate();
   const { isAuthenticated, user } = useAuthStore();
 
-  const [events, setEvents] = useState<Event[]>([]);
+  const [events, setEvents] = useState<Event[]>(defaultEvents as unknown as Event[]);
   const [userRegistrations, setUserRegistrations] = useState<number[]>([]);
 
   const categoryParam = searchParams.get('category')?.toUpperCase() || 'ALL';
 
   useEffect(() => {
     api.events.getAll().then((res) => {
-      if (Array.isArray(res.data)) setEvents(res.data);
-    }).catch(() => setEvents([]));
+      if (Array.isArray(res.data) && res.data.length > 0) setEvents(res.data);
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -217,7 +220,7 @@ export const EventsPage: React.FC = () => {
   };
 
   const filteredEvents = events.filter((e) => {
-    if (categoryParam === 'FLAGSHIP') return e.category === 'FLAGSHIP';
+    if (categoryParam === 'FLAGSHIP') return e.category === 'FLAGSHIP' || e.is_flagship;
     if (categoryParam === 'ONLINE') return e.is_online === true;
     if (categoryParam === 'TECHNICAL') return e.category === 'TECHNICAL' && !e.is_online;
     if (categoryParam === 'NON_TECHNICAL') return e.category === 'NON_TECHNICAL' && !e.is_online;
@@ -225,15 +228,61 @@ export const EventsPage: React.FC = () => {
     if (categoryParam === 'SOLO') return e.team_type === 'INDIVIDUAL' && e.max_team_size <= 1;
     return true;
   }).sort((a, b) => {
-    if (a.category === 'FLAGSHIP' && b.category !== 'FLAGSHIP') return -1;
-    if (a.category !== 'FLAGSHIP' && b.category === 'FLAGSHIP') return 1;
+    // 1. Star of LOGIN (Flagship event) is highest priority #1
+    const aIsFlagship = a.is_flagship || a.category === 'FLAGSHIP' || a.name.toLowerCase().includes('star of login');
+    const bIsFlagship = b.is_flagship || b.category === 'FLAGSHIP' || b.name.toLowerCase().includes('star of login');
+    if (aIsFlagship && !bIsFlagship) return -1;
+    if (!aIsFlagship && bIsFlagship) return 1;
+
+    // 2. The Extraction (Exclusive CTF arena) is top priority #2 right next to Flagship
+    const aIsExtraction = a.name.toLowerCase().includes('extraction') || (a as any).slug === 'the-extraction';
+    const bIsExtraction = b.name.toLowerCase().includes('extraction') || (b as any).slug === 'the-extraction';
+    if (aIsExtraction && !bIsExtraction) return -1;
+    if (!aIsExtraction && bIsExtraction) return 1;
+
+    // 3. Online events or remaining order
     if (a.is_online && !b.is_online) return -1;
     if (!a.is_online && b.is_online) return 1;
     return 0;
   });
 
+  const structuredData = [
+    getBreadcrumbSchema([
+      { name: 'Home', url: '/' },
+      { name: 'Events & Arenas', url: '/events' },
+    ]),
+    {
+      '@context': 'https://schema.org',
+      '@type': 'ItemList',
+      name: 'LOGIN 2026 Competitive Arenas',
+      itemListElement: filteredEvents.map((e, index) => ({
+        '@type': 'ListItem',
+        position: index + 1,
+        name: e.name,
+        url: `${SITE_CONFIG.baseUrl}/events/${(e as any).slug || e.id}`,
+      })),
+    },
+  ];
+
+  const categoryLabel = categoryParam === 'ALL' ? 'All 11 Arenas' : `${categoryParam} Arenas`;
+
   return (
     <div className="min-h-screen bg-[#0A0607] py-12 text-[#F7F2F2]">
+      <SEOHead
+        title={`${categoryLabel} | Hackathons, CTF & Technical Events 2026 | PSG Tech Coimbatore`}
+        description={`Explore ${categoryLabel.toLowerCase()} at LOGIN 2026, PSG College of Technology, Coimbatore. Competitive coding, cybersecurity CTF, debugging, algorithmic escape rooms, and non-technical challenges on September 18 & 19, 2026.`}
+        keywords={[
+          'LOGIN 2026 events',
+          'PSG Tech events',
+          'Coimbatore intercollegiate technical events',
+          'college events Tamil Nadu',
+          'technical competitions Coimbatore',
+          'coding hackathon Coimbatore',
+          'CTF competition Tamil Nadu',
+        ]}
+        canonicalUrl="/events"
+        structuredData={structuredData}
+      />
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Sticky Filter Bar */}
@@ -288,52 +337,82 @@ export const EventsPage: React.FC = () => {
               const detail = getEventDetail(event.name);
               const isRegistered = userRegistrations.includes(event.id);
               const isTeam = event.team_type === 'TEAM' || event.max_team_size > 1;
+              const isExtraction = event.name.toLowerCase().includes('extraction') || (event as any).slug === 'the-extraction';
 
               return (
                 <div
                   key={event.id}
                   onClick={() => {
-                    const isExtraction = event.name.toLowerCase().includes('extraction') || (event as any).slug === 'the-extraction';
                     navigate(isExtraction ? '/events/the-extraction' : `/events/${(event as any).slug || event.id}`);
                   }}
-                  className={`group bg-[#130C0E] rounded-[2px] flex flex-col card-hover-lift corner-bracket-container border animate-fade-in-up cursor-pointer transition-all duration-300 ${
-                    event.is_flagship
-                      ? 'border-[#E01B22] shadow-[0_0_25px_rgba(224,27,34,0.25)] hover:shadow-[0_0_35px_rgba(224,27,34,0.4)]'
-                      : 'border-[#2A1A1D] hover:border-[#E01B22]/60 shadow-xl hover:shadow-2xl hover:shadow-[#E01B22]/10'
+                  className={`group rounded-[2px] flex flex-col card-hover-lift corner-bracket-container border animate-fade-in-up cursor-pointer transition-all duration-300 relative overflow-hidden ${
+                    isExtraction
+                      ? 'bg-gradient-to-b from-[#220B11] via-[#140C0E] to-[#0A0607] border-[#FF2A2A] shadow-[0_0_35px_rgba(224,27,34,0.4)] hover:shadow-[0_0_55px_rgba(255,42,42,0.65)] ring-1 ring-[#FF2A2A]/60 hover:ring-[#FF2A2A]'
+                      : event.is_flagship
+                        ? 'bg-[#130C0E] border-[#E01B22] shadow-[0_0_25px_rgba(224,27,34,0.25)] hover:shadow-[0_0_35px_rgba(224,27,34,0.4)]'
+                        : 'bg-[#130C0E] border-[#2A1A1D] hover:border-[#E01B22]/60 shadow-xl hover:shadow-2xl hover:shadow-[#E01B22]/10'
                   }`}
                   style={{ animationDelay: `${idx * 0.05}s` }}
                 >
-                  <div className="corner-bracket-tl" />
-                  <div className="corner-bracket-br" />
+                  <div className={`corner-bracket-tl ${isExtraction ? 'border-[#FF2A2A]' : ''}`} />
+                  <div className={`corner-bracket-br ${isExtraction ? 'border-[#FF2A2A]' : ''}`} />
+
+                  {isExtraction && (
+                    <div className="absolute top-0 right-0 w-36 h-36 bg-[#E01B22]/15 rounded-full blur-2xl pointer-events-none -mr-12 -mt-12" />
+                  )}
 
                   {/* Compact Mobile Layout (< sm) */}
-                  <div className="sm:hidden p-3.5 flex gap-3.5 items-center">
-                    <div className="w-24 h-24 bg-[#1A1114] border border-[#3E2529] rounded-[2px] shrink-0 flex items-center justify-center relative overflow-hidden">
-                      {event.is_flagship && (
+                  <div className={`sm:hidden p-3.5 flex gap-3.5 items-center ${isExtraction ? 'border-l-4 border-l-[#FF2A2A] bg-gradient-to-r from-[#2A0D15]/60 to-transparent' : ''}`}>
+                    <div className={`w-24 h-24 rounded-[2px] shrink-0 flex items-center justify-center relative overflow-hidden border ${
+                      isExtraction
+                        ? 'bg-gradient-to-br from-[#380E18] to-[#16080C] border-[#FF2A2A]/70 shadow-[0_0_15px_rgba(224,27,34,0.35)]'
+                        : 'bg-[#1A1114] border-[#3E2529]'
+                    }`}>
+                      {isExtraction ? (
+                        <span className="absolute top-1 right-1 w-2.5 h-2.5 rounded-full bg-[#FF2A2A] animate-ping" title="Exclusive CTF" />
+                      ) : event.is_flagship ? (
                         <span className="absolute top-1 right-1 w-2 h-2 rounded-full bg-[#E01B22] animate-pulse" title="Flagship Event" />
-                      )}
+                      ) : null}
                       <img
                         src={event.guardian_asset || '/assets/login.png'}
                         alt={`${detail.guardianName} Guardian`}
-                        className="max-h-16 w-auto object-contain drop-shadow-[0_0_10px_rgba(224,27,34,0.3)]"
+                        className={`max-h-16 w-auto object-contain ${
+                          isExtraction
+                            ? 'drop-shadow-[0_0_14px_rgba(255,42,42,0.6)]'
+                            : 'drop-shadow-[0_0_10px_rgba(224,27,34,0.3)]'
+                        }`}
                       />
                     </div>
 
                     <div className="flex-1 min-w-0 space-y-1.5 font-mono">
-                      <div className="flex items-center justify-between gap-1">
-                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded-[1px] tracking-wider uppercase ${
-                          event.category === 'FLAGSHIP' ? 'bg-[#E01B22] text-white' : 'bg-[#E01B22]/15 text-[#FF2A2A] border border-[#E01B22]/30'
-                        }`}>
-                          {event.category === 'FLAGSHIP' ? '★ FLAGSHIP' : event.is_online ? 'ONLINE' : event.category}
-                        </span>
+                      <div className="flex items-center justify-between gap-1 flex-wrap">
+                        {isExtraction ? (
+                          <span className="px-2 py-0.5 text-[9px] font-black rounded-[1px] tracking-wider uppercase bg-gradient-to-r from-[#E01B22] to-[#FF4545] text-white shadow-[0_0_10px_rgba(224,27,34,0.6)] flex items-center gap-1 animate-pulse">
+                            <Zap className="w-2.5 h-2.5 fill-current" /> EXCLUSIVE CTF
+                          </span>
+                        ) : (
+                          <span className={`px-2 py-0.5 text-[9px] font-bold rounded-[1px] tracking-wider uppercase ${
+                            event.category === 'FLAGSHIP' ? 'bg-[#E01B22] text-white' : 'bg-[#E01B22]/15 text-[#FF2A2A] border border-[#E01B22]/30'
+                          }`}>
+                            {event.category === 'FLAGSHIP' ? '★ FLAGSHIP' : event.is_online ? 'ONLINE' : event.category}
+                          </span>
+                        )}
                         <span className={`px-2 py-0.5 text-[9px] font-bold rounded-[1px] ${
-                          isTeam ? 'bg-[#E08A17]/10 text-[#E08A17] border border-[#E08A17]/30' : 'bg-[#1FA971]/10 text-[#1FA971] border border-[#1FA971]/30'
+                          isExtraction
+                            ? 'bg-[#E08A17]/20 text-[#FF9E3B] border border-[#E08A17]/50'
+                            : isTeam
+                              ? 'bg-[#E08A17]/10 text-[#E08A17] border border-[#E08A17]/30'
+                              : 'bg-[#1FA971]/10 text-[#1FA971] border border-[#1FA971]/30'
                         }`}>
-                          {isTeam ? `👥 SQUAD (${event.min_team_size || 2}-${event.max_team_size || 2})` : '👤 SOLO'}
+                          {isExtraction ? '👥 1–2 OPERATIVES' : isTeam ? `👥 SQUAD (${event.min_team_size || 2}-${event.max_team_size || 2})` : '👤 SOLO'}
                         </span>
                       </div>
 
-                      <h2 className="text-base font-display font-bold text-[#F7F2F2] group-hover:text-[#E01B22] transition-colors leading-snug truncate">
+                      <h2 className={`text-base font-display font-bold leading-snug truncate transition-colors ${
+                        isExtraction
+                          ? 'text-[#FFF] group-hover:text-[#FF4545] drop-shadow-[0_0_8px_rgba(255,42,42,0.4)]'
+                          : 'text-[#F7F2F2] group-hover:text-[#E01B22]'
+                      }`}>
                         {event.name}
                       </h2>
 
@@ -342,6 +421,10 @@ export const EventsPage: React.FC = () => {
                         {isRegistered ? (
                           <span className="text-[#1FA971] font-bold flex items-center gap-0.5">
                             <CheckCircle2 className="w-3 h-3" /> REGISTERED
+                          </span>
+                        ) : isExtraction ? (
+                          <span className="text-[#FF4545] font-black group-hover:translate-x-1 transition-transform inline-flex items-center gap-1">
+                            ENTER CTF MISSION →
                           </span>
                         ) : (
                           <span className="text-[#E01B22] font-bold group-hover:translate-x-1 transition-transform inline-flex items-center gap-0.5">
@@ -355,38 +438,77 @@ export const EventsPage: React.FC = () => {
                   {/* Standard Tablet & Desktop Layout (>= sm) */}
                   <div className="hidden sm:flex flex-col flex-1 justify-between">
                     {/* Guardian Art Frame */}
-                    <div className="p-5 bg-[#1A1114] border-b-2 border-[#3E2529] flex items-center justify-center scanlines h-48 relative overflow-hidden shadow-[inset_0_0_40px_rgba(224,27,34,0.06)]">
-                      {event.is_flagship && (
+                    <div className={`p-5 flex items-center justify-center scanlines h-48 relative overflow-hidden ${
+                      isExtraction
+                        ? 'bg-gradient-to-b from-[#2E0B15] via-[#1A0A0F] to-[#120508] border-b-2 border-[#FF2A2A]/70 shadow-[inset_0_0_50px_rgba(224,27,34,0.3)]'
+                        : 'bg-[#1A1114] border-b-2 border-[#3E2529] shadow-[inset_0_0_40px_rgba(224,27,34,0.06)]'
+                    }`}>
+                      {isExtraction ? (
+                        <>
+                          <div className="absolute top-3 left-3 px-2 py-0.5 bg-[#0A0607]/90 border border-[#FF2A2A]/60 text-[#FF6B6B] font-mono text-[9px] font-extrabold tracking-widest rounded-[2px] z-10 flex items-center gap-1 backdrop-blur-sm shadow-md">
+                            <Terminal className="w-2.5 h-2.5 text-[#FF2A2A]" /> SYS // BLACKOUT-9
+                          </div>
+                          <div className="absolute top-3 right-3 px-2.5 py-0.5 text-[10px] font-mono font-black bg-gradient-to-r from-[#E01B22] via-[#FF2A2A] to-[#E01B22] text-white rounded-[2px] shadow-[0_0_15px_rgba(224,27,34,0.8)] z-10 flex items-center gap-1 animate-pulse">
+                            <Zap className="w-3 h-3 fill-current" /> EXCLUSIVE CTF ARENA
+                          </div>
+                          <div className="absolute bottom-1 right-3 text-[8px] font-mono text-[#FF4545]/70 tracking-widest uppercase font-bold select-none">
+                            OPERATION BLACKOUT // LIVE
+                          </div>
+                        </>
+                      ) : event.is_flagship ? (
                         <span className="absolute top-3 right-3 px-2.5 py-0.5 text-[10px] font-mono font-bold bg-[#E01B22] text-[#F7F2F2] rounded-[2px] animate-pulse-glow z-10">
                           ★ FLAGSHIP
                         </span>
-                      )}
+                      ) : null}
+
                       <img
                         src={event.guardian_asset || '/assets/login.png'}
                         alt={`${detail.guardianName} Guardian`}
-                        className="max-h-36 w-auto object-contain animate-float-slow drop-shadow-[0_0_20px_rgba(224,27,34,0.2)]"
+                        className={`max-h-36 w-auto object-contain animate-float-slow ${
+                          isExtraction
+                            ? 'drop-shadow-[0_0_28px_rgba(255,42,42,0.65)]'
+                            : 'drop-shadow-[0_0_20px_rgba(224,27,34,0.2)]'
+                        }`}
                       />
                     </div>
 
                     {/* Card Body Format */}
                     <div className="p-6 flex-1 flex flex-col justify-between space-y-4">
                       <div>
-                        <h2 className="text-xl font-display font-bold text-[#F7F2F2] group-hover:text-[#E01B22] transition-colors leading-tight">
+                        <h2 className={`text-xl font-display font-bold leading-tight transition-colors ${
+                          isExtraction
+                            ? 'text-[#FFF] group-hover:text-[#FF4545] drop-shadow-[0_0_8px_rgba(224,27,34,0.3)]'
+                            : 'text-[#F7F2F2] group-hover:text-[#E01B22]'
+                        }`}>
                           {event.name}
                         </h2>
 
-                        <div className="text-xs font-mono font-semibold text-[#FF2A2A] mt-1">
-                          {event.category === 'FLAGSHIP' ? 'Flagship Event' : event.is_online ? 'Online Event' : (event.category === 'TECHNICAL' ? 'Technical' : 'Non-Technical')} • {(event.team_type === 'TEAM' || event.max_team_size > 1) ? `${event.min_team_size || 2}${event.max_team_size > (event.min_team_size || 1) ? `–${event.max_team_size}` : ''} Members` : 'Individual'} • {detail.durationText}
-                        </div>
+                        {isExtraction ? (
+                          <div className="text-xs font-mono font-bold text-[#FF4545] mt-1 flex items-center gap-1.5">
+                            <span className="inline-block w-2 h-2 rounded-full bg-[#FF2A2A] animate-ping" />
+                            <span>Exclusive Cybersecurity CTF</span> • <span>1–2 Operatives</span> • <span>{detail.durationText}</span>
+                          </div>
+                        ) : (
+                          <div className="text-xs font-mono font-semibold text-[#FF2A2A] mt-1">
+                            {event.category === 'FLAGSHIP' ? 'Flagship Event' : event.is_online ? 'Online Event' : (event.category === 'TECHNICAL' ? 'Technical' : 'Non-Technical')} • {(event.team_type === 'TEAM' || event.max_team_size > 1) ? `${event.min_team_size || 2}${event.max_team_size > (event.min_team_size || 1) ? `–${event.max_team_size}` : ''} Members` : 'Individual'} • {detail.durationText}
+                          </div>
+                        )}
 
-                        <p className="text-xs text-[#A79798] leading-relaxed mt-3 line-clamp-3">
+                        <p className={`text-xs leading-relaxed mt-3 line-clamp-3 ${isExtraction ? 'text-[#C7B7B9]' : 'text-[#A79798]'}`}>
                           {event.description || detail.shortDesc}
                         </p>
 
                         {detail.skills && detail.skills.length > 0 && (
-                          <div className="mt-4 pt-3 border-t border-[#2A1A1D]/60 flex flex-wrap gap-1.5">
+                          <div className={`mt-4 pt-3 border-t flex flex-wrap gap-1.5 ${isExtraction ? 'border-[#3E1A22]' : 'border-[#2A1A1D]/60'}`}>
                             {detail.skills.map((skill, sIdx) => (
-                              <span key={sIdx} className="px-2 py-0.5 text-[10px] font-mono bg-[#1A1114] text-[#F7F2F2]/80 border border-[#3E2529] rounded-[2px]">
+                              <span
+                                key={sIdx}
+                                className={`px-2 py-0.5 text-[10px] font-mono rounded-[2px] ${
+                                  isExtraction
+                                    ? 'bg-[#2A0D15] text-[#FF9E9E] border border-[#FF2A2A]/50 font-bold shadow-[0_0_6px_rgba(224,27,34,0.2)]'
+                                    : 'bg-[#1A1114] text-[#F7F2F2]/80 border border-[#3E2529]'
+                                }`}
+                              >
                                 {skill}
                               </span>
                             ))}
@@ -394,47 +516,80 @@ export const EventsPage: React.FC = () => {
                         )}
                       </div>
 
-                      <div className="pt-4 border-t border-[#2A1A1D] flex items-center justify-between gap-2 mt-auto">
-                        <button
-                          onClick={(e) => { e.stopPropagation(); navigate(`/events/${(event as any).slug}`); }}
-                          className="px-3.5 py-2 text-xs font-mono font-semibold border border-[#2A1A1D] hover:border-[#A79798] text-[#A79798] hover:text-[#F7F2F2] rounded-[2px] transition-colors"
-                        >
-                          View Details
-                        </button>
+                      <div className={`pt-4 border-t flex items-center justify-between gap-2 mt-auto ${isExtraction ? 'border-[#3E1A22]' : 'border-[#2A1A1D]'}`}>
+                        {isExtraction ? (
+                          <>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); navigate('/events/the-extraction'); }}
+                              className="px-3.5 py-2 text-xs font-mono font-bold border border-[#FF2A2A]/40 hover:border-[#FF2A2A] text-[#FF6B6B] hover:text-[#FFF] bg-[#2A0E15]/60 hover:bg-[#3E121E] rounded-[2px] transition-all"
+                            >
+                              Mission Briefing
+                            </button>
 
-                        {user?.role === 'admin' || user?.role === 'coordinator' ? (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); navigate(user?.role === 'coordinator' ? '/coordinator' : '/admin'); }}
-                            className="px-3.5 py-2 bg-[#1A1114] border border-[#3E2529] hover:border-[#E08A17] text-[#E08A17] hover:text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors"
-                          >
-                            Manage Event
-                          </button>
-                        ) : event.is_flagship ? (
-                          <span className="px-3.5 py-2 bg-[#1A1114] border border-[#E01B22] text-[#E01B22] font-mono text-xs font-bold rounded-[2px]">
-                            Invite-Only
-                          </span>
-                        ) : event.status !== 'open' ? (
-                          <span className="px-4 py-2 bg-[#130C0E] border border-[#2A1A1D] text-[#A79798] font-mono text-xs font-bold uppercase rounded-[2px] cursor-not-allowed">
-                            Registration Filled
-                          </span>
-                        ) : !isAuthenticated ? (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); navigate('/login'); }}
-                            className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors shadow-md"
-                          >
-                            Register Now
-                          </button>
-                        ) : isRegistered ? (
-                          <span className="chip-registered px-3.5 py-2 flex items-center gap-1 text-xs font-mono">
-                            <CheckCircle2 className="w-3.5 h-3.5" /> Registered ✓
-                          </span>
+                            {user?.role === 'admin' || user?.role === 'coordinator' ? (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); navigate(user?.role === 'coordinator' ? '/coordinator' : '/admin'); }}
+                                className="px-3.5 py-2 bg-[#1A1114] border border-[#3E2529] hover:border-[#E08A17] text-[#E08A17] hover:text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors"
+                              >
+                                Manage Event
+                              </button>
+                            ) : isRegistered ? (
+                              <span className="chip-registered px-3.5 py-2 flex items-center gap-1 text-xs font-mono font-bold">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Registered ✓
+                              </span>
+                            ) : (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); navigate('/events/the-extraction'); }}
+                                className="px-4 py-2 bg-gradient-to-r from-[#E01B22] via-[#FF2A2A] to-[#B00E14] hover:from-[#FF4545] hover:to-[#E01B22] text-white font-mono text-xs font-black uppercase rounded-[2px] transition-all shadow-[0_0_20px_rgba(224,27,34,0.6)] hover:shadow-[0_0_30px_rgba(255,42,42,0.9)] flex items-center gap-1.5"
+                              >
+                                <Terminal className="w-3.5 h-3.5" /> ENTER CTF MISSION →
+                              </button>
+                            )}
+                          </>
                         ) : (
-                          <button
-                            onClick={(e) => { e.stopPropagation(); navigate(`/events/${(event as any).slug}`); }}
-                            className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors shadow-md"
-                          >
-                            Register Now
-                          </button>
+                          <>
+                            <button
+                              onClick={(e) => { e.stopPropagation(); navigate(`/events/${(event as any).slug}`); }}
+                              className="px-3.5 py-2 text-xs font-mono font-semibold border border-[#2A1A1D] hover:border-[#A79798] text-[#A79798] hover:text-[#F7F2F2] rounded-[2px] transition-colors"
+                            >
+                              View Details
+                            </button>
+
+                            {user?.role === 'admin' || user?.role === 'coordinator' ? (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); navigate(user?.role === 'coordinator' ? '/coordinator' : '/admin'); }}
+                                className="px-3.5 py-2 bg-[#1A1114] border border-[#3E2529] hover:border-[#E08A17] text-[#E08A17] hover:text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors"
+                              >
+                                Manage Event
+                              </button>
+                            ) : event.is_flagship ? (
+                              <span className="px-3.5 py-2 bg-[#1A1114] border border-[#E01B22] text-[#E01B22] font-mono text-xs font-bold rounded-[2px]">
+                                Invite-Only
+                              </span>
+                            ) : event.status !== 'open' ? (
+                              <span className="px-4 py-2 bg-[#130C0E] border border-[#2A1A1D] text-[#A79798] font-mono text-xs font-bold uppercase rounded-[2px] cursor-not-allowed">
+                                Registration Filled
+                              </span>
+                            ) : !isAuthenticated ? (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); navigate('/login'); }}
+                                className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors shadow-md"
+                              >
+                                Register Now
+                              </button>
+                            ) : isRegistered ? (
+                              <span className="chip-registered px-3.5 py-2 flex items-center gap-1 text-xs font-mono">
+                                <CheckCircle2 className="w-3.5 h-3.5" /> Registered ✓
+                              </span>
+                            ) : (
+                              <button
+                                onClick={(e) => { e.stopPropagation(); navigate(`/events/${(event as any).slug}`); }}
+                                className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-xs font-bold uppercase rounded-[2px] transition-colors shadow-md"
+                              >
+                                Register Now
+                              </button>
+                            )}
+                          </>
                         )}
                       </div>
                     </div>

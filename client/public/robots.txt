@@ -1,0 +1,37 @@
+# robots.txt for LOGIN 2026 - PSG College of Technology
+# Official Technical Symposium Portal (https://login.psgtech.ac.in)
+
+User-agent: *
+Allow: /
+Allow: /about
+Allow: /events
+Allow: /events/
+Allow: /ctf
+Allow: /the-extraction
+Allow: /login-2026
+Allow: /timeline
+Allow: /gallery
+Allow: /contact
+Allow: /coordinators
+Allow: /winners
+Allow: /register
+Allow: /alumni-register
+
+# Disallow private user dashboards, admin control panels, and internal APIs
+Disallow: /dashboard/
+Disallow: /dashboard
+Disallow: /admin/
+Disallow: /admin
+Disallow: /coordinator/
+Disallow: /coordinator
+Disallow: /api/
+Disallow: /forgot-password
+Disallow: /reset-password
+Disallow: /change-password
+Disallow: /special-user
+Disallow: /junior-attendance
+Disallow: /event-dashboard
+
+# Host and Sitemap
+Host: https://login.psgtech.ac.in
+Sitemap: https://login.psgtech.ac.in/sitemap.xml
