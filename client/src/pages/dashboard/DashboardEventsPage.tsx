@@ -62,7 +62,7 @@ export const DashboardEventsPage: React.FC = () => {
   const [teamSubmitting, setTeamSubmitting] = useState(false);
   const [resultModal, setResultModal] = useState<{ type: 'success' | 'error'; title: string; message: string } | null>(null);
 
-  const { data: events = [], isLoading } = useQuery({
+  const { data: events = [], isLoading, isError: eventsLoadFailed } = useQuery({
     queryKey: ['events'],
     queryFn: async () => { const res = await api.events.getAll(); return res.data || []; },
   });
@@ -186,7 +186,8 @@ export const DashboardEventsPage: React.FC = () => {
     else if (filter === 'INDIVIDUAL') matchesFilter = event.team_type === 'INDIVIDUAL';
     else if (filter === 'TEAM') matchesFilter = event.team_type === 'TEAM';
 
-    return matchesSearch && matchesFilter && event.status === 'open';
+    const eventStatus = String(event.status || '').trim().toLowerCase();
+    return matchesSearch && matchesFilter && eventStatus !== 'cancelled' && eventStatus !== 'completed';
   });
 
   const containerVariants = {
@@ -270,6 +271,10 @@ export const DashboardEventsPage: React.FC = () => {
       {isLoading ? (
         <div className="text-center py-16 text-xs font-mono text-[#A79798] flex items-center justify-center gap-2">
           <Sparkles className="w-4 h-4 text-[#E01B22] animate-spin" /> Loading event dossiers...
+        </div>
+      ) : eventsLoadFailed ? (
+        <div className="text-center py-16 text-xs font-mono text-[#FF2A2A] bg-[#0A0607] border border-[#E01B22]/50 p-6 rounded-[2px]">
+          Event data could not be loaded. Please refresh and try again.
         </div>
       ) : filteredEvents.length === 0 ? (
         <div className="text-center py-16 text-xs font-mono text-[#A79798] bg-[#0A0607] border border-[#2A1A1D] p-6 rounded-[2px]">
@@ -394,6 +399,13 @@ export const DashboardEventsPage: React.FC = () => {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
+                  ) : String(event.status || '').trim().toLowerCase() !== 'open' ? (
+                    <button
+                      disabled
+                      className="w-full py-2.5 bg-[#1A1114] text-[#A79798] border border-[#2A1A1D] font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 cursor-not-allowed"
+                    >
+                      REGISTRATION CLOSED
+                    </button>
                   ) : !canRegister ? (
                     <button
                       disabled

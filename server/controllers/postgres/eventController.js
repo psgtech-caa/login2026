@@ -12,11 +12,15 @@ const readFromNeon = ['true', '1', 'yes', 'on'].includes(
 
 const findAllEvents = async (options = {}) => {
   if (readFromNeon && neonSequelize) {
-    const [rows] = await neonSequelize.query(`
-      SELECT * FROM "events"
-      ORDER BY "date" ASC, "start_time" ASC
-    `);
-    return rows;
+    try {
+      const [rows] = await neonSequelize.query(`
+        SELECT * FROM "events"
+        ORDER BY "date" ASC, "start_time" ASC
+      `);
+      return rows;
+    } catch (error) {
+      console.warn('[Events] Neon read failed; falling back to local PostgreSQL:', error.message);
+    }
   }
 
   return eventModel.findAll(options);
@@ -57,6 +61,7 @@ const enrichEvent = (event) => {
 
   return {
     ...plainEvent,
+    status: String(plainEvent.status || '').trim().toLowerCase(),
     slug,
     detail: catalogEntry?.detail || {
       name: plainEvent.name,

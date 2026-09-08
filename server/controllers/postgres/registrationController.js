@@ -7,6 +7,28 @@ const attendanceModel = require("../../models/postgres/attendanceModel");
 const teamModel = require("../../models/postgres/teamModel");
 const teamMemberModel = require("../../models/postgres/teamMemberModel");
 const { sendEventRegistrationConfirmation } = require("../../services/emailService");
+const { neonSequelize } = require("../../config/db/postgres");
+const { QueryTypes } = require("sequelize");
+
+const readFromNeon = ['true', '1', 'yes', 'on'].includes(
+  String(process.env.READ_EVENTS_FROM_NEON || '').toLowerCase()
+);
+
+const findEventForRegistration = async (eventId) => {
+  if (readFromNeon && neonSequelize) {
+    try {
+      const rows = await neonSequelize.query(
+        'SELECT * FROM "events" WHERE "id" = :id LIMIT 1',
+        { replacements: { id: eventId }, type: QueryTypes.SELECT }
+      );
+      if (rows[0]) return rows[0];
+    } catch (error) {
+      console.warn('[Registration] Neon event read failed; falling back to local PostgreSQL:', error.message);
+    }
+  }
+
+  return eventModel.findByPk(eventId);
+};
 
 const normalizeTeamEmails = (teamMembers) => {
   if (!Array.isArray(teamMembers)) return [];
@@ -77,7 +99,7 @@ const createRegistration = async (req, res) => {
     const numericEventId = Number(event_id);
 
     // 1. Fetch Event & Validate Existence
-    const event = await eventModel.findByPk(numericEventId);
+    const event = await findEventForRegistration(numericEventId);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     // Block direct registration for Star of Login (invite-only for winners)
