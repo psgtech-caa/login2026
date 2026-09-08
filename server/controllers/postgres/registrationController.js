@@ -30,6 +30,24 @@ const findEventForRegistration = async (eventId) => {
   return eventModel.findByPk(eventId);
 };
 
+const findEventsForRead = async (eventIds) => {
+  if (!eventIds.length) return [];
+
+  if (readFromNeon && neonSequelize) {
+    try {
+      const rows = await neonSequelize.query(
+        'SELECT * FROM "events" WHERE "id" IN (:eventIds)',
+        { replacements: { eventIds }, type: QueryTypes.SELECT }
+      );
+      return rows;
+    } catch (error) {
+      console.warn('[Registrations] Neon event details read failed; falling back to local PostgreSQL:', error.message);
+    }
+  }
+
+  return eventModel.findAll({ where: { id: eventIds } });
+};
+
 const normalizeTeamEmails = (teamMembers) => {
   if (!Array.isArray(teamMembers)) return [];
 
@@ -63,9 +81,7 @@ const getStudentRegisteredEvents = async (studentId) => {
   if (!registrations.length) return [];
 
   const eventIds = [...new Set(registrations.map((registration) => registration.event_id).filter(Boolean))];
-  const events = await eventModel.findAll({
-    where: { id: eventIds },
-  });
+  const events = await findEventsForRead(eventIds);
 
   const eventMap = new Map(events.map((event) => [event.id, event]));
 
@@ -110,7 +126,7 @@ const createRegistration = async (req, res) => {
     }
 
     // 3. Deadline and Status Check
-    if (event.status !== "open") {
+    if (String(event.status || '').trim().toLowerCase() !== "open") {
       return res.status(400).json({ message: "Registrations for this event are currently closed." });
     }
     if (event.registration_deadline && new Date() > new Date(event.registration_deadline)) {
@@ -144,14 +160,8 @@ const createRegistration = async (req, res) => {
       });
     }
 
-    // 6. Overlap Collision Guard & Max 5 Events Limit
+    // 6. Overlap Collision Guard
     const currentRegistrations = await getStudentRegisteredEvents(student_id);
-
-    if (currentRegistrations.length >= 5) {
-      return res.status(400).json({
-        message: "Maximum limit reached: You can register for a maximum of 5 events in total across the symposium.",
-      });
-    }
 
     let clashingEvent = null;
     const hasOverlap = currentRegistrations.some((reg) => {
@@ -407,9 +417,14 @@ const getMyRegistrations = async (req, res) => {
       order: [["createdAt", "DESC"]],
     });
 
+    const eventIds = [...new Set(registrations.map((registration) => registration.event_id).filter(Boolean))];
+    const eventRows = await findEventsForRead(eventIds);
+    const eventById = new Map(eventRows.map((event) => [Number(event.id), event.toJSON ? event.toJSON() : event]));
+
     const enrichedRegistrations = await Promise.all(
       registrations.map(async (registration) => {
         const payload = registration.toJSON();
+        payload.event = eventById.get(Number(payload.event_id)) || payload.event || null;
 
         try {
           if (!payload.team_name) {
@@ -494,7 +509,7 @@ const getEventRegistrations = async (req, res) => {
         {
           model: userModel,
           as: "student",
-          attributes: ["id", "name", "email", "phone", "college_name", "department", "roll_no", "student_id_code"],
+          attributes: ["id", "login_id", "name", "email", "phone", "college_name", "department", "roll_no", "student_id_code"],
         },
       ],
       order: [

@@ -441,7 +441,7 @@ export const AdminPage: React.FC = () => {
 
   // CSV Export for Event Registrations
   const exportEventRegistrationsCSV = () => {
-    const headers = ['Event Name', 'Student Name', 'Student ID', 'Email', 'Phone', 'College', 'Department', 'Team Name', 'Attendance Status'];
+    const headers = ['Event Name', 'Participant Name', 'User ID', 'Email', 'Phone', 'College', 'Department', 'Team Name', 'Attendance Status'];
     const rows: string[][] = [];
 
     allRegistrations.forEach((eventGroup) => {
@@ -449,7 +449,7 @@ export const AdminPage: React.FC = () => {
         rows.push([
           `"${eventGroup.eventName}"`,
           `"${reg.student?.name || reg.user?.name || 'Student'}"`,
-          `"${reg.student?.login_id || reg.user?.login_id || '-'}"`,
+          `"${reg.student?.login_id || reg.user?.login_id || reg.student?.id || reg.user?.id || '-'}"`,
           `"${reg.student?.email || reg.user?.email || '-'}"`,
           `"${reg.student?.phone || reg.user?.phone || '-'}"`,
           `"${reg.student?.college_name || reg.user?.college_name || '-'}"`,
@@ -843,7 +843,7 @@ export const AdminPage: React.FC = () => {
                         <table className="w-full text-left text-xs font-body">
                           <thead className="text-[#6B5A5C] font-mono border-b border-[#2A1A1D]">
                             <tr>
-                              <th className="py-2 px-3">STUDENT ID</th>
+                              <th className="py-2 px-3">USER ID</th>
                               <th className="py-2 px-3">PARTICIPANT</th>
                               <th className="py-2 px-3">COLLEGE</th>
                               <th className="py-2 px-3">TEAM / SQUAD</th>
@@ -857,7 +857,7 @@ export const AdminPage: React.FC = () => {
                             {eventGroup.registrations.map((reg: any) => (
                               <tr key={reg.id} className="hover:bg-[#130C0E]">
                                 <td className="py-2 px-3 font-mono text-[#1FA971] font-bold">
-                                  {reg.student?.login_id || reg.user?.login_id || '-'}
+                                  {reg.student?.login_id || reg.user?.login_id || reg.student?.id || reg.user?.id || '-'}
                                 </td>
                                 <td className="py-2 px-3">
                                   <div className="font-bold text-[#F7F2F2]">{reg.student?.name || reg.user?.name || 'Participant'}</div>

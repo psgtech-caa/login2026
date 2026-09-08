@@ -85,12 +85,16 @@ export const DashboardEventsPage: React.FC = () => {
   });
 
   const registeredEventIds = new Set(
-    myRegistrations.filter((r: any) => r.status === 'registered').map((r: any) => r.event_id)
+    myRegistrations
+      .filter((r: any) => String(r.status || '').toLowerCase() === 'registered')
+      .map((r: any) => String(r.event_id))
   );
   const rejectedEventIds = new Set(
-    myRegistrations.filter((r: any) => r.status === 'rejected').map((r: any) => r.event_id)
+    myRegistrations
+      .filter((r: any) => String(r.status || '').toLowerCase() === 'rejected')
+      .map((r: any) => String(r.event_id))
   );
-  const activeRegistrations = myRegistrations.filter((r: any) => r.status === 'registered');
+  const activeRegistrations = myRegistrations.filter((r: any) => String(r.status || '').toLowerCase() === 'registered');
 
   const pStatus = paymentData?.status || 'NOT_SUBMITTED';
   const canRegister = pStatus === 'PENDING' || pStatus === 'VERIFIED';
@@ -212,13 +216,9 @@ export const DashboardEventsPage: React.FC = () => {
           <p className="text-xs text-[#A79798] font-mono mt-1">Explore, form squads, and compete across 11 technical & non-technical arenas</p>
         </div>
         <div className="flex items-center gap-2 text-xs font-mono">
-          <span className="text-[#A79798]">Registrations Limit:</span>
-          <span className={`px-2.5 py-1 rounded-[2px] font-bold border ${
-            activeRegistrations.length >= 5
-              ? 'bg-[#E08A17]/20 border-[#E08A17] text-[#E08A17]' 
-              : 'bg-[#E01B22]/20 border-[#E01B22]/40 text-[#F7F2F2]'
-          }`}>
-            {activeRegistrations.length} / 5 EVENTS USED
+          <span className="text-[#A79798]">Registered events:</span>
+          <span className="px-2.5 py-1 rounded-[2px] font-bold border bg-[#E01B22]/20 border-[#E01B22]/40 text-[#F7F2F2]">
+            {activeRegistrations.length}
           </span>
         </div>
       </div>
@@ -290,8 +290,8 @@ export const DashboardEventsPage: React.FC = () => {
           {filteredEvents.map((event) => {
             const imageUrl = getEventImage(event.name);
             const guardian = getEventGuardian(event.name);
-            const isRegistered = registeredEventIds.has(event.id);
-            const isRejected = rejectedEventIds.has(event.id);
+            const isRegistered = registeredEventIds.has(String(event.id));
+            const isRejected = rejectedEventIds.has(String(event.id));
 
             return (
               <motion.div
@@ -412,14 +412,6 @@ export const DashboardEventsPage: React.FC = () => {
                       className="w-full py-2.5 bg-[#4A050A] text-[#FF2A2A] border border-[#E01B22] font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 opacity-80 cursor-not-allowed"
                     >
                       PAYMENT REQUIRED TO REGISTER
-                    </button>
-                  ) : activeRegistrations.length >= 5 ? (
-                    <button
-                      disabled
-                      className="w-full py-2.5 bg-[#1A1114] text-[#E08A17] border border-[#E08A17]/40 font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 cursor-not-allowed opacity-90"
-                      title="You have reached the maximum limit of 5 event registrations"
-                    >
-                      MAX 5 EVENTS LIMIT REACHED
                     </button>
                   ) : Boolean(checkScheduleClash(event)) ? (
                     <button

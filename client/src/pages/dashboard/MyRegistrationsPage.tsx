@@ -23,7 +23,7 @@ export const MyRegistrationsPage: React.FC = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#2A1A1D] pb-4">
         <div>
           <h1 className="text-xl font-display font-bold text-[#F7F2F2]">My Registrations</h1>
-          <p className="text-xs text-[#6B5A5C] font-mono mt-1">{registrations.filter((reg: any) => reg.status === 'registered').length} active event{registrations.filter((reg: any) => reg.status === 'registered').length !== 1 ? 's' : ''}</p>
+          <p className="text-xs text-[#6B5A5C] font-mono mt-1">{registrations.filter((reg: any) => String(reg.status || '').toLowerCase() === 'registered').length} active event{registrations.filter((reg: any) => String(reg.status || '').toLowerCase() === 'registered').length !== 1 ? 's' : ''}</p>
         </div>
         <button
           onClick={() => setIsQrModalOpen(true)}
