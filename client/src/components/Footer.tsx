@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Play, Mail, Phone, MapPin } from 'lucide-react';
+import { Play, Mail, Phone, MapPin, CreditCard, ArrowRight, MessageCircle } from 'lucide-react';
 
 interface FooterProps {
   onReplayIntro?: () => void;
@@ -19,9 +19,45 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
   return (
     <footer className="bg-[#0A0607] border-t border-[#2A1A1D] text-[#A79798] pt-14 sm:pt-16 pb-10 sm:pb-12 w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+        {/* High-priority support and payment links */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-10">
+          <div className="group flex flex-col justify-center gap-3 border border-[#E01B22]/50 bg-[#18090D] px-4 sm:px-5 py-4 hover:border-[#E01B22] hover:bg-[#220B11] transition-colors">
+            <div className="flex items-center gap-3 min-w-0">
+              <CreditCard className="w-5 h-5 text-[#E01B22] shrink-0" />
+              <span className="text-[10px] font-mono font-bold tracking-widest text-[#E01B22] uppercase">Registration & payment portals</span>
+            </div>
+            <div className="flex flex-wrap items-center gap-x-5 gap-y-2 pl-8 text-xs font-mono">
+              <Link to="/dashboard/payment" className="inline-flex items-center gap-1.5 text-[#F7F2F2] hover:text-[#FF4545] transition-colors">
+                Participant payment <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+              <a
+                href="https://events.psginstitutions.in/EMS/register/E5294158179"
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1.5 text-[#F7F2F2] hover:text-[#FF4545] transition-colors"
+              >
+                Official event registration <ArrowRight className="w-3.5 h-3.5" />
+              </a>
+            </div>
+          </div>
+          <Link
+            to="/contact"
+            className="group flex items-center justify-between gap-4 border border-[#2A1A1D] bg-[#130C0E] px-4 sm:px-5 py-4 hover:border-[#E01B22]/70 hover:bg-[#18090D] transition-colors"
+          >
+            <span className="flex items-center gap-3 min-w-0">
+              <MessageCircle className="w-5 h-5 text-[#E01B22] shrink-0" />
+              <span className="min-w-0">
+                <span className="block text-[10px] font-mono font-bold tracking-widest text-[#E01B22] uppercase">Need help?</span>
+                <span className="block mt-1 text-xs text-[#F7F2F2] truncate">Contact the organizing committee</span>
+              </span>
+            </span>
+            <ArrowRight className="w-4 h-4 text-[#A79798] shrink-0 transition-transform group-hover:translate-x-1 group-hover:text-[#E01B22]" />
+          </Link>
+        </div>
         
         {/* Main Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 sm:gap-6 pb-10 sm:pb-12 border-b border-[#2A1A1D]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-x-8 gap-y-10 sm:gap-y-8 pb-10 sm:pb-12 border-b border-[#2A1A1D] items-start">
           
           {/* Column 1: Brand & Theme */}
           <div className="space-y-4 sm:col-span-2 lg:col-span-1">
@@ -129,6 +165,11 @@ export const Footer: React.FC<FooterProps> = ({ onReplayIntro }) => {
               <li className="flex items-center gap-2">
                 <Mail className="w-4 h-4 text-[#E01B22] shrink-0" />
                 <a href="mailto:login@psgtech.ac.in" className="hover:text-[#F7F2F2] transition-colors font-mono">login@psgtech.ac.in</a>
+              </li>
+              <li>
+                <Link to="/contact" className="inline-flex items-center gap-1.5 text-xs font-mono font-bold text-[#E01B22] hover:text-[#FF2A2A] transition-colors">
+                  CONTACT SUPPORT <ArrowRight className="w-3.5 h-3.5" />
+                </Link>
               </li>
               <li className="space-y-1 pt-1 border-t border-[#2A1A1D]/60">
                 <span className="text-[10px] font-mono font-bold text-[#E01B22] uppercase tracking-wider block">SECRETARY</span>

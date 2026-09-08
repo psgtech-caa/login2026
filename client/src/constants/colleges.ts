@@ -604,6 +604,20 @@ export const RAW_COLLEGES: Omit<CollegeItem, "category">[] = [
     type: 'ENGINEERING',
   },
   {
+  id: 'akshaya_college_of_engineering_and_technology',
+  name: 'Akshaya College of Engineering and Technology',
+  shortName: 'ACET',
+  city: 'kinathukadavu',
+  type: 'ENGINEERING',
+  },
+  {
+  id: 'akshaya_college_of_arts_and_science',
+  name: 'Akshaya College of Arts and Science',
+  shortName: 'ACAS',
+  city: 'kinathukadavu',
+  type: 'ARTS & SCIENCE',
+  },
+  {
     id: 'bharathidasan_university',
     name: 'Bharathidasan University',
     shortName: 'BHAUNI',

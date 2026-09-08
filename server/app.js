@@ -5,7 +5,8 @@ const fs = require("fs");
 const cookieParser = require("cookie-parser");
 const session = require("express-session");
 const expressLayouts = require("express-ejs-layouts");
-const { sendEmail } = require("./services/emailService");
+const { sendEmail, sendOtpEmail } = require("./services/emailService");
+const otpModel = require("./models/postgres/otpModel");
 
 const app = express();
 const publicUploadsDir = path.join(__dirname, "public", "uploads");
@@ -110,7 +111,40 @@ app.use("/uploads", express.static(publicUploadsDir));
 // MPA View Routes (Server-rendered HTML)
 app.use("/", require("./routes/views/index"));
 
-const { contactLimiter } = require("./middleware/rateLimiter");
+const { contactLimiter, otpLimiter } = require("./middleware/rateLimiter");
+
+app.post("/api/contact/send-otp", otpLimiter, async (req, res) => {
+  try {
+    const normalizedEmail = String(req.body?.email || "").trim().toLowerCase();
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+      return res.status(400).json({ message: "Valid email address is required." });
+    }
+
+    const existingOtp = await otpModel.findOne({ where: { email: normalizedEmail } });
+    if (existingOtp) {
+      const secondsPassed = (Date.now() - new Date(existingOtp.updatedAt || existingOtp.createdAt).getTime()) / 1000;
+      if (secondsPassed < 60) {
+        return res.status(429).json({
+          message: `Please wait ${Math.ceil(60 - secondsPassed)} seconds before requesting another OTP.`,
+        });
+      }
+    }
+
+    const otp = String(Math.floor(100000 + Math.random() * 900000));
+    const expiresAt = new Date(Date.now() + 10 * 60 * 1000);
+    if (existingOtp) {
+      await existingOtp.update({ otp, expires_at: expiresAt });
+    } else {
+      await otpModel.create({ email: normalizedEmail, otp, expires_at: expiresAt });
+    }
+
+    await sendOtpEmail(normalizedEmail, otp, 10);
+    return res.status(200).json({ message: "Verification code sent to your email." });
+  } catch (error) {
+    console.error("Contact OTP error:", error);
+    return res.status(500).json({ message: "Unable to send the verification code right now." });
+  }
+});
 
 /**
  * Escape HTML special characters for safe email embedding.
@@ -127,7 +161,7 @@ const escapeHtml = (str) => {
 
 app.post("/api/contact", contactLimiter, async (req, res) => {
   try {
-    const { name, email, message } = req.body || {};
+    const { name, email, message, otp } = req.body || {};
     const trimmedName = String(name || "").trim();
     const trimmedEmail = String(email || "").trim();
     const trimmedMessage = String(message || "").trim();
@@ -143,6 +177,15 @@ app.post("/api/contact", contactLimiter, async (req, res) => {
     if (trimmedMessage.length < 12) {
       return res.status(400).json({ message: "Your message must be at least 12 characters long." });
     }
+
+    const normalizedEmail = trimmedEmail.toLowerCase();
+    const validOtp = await otpModel.findOne({
+      where: { email: normalizedEmail, otp: String(otp || '').trim() },
+    });
+    if (!validOtp || new Date() > validOtp.expires_at) {
+      return res.status(400).json({ message: "Enter a valid, unexpired verification code before sending your message." });
+    }
+    await validOtp.destroy();
 
     // Sanitize user input for email HTML to prevent XSS
     const safeName = escapeHtml(trimmedName);

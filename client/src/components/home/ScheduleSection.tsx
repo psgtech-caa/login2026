@@ -10,21 +10,29 @@ const SCHEDULE_DATA: Record<'DAY_01' | 'DAY_02', Array<{ time: string; title: st
     { time: '10:30 AM', title: 'Hunt your Treasure', type: 'GAMING', venue: 'K503, K504, K505', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981', image: '/assets/events/hunt_your_treasure.webp', slug: 'hunt-your-treasure' },
     { time: '12:30 PM', title: 'Lunch', type: 'GENERAL', venue: 'F block Canteen', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
     { time: '01:30 PM', title: 'Pixel Paradox', type: 'CREATIVE', venue: 'IS Lab', bgClass: 'from-[#160A18] to-[#0A0607]', accent: '#A855F7', image: '/assets/events/pixel_paradox.webp', slug: 'pixel-paradox' },
-    { time: '09:30 AM', title: 'The Extraction', type: 'TECHNICAL', venue: 'CAT Lab', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316', image: '/assets/events/the_extraction.webp', slug: 'the-extraction' },
+    { time: '01:30 PM', title: 'The Extraction', type: 'TECHNICAL', venue: 'CAT Lab', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316', image: '/assets/events/the_extraction.webp', slug: 'the-extraction' },
     { time: '03:00 PM', title: 'In the Slot', type: 'GAMING', venue: 'F202', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981', image: '/assets/events/in_the_slot.webp', slug: 'in-the-slot' },
+    { time: '03:30 PM', title: 'Snack (MXIANS)', type: 'GENERAL', venue: 'F block canteen', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
     { time: '03:30 PM', title: 'Blind Coding', type: 'TECHNICAL', venue: 'CC Lab', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316', image: '/assets/events/blind_coding.webp', slug: 'blind-coding' },
   ],
   DAY_02: [
-    { time: '01:30 PM', title: 'Project Phoenix', type: 'TECHNICAL', venue: 'CAT Lab', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316', image: '/assets/events/phoenix.webp', slug: 'project-phoenix' },
+    { time: '09:30 AM', title: 'Project Phoenix', type: 'TECHNICAL', venue: 'CAT Lab', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316', image: '/assets/events/phoenix.webp', slug: 'project-phoenix' },
+    { time: '10:00 AM', title: 'Snacks (MXIANS)', type: 'GENERAL', venue: 'F block canteen', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
     { time: '10:00 AM', title: 'Debug Arena', type: 'TECHNICAL', venue: 'CC Lab', bgClass: 'from-[#1C140D] to-[#0A0607]', accent: '#F97316', image: '/assets/events/debug_arena.webp', slug: 'debug-arena' },
     { time: '12:30 PM', title: 'Star of Login (Round 1)', type: 'GENERAL', venue: 'F202', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22', image: '/assets/events/star_of_login.webp', slug: 'star-of-login' },
     { time: '01:00 PM', title: 'Lunch', type: 'GENERAL', venue: 'F block Canteen', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
     { time: '02:00 PM', title: 'Star of Login (Round 2)', type: 'GENERAL', venue: 'D block conference hall (Ground floor)', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22', image: '/assets/events/star_of_login.webp', slug: 'star-of-login' },
     { time: '03:30 PM', title: 'Valedictory', type: 'GENERAL', venue: 'D block conference hall (Ground floor)', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22', image: '/assets/gallery-2.webp' },
+    { time: '04:00 PM', title: 'Snacks (MXIANS)', type: 'GENERAL', venue: 'F block canteen', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
     { time: '05:00 PM', title: 'Entertainment', type: 'GAMING', venue: 'Centenary hall', bgClass: 'from-[#0D1C16] to-[#0A0607]', accent: '#10B981', image: '/assets/events/nostos.webp', slug: 'nostos' },
     { time: '07:30 PM', title: 'Dinner', type: 'GENERAL', venue: 'Near F block canteen', bgClass: 'from-[#1A0B0E] to-[#0A0607]', accent: '#E01B22' },
   ],
 };
+
+const DAY_LABELS = {
+  DAY_01: 'DAY 01 • 18 SEP 2026',
+  DAY_02: 'DAY 02 • 19 SEP 2026',
+} as const;
 
 export const ScheduleSection: React.FC = () => {
   const [activeDay, setActiveDay] = useState<'DAY_01' | 'DAY_02'>('DAY_01');
@@ -101,7 +109,7 @@ export const ScheduleSection: React.FC = () => {
                       : 'text-[#6B5A5C] hover:text-[#A79798]'
                   }`}
                 >
-                  {day.replace('_', ' ')}
+                  {DAY_LABELS[day]}
                 </button>
               ))}
             </div>
@@ -120,7 +128,7 @@ export const ScheduleSection: React.FC = () => {
                   : 'bg-[#130C0E] text-[#A79798] border-[#2A1A1D]'
               }`}
             >
-              {day.replace('_', ' ')}
+              {DAY_LABELS[day]}
             </button>
           ))}
         </div>
@@ -246,7 +254,7 @@ export const ScheduleSection: React.FC = () => {
                         <img 
                           src={item.image} 
                           alt={item.title} 
-                          className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-500 ${isActive ? 'opacity-30' : 'opacity-20 group-hover:opacity-40'}`} 
+                          className={`absolute inset-0 w-full h-full object-cover transition-all duration-500 ${isActive ? 'opacity-45 scale-105' : 'opacity-0 scale-100 group-hover:opacity-45 group-hover:scale-105'}`} 
                         />
                       )}
                       
@@ -279,8 +287,8 @@ export const ScheduleSection: React.FC = () => {
                         
                         <div className="w-12 h-1 mb-6 rounded-full" style={{ backgroundColor: item.accent, boxShadow: `0 0 10px ${item.accent}` }} />
 
-                        <div className="flex flex-row items-end justify-between gap-4">
-                          <div className="space-y-3">
+                        <div className="relative min-h-[180px]">
+                          <div className="space-y-3 pr-28 md:pr-32 min-w-0">
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-mono font-bold tracking-widest uppercase border bg-black/40 backdrop-blur-md rounded-[2px]" style={{ color: item.accent, borderColor: item.accent }}>
                               <Zap className="w-3 h-3" /> {item.type}
                             </span>
@@ -301,7 +309,7 @@ export const ScheduleSection: React.FC = () => {
                             </div>
                           </div>
 
-                          <div className="shrink-0 border bg-black/60 backdrop-blur-md p-4 rounded-[2px] flex flex-col items-center justify-center min-w-[100px]" style={{ borderColor: `${item.accent}40` }}>
+                          <div className="absolute top-0 right-0 border bg-black/60 backdrop-blur-md p-3 md:p-4 rounded-[2px] flex flex-col items-center justify-center w-[88px] md:w-[100px]" style={{ borderColor: `${item.accent}40` }}>
                             <Clock className="w-5 h-5 mb-1" style={{ color: item.accent }} />
                             <span className="font-mono text-base font-bold text-white tracking-wider">
                               {item.time.split(' ')[0]}

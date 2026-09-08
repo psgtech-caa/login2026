@@ -2,11 +2,12 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { CheckCircle2, Filter, Zap, Terminal } from 'lucide-react';
-import { TimelineSection } from '../components/home/TimelineSection';
+import { CheckCircle2, Filter, Zap, Terminal, CalendarClock } from 'lucide-react';
+import { ScheduleSection } from '../components/home/ScheduleSection';
 import { SEOHead } from '../components/common/SEOHead';
 import { getBreadcrumbSchema, SITE_CONFIG } from '../data/seoConfig';
 import defaultEvents from '../data/events.json';
+import { formatEventTiming } from '../utils/eventFormatting';
 
 interface Event {
   id: number;
@@ -195,9 +196,13 @@ export const EventsPage: React.FC = () => {
   const categoryParam = searchParams.get('category')?.toUpperCase() || 'ALL';
 
   useEffect(() => {
-    api.events.getAll().then((res) => {
+    const loadEvents = () => api.events.getAll().then((res) => {
       if (Array.isArray(res.data) && res.data.length > 0) setEvents(res.data);
     }).catch(() => {});
+
+    loadEvents();
+    const refreshTimer = window.setInterval(loadEvents, 30_000);
+    return () => window.clearInterval(refreshTimer);
   }, []);
 
   useEffect(() => {
@@ -425,7 +430,7 @@ export const EventsPage: React.FC = () => {
                       </h2>
 
                       <div className="text-[10px] text-[#A79798] flex items-center justify-between pt-1 border-t border-[#2A1A1D]/40">
-                        <span>{detail.durationText}</span>
+                        <span className="truncate pr-2">{formatEventTiming(event.date, event.start_time, event.end_time)}</span>
                         {isRegistered ? (
                           <span className="text-[#1FA971] font-bold flex items-center gap-0.5">
                             <CheckCircle2 className="w-3 h-3" /> REGISTERED
@@ -505,6 +510,11 @@ export const EventsPage: React.FC = () => {
                         <p className={`text-xs leading-relaxed mt-3 line-clamp-3 ${isExtraction ? 'text-[#C7B7B9]' : 'text-[#A79798]'}`}>
                           {event.description || detail.shortDesc}
                         </p>
+
+                        <div className="mt-3 flex items-center gap-2 text-[11px] font-mono text-[#D5C9CA]">
+                          <CalendarClock className="w-3.5 h-3.5 text-[#E01B22] shrink-0" />
+                          <span>{formatEventTiming(event.date, event.start_time, event.end_time)}</span>
+                        </div>
 
                         {detail.skills && detail.skills.length > 0 && (
                           <div className={`mt-4 pt-3 border-t flex flex-wrap gap-1.5 ${isExtraction ? 'border-[#3E1A22]' : 'border-[#2A1A1D]/60'}`}>
@@ -610,9 +620,9 @@ export const EventsPage: React.FC = () => {
 
       </div>
 
-      {/* ── EVENT TIMELINE EMBEDDED IN EVENTS ROUTE ── */}
+      {/* ── OFFICIAL EVENT AGENDA EMBEDDED IN EVENTS ROUTE ── */}
       <div className="mt-20">
-        <TimelineSection />
+        <ScheduleSection />
       </div>
 
     </div>

@@ -1,9 +1,26 @@
 const fs = require("fs");
 const path = require("path");
-const { Op } = require("sequelize");
+const { QueryTypes } = require("sequelize");
 const eventModel = require("../../models/postgres/eventModel");
 const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
 const userModel = require("../../models/postgres/userModel");
+const { neonSequelize } = require("../../config/db/postgres");
+
+const readFromNeon = ['true', '1', 'yes', 'on'].includes(
+  String(process.env.READ_EVENTS_FROM_NEON || '').toLowerCase()
+);
+
+const findAllEvents = async (options = {}) => {
+  if (readFromNeon && neonSequelize) {
+    const [rows] = await neonSequelize.query(`
+      SELECT * FROM "events"
+      ORDER BY "date" ASC, "start_time" ASC
+    `);
+    return rows;
+  }
+
+  return eventModel.findAll(options);
+};
 
 const getSlug = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
 
@@ -66,7 +83,7 @@ const createEvent = async (req, res) => {
 
 const getAllEvents = async (req, res) => {
   try {
-    const events = await eventModel.findAll({
+    const events = await findAllEvents({
       order: [["date", "ASC"], ["start_time", "ASC"]],
     });
     const orderedEvents = [...events].sort((a, b) => {
@@ -105,11 +122,19 @@ const getEvent = async (req, res) => {
     const lookup = req.params.id;
 
     if (lookup && !Number.isNaN(Number(lookup))) {
-      event = await eventModel.findByPk(Number(lookup));
+      if (readFromNeon && neonSequelize) {
+        const rows = await neonSequelize.query('SELECT * FROM "events" WHERE "id" = :id LIMIT 1', {
+          replacements: { id: Number(lookup) },
+          type: QueryTypes.SELECT,
+        });
+        event = rows[0] || null;
+      } else {
+        event = await eventModel.findByPk(Number(lookup));
+      }
     }
 
     if (!event) {
-      const allEvents = await eventModel.findAll();
+      const allEvents = await findAllEvents();
       const slug = getSlug(lookup);
       event = allEvents.find((entry) => getSlug(entry.name) === slug || String(entry.id) === String(lookup));
     }
@@ -214,7 +239,7 @@ const getTimeline = async (req, res) => {
     const where = { is_online: false };
     if (date) where.date = date;
 
-    const events = await eventModel.findAll({
+    const events = await findAllEvents({
       where,
       order: [["start_time", "ASC"]],
     });

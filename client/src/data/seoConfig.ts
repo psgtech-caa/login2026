@@ -290,8 +290,13 @@ export const HOMEPAGE_FAQS = [
       'Students can register directly through the official LOGIN 2026 portal at https://login.psgtech.ac.in/register by selecting their college, creating their participant credentials, and selecting their desired technical and non-technical event tracks.',
   },
   {
-    question: 'Are there registration fees or certificates for participating in LOGIN 2026?',
+    question: 'Is the registration fee charged for each event?',
     answer:
-      'Participation guidelines, event details, and official merit/participation e-certificates issued by the Computer Applications Association and PSG College of Technology are available on the participant portal. Winners in each arena receive certificates of achievement and awards.',
+      'No. The registration fee is ₹100 only once per participant. After paying ₹100, a participant can register for multiple LOGIN 2026 events without paying ₹100 again for every event. Official participation and merit e-certificates are also provided as applicable.',
+  },
+  {
+    question: 'Are lunch and snacks provided for registered participants?',
+    answer:
+      'Yes. Registered participants receive free lunch and snacks during the LOGIN 2026 event days, according to the official event schedule.',
   },
 ];

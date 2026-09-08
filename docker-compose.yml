@@ -44,6 +44,7 @@ services:
       DISABLE_DB_SYNC: "true"
       DB_STARTUP_MUTATIONS: "false"
       CONNECT_NEON_ON_BOOT: "false"
+      READ_EVENTS_FROM_NEON: "true"
     env_file:
       - ./.env
     networks:

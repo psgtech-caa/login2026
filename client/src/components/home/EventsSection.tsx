@@ -25,7 +25,7 @@ export const EventsSection: React.FC = () => {
   const [isExploreHovered, setIsExploreHovered] = useState(false);
 
   useEffect(() => {
-    api.events.getAll().then((res) => {
+    const loadEvents = () => api.events.getAll().then((res) => {
       if (Array.isArray(res.data) && res.data.length > 0) {
         const updated = STATIC_EVENTS.map(item => {
           const matched = res.data.find((e: any) => {
@@ -40,6 +40,10 @@ export const EventsSection: React.FC = () => {
         setEvents(updated);
       }
     }).catch(() => setEvents(STATIC_EVENTS));
+
+    loadEvents();
+    const refreshTimer = window.setInterval(loadEvents, 30_000);
+    return () => window.clearInterval(refreshTimer);
   }, []);
 
   return (

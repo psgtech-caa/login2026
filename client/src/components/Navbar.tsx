@@ -79,10 +79,10 @@ export const Navbar: React.FC<NavbarProps> = () => {
 
             {/* Brand Title with Responsive Truncation */}
             <div className="flex flex-col min-w-0">
-              <span className="font-display font-black text-sm sm:text-lg lg:text-xl tracking-wider text-[#F7F2F2] group-hover:text-[#E01B22] transition-colors uppercase leading-none drop-shadow-[0_0_10px_rgba(224,27,34,0.3)] truncate">
+              <span className="font-display font-black text-sm sm:text-lg lg:text-xl tracking-wider text-[#F7F2F2] uppercase leading-none drop-shadow-[0_0_10px_rgba(224,27,34,0.3)] truncate">
                 LOGIN<span className="text-[#E01B22] font-black">2K26</span>
               </span>
-              <span className="text-[7px] xs:text-[8px] sm:text-[9.5px] font-mono text-[#A79798] tracking-wider uppercase font-bold mt-0.5 leading-none group-hover:text-white transition-colors truncate max-w-[140px] xs:max-w-[180px] sm:max-w-none">
+              <span className="text-[7px] xs:text-[8px] sm:text-[9.5px] font-mono text-[#A79798] tracking-wider uppercase font-bold mt-0.5 leading-none truncate max-w-[140px] xs:max-w-[180px] sm:max-w-none">
                 DEPARTMENT OF COMPUTER APPLICATIONS
               </span>
             </div>

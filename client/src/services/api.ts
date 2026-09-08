@@ -12,6 +12,11 @@ export const api = {
   put: async (url: string, data?: any) => await axiosInstance.put(url, data),
   delete: async (url: string) => await axiosInstance.delete(url),
 
+  contact: {
+    sendOtp: async (email: string) => await axiosInstance.post('/contact/send-otp', { email }),
+    sendMessage: async (data: { name: string; email: string; message: string; otp: string }) => await axiosInstance.post('/contact', data),
+  },
+
   // Auth Module
   auth: {
     register: async (data: any) => await axiosInstance.post('/auth/register', data),

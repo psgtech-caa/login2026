@@ -8,9 +8,13 @@ export const ContactPage: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [message, setMessage] = useState('');
+  const [otp, setOtp] = useState('');
+  const [otpSent, setOtpSent] = useState(false);
   const [sending, setSending] = useState(false);
+  const [sendingOtp, setSendingOtp] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,23 +39,41 @@ export const ContactPage: React.FC = () => {
     }
 
     setError(null);
-    setSending(true);
+    setNotice(null);
 
     try {
-      await api.post('/contact', {
+      if (!otpSent) {
+        setSendingOtp(true);
+        await api.contact.sendOtp(trimmedEmail);
+        setOtpSent(true);
+        setNotice('Verification code sent. Check your email and enter the 6-digit code to continue.');
+        return;
+      }
+
+      if (!/^\d{6}$/.test(otp.trim())) {
+        setError('Enter the 6-digit verification code sent to your email.');
+        return;
+      }
+
+      setSending(true);
+      await api.contact.sendMessage({
         name: trimmedName,
         email: trimmedEmail,
         message: trimmedMessage,
+        otp: otp.trim(),
       });
 
       setSent(true);
       setName('');
       setEmail('');
       setMessage('');
+      setOtp('');
+      setOtpSent(false);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Transmission failed. Please try again or contact login@psgtech.ac.in directly.');
     } finally {
       setSending(false);
+      setSendingOtp(false);
     }
   };
 
@@ -232,6 +254,11 @@ export const ContactPage: React.FC = () => {
                     {error}
                   </div>
                 )}
+                {notice && (
+                  <div className="p-3 bg-[#1FA971]/10 border border-[#1FA971]/40 rounded-[1px] text-[10px] font-mono text-[#1FA971]">
+                    {notice}
+                  </div>
+                )}
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono text-[#6B5A5C] uppercase tracking-wider block">NAME / IDENTIFIER</label>
@@ -249,11 +276,32 @@ export const ContactPage: React.FC = () => {
                   <input
                     type="email"
                     value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    onChange={(e) => {
+                      setEmail(e.target.value);
+                      setOtp('');
+                      setOtpSent(false);
+                      setNotice(null);
+                    }}
                     placeholder="Enter your security-cleared email"
                     className="w-full bg-[#0A0607]/80 border border-[#2A1A1D] focus:border-[#E01B22]/60 px-4 py-3 rounded-[2px] font-mono text-xs text-[#F7F2F2] placeholder-[#4A383A] outline-none transition-colors"
                   />
                 </div>
+
+                {otpSent && (
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-mono text-[#E01B22] uppercase tracking-wider block">EMAIL VERIFICATION CODE</label>
+                    <input
+                      type="text"
+                      inputMode="numeric"
+                      autoComplete="one-time-code"
+                      maxLength={6}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                      placeholder="Enter 6-digit OTP"
+                      className="w-full bg-[#0A0607]/80 border border-[#E01B22]/50 focus:border-[#E01B22] px-4 py-3 rounded-[2px] font-mono text-sm tracking-[0.35em] text-[#F7F2F2] placeholder-[#4A383A] outline-none transition-colors"
+                    />
+                  </div>
+                )}
 
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-mono text-[#6B5A5C] uppercase tracking-wider block">MESSAGE BODY</label>
@@ -269,13 +317,18 @@ export const ContactPage: React.FC = () => {
                 <div className="pt-2">
                   <button
                     type="submit"
-                    disabled={sending}
+                    disabled={sending || sendingOtp}
                     className="w-full py-3 bg-[#E01B22] hover:bg-[#FF2A2A] disabled:bg-[#E01B22]/40 text-[#F7F2F2] font-bold font-mono text-xs tracking-widest rounded-[2px] transition-all flex items-center justify-center gap-2 hover:shadow-[0_0_20px_rgba(224,27,34,0.3)] uppercase"
                   >
-                    {sending ? (
+                    {sending || sendingOtp ? (
                       <>
                         <span className="w-4 h-4 border-2 border-t-transparent border-[#F7F2F2] rounded-full animate-spin" />
-                        BROADCASTING UPLINK...
+                        {sendingOtp ? 'SENDING VERIFICATION CODE...' : 'BROADCASTING UPLINK...'}
+                      </>
+                    ) : !otpSent ? (
+                      <>
+                        <Mail className="w-3.5 h-3.5" />
+                        SEND VERIFICATION CODE
                       </>
                     ) : (
                       <>
