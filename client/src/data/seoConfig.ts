@@ -295,8 +295,8 @@ export const HOMEPAGE_FAQS = [
       'No. The registration fee is ₹100 only once per participant. After paying ₹100, a participant can register for multiple LOGIN 2026 events without paying ₹100 again for every event. Official participation and merit e-certificates are also provided as applicable.',
   },
   {
-    question: 'Are lunch and snacks provided for registered participants?',
+    question: 'Are lunch, snacks, and accommodation provided for participants?',
     answer:
-      'Yes. Registered participants receive free lunch and snacks during the LOGIN 2026 event days, according to the official event schedule.',
+      'Yes. Registered participants receive free lunch and snacks during the LOGIN 2026 event days, according to the official event schedule. Limited free accommodation will also be provided for participants, subject to availability.',
   },
 ];

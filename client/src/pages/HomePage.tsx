@@ -97,6 +97,9 @@ export const HomePage: React.FC = () => {
             <p className="text-xs sm:text-sm text-[#A79798] leading-relaxed">
               Explore specialized symposium tracks designed for MCA, engineering, and computing students across Tamil Nadu and all of India.
             </p>
+            <p className="inline-flex items-center justify-center border border-[#E08A17]/40 bg-[#E08A17]/10 px-3 py-2 text-[11px] font-mono font-bold text-[#E08A17]">
+              Limited free accommodation will be provided for participants, subject to availability.
+            </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

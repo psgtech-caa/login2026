@@ -561,7 +561,7 @@ END:VCALENDAR`;
                 <div className="bg-[#0A0607] border border-[#2A1A1D] p-3.5 rounded-[2px]">
                   <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
                     <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                    <span>Accommodation required for event days (Sep 18-19)</span>
+                    <span>Request limited free accommodation for the night of 18 September.</span>
                   </label>
                 </div>
               </>
@@ -608,7 +608,7 @@ END:VCALENDAR`;
                   <div className="flex items-end pb-1">
                     <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
                       <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                      <span>Accommodation required</span>
+                      <span>Request limited free accommodation for participants.</span>
                     </label>
                   </div>
                 </div>
