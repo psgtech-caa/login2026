@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { soundFx } from '../../utils/audioFx';
 import { useUIStore } from '../../store/uiStore';
@@ -8,7 +8,12 @@ type ConvoState = 'initial' | 'challenge' | 'unlocked';
 
 export const SpidermanCompanion: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { isCompanionOpen, toggleCompanion, closeCompanion } = useUIStore();
+
+  if (location.pathname.startsWith('/dashboard')) {
+    return null;
+  }
 
   const [convoState, setConvoState] = useState<ConvoState>('initial');
   const [isMuted, setIsMuted] = useState<boolean>(soundFx.isMuted());

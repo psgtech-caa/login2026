@@ -49,9 +49,9 @@ export const Navbar: React.FC<NavbarProps> = () => {
   const isHomepage = location.pathname === '/' || location.pathname === '/home';
 
   return (
-    <header className={`w-full sticky top-0 z-50 transition-colors duration-300 ${
-      isHomepage && !isSticky
-        ? 'bg-transparent border-b border-transparent'
+    <header className={`w-full transition-all duration-300 ${
+      isHomepage && !isSticky && !mobileMenuOpen
+        ? 'bg-transparent border-b border-transparent shadow-none'
         : 'bg-[#130C0E]/95 backdrop-blur-md border-b border-[#2A1A1D] shadow-2xl'
     }`}>
       <div className="max-w-7xl mx-auto px-3 sm:px-8 py-2.5 sm:py-3 flex items-center justify-between gap-2">
@@ -89,7 +89,7 @@ export const Navbar: React.FC<NavbarProps> = () => {
           </Link>
 
           {/* Desktop Navigation Links */}
-          <nav className="hidden md:flex items-center space-x-3 lg:space-x-6 font-mono text-xs tracking-wider font-bold uppercase">
+          <nav className="hidden md:flex items-center space-x-3 lg:space-x-6 font-mono text-xs tracking-wider font-bold uppercase drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)]">
             <Link
               to="/home"
               className={`relative py-1 px-2 transition-colors font-bold ${

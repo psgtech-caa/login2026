@@ -23,7 +23,8 @@ export const api = {
     checkEmail: async (email: string) => await axiosInstance.post('/auth/check-email', { email }),
     sendOtp: async (email: string) => await axiosInstance.post('/auth/send-otp', { email }),
     login: async (data: { loginId?: string; email?: string; password: string }) => await axiosInstance.post('/auth/login', data),
-    googleLogin: async (credential: string) => await axiosInstance.post('/auth/google', { credential }),
+    googleLogin: async (payload: { credential?: string; accessToken?: string } | string) =>
+      await axiosInstance.post('/auth/google', typeof payload === 'string' ? { credential: payload } : payload),
     logout: async () => await axiosInstance.post('/auth/logout'),
     forgotPassword: async (email: string) => await axiosInstance.post('/auth/forgot-password', { email }),
     resetPassword: async (data: { email: string; otp: string; newPassword: string }) => await axiosInstance.post('/auth/reset-password', data),

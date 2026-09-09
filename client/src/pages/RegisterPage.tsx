@@ -4,7 +4,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { api } from '../services/api';
-import { ArrowRight, ShieldCheck, ShieldAlert, AlertCircle, Eye, EyeOff, Copy, Check, Calendar as CalendarIcon, Sparkles, Lock, Download, Loader2 } from 'lucide-react';
+import { ArrowRight, ShieldCheck, ShieldAlert, AlertCircle, Eye, EyeOff, Copy, Check, Calendar as CalendarIcon, Sparkles, Lock, Download, Loader2, X } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { PG_DEPARTMENTS } from '../constants/departments';
 import { CollegeCombobox } from '../components/common/CollegeCombobox';
@@ -679,7 +679,21 @@ END:VCALENDAR`;
       {showOtpModal && (
         <div className="fixed inset-0 z-50 bg-[#0A0607]/80 backdrop-blur-sm flex items-center justify-center p-4">
           <div className="bg-[#130C0E] border border-[#E01B22] w-full max-w-md p-6 rounded-[2px] shadow-2xl relative">
-            <h3 className="font-display font-bold text-lg text-[#F7F2F2] mb-2 flex items-center gap-2">
+            {/* Close Modal Button */}
+            <button
+              type="button"
+              onClick={() => {
+                setShowOtpModal(false);
+                setServerError(null);
+              }}
+              className="absolute top-4 right-4 text-[#A79798] hover:text-[#FF2A2A] hover:bg-[#E01B22]/10 p-1.5 rounded-full transition-all duration-200 focus:outline-none"
+              title="Close OTP verification"
+              aria-label="Close OTP verification modal"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <h3 className="font-display font-bold text-lg text-[#F7F2F2] mb-2 flex items-center gap-2 pr-8">
               <ShieldAlert className="w-5 h-5 text-[#E08A17]" /> VERIFY YOUR EMAIL
             </h3>
             <p className="text-xs font-mono text-[#A79798] mb-6 leading-relaxed">

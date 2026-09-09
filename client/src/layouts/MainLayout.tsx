@@ -78,21 +78,30 @@ export const MainLayout: React.FC = () => {
       {showIntro && <IntroVideo onComplete={() => setShowIntro(false)} />}
 
       {/* Header & Navigation */}
-      {!showIntro && <Navbar onOpenCommandSearch={() => setCommandSearchOpen(true)} />}
+      {(() => {
+        const isHomepage = location.pathname === '/' || location.pathname === '/home';
+        return (
+          <div className={isHomepage ? "fixed top-0 left-0 right-0 z-50 pointer-events-auto" : "sticky top-0 z-50 pointer-events-auto"}>
+            {!showIntro && <Navbar onOpenCommandSearch={() => setCommandSearchOpen(true)} />}
 
-      {!showIntro && showRegistrationNotice && (
-        <div className="flex justify-center px-4 py-2 bg-[#0A0607] border-b border-[#2A1A1D]">
-          <div className="flex items-center gap-2 border border-[#E01B22]/60 bg-[#18090D] px-3 py-1.5 text-[10px] font-mono text-[#F7F2F2] shadow-[0_0_14px_rgba(224,27,34,0.2)]">
-            <Clock3 className="w-3.5 h-3.5 text-[#E01B22] shrink-0" />
-            <Link to="/events" onClick={dismissRegistrationNotice} className="hover:text-[#FF4545] text-center">
-              REGISTRATIONS CLOSE IN {registrationDaysLeft} {registrationDaysLeft === 1 ? 'DAY' : 'DAYS'}. FILL YOUR SLOT.
-            </Link>
-            <button onClick={dismissRegistrationNotice} aria-label="Dismiss registration notice" className="text-[#A79798] hover:text-white">
-              <X className="w-3.5 h-3.5" />
-            </button>
+            {!showIntro && showRegistrationNotice && (
+              <div className={`flex justify-center px-4 py-1.5 transition-colors duration-300 ${
+                isHomepage ? 'bg-transparent border-none' : 'bg-[#0A0607] border-b border-[#2A1A1D]'
+              }`}>
+                <div className="flex items-center gap-2 border border-[#E01B22]/60 bg-[#18090D]/90 backdrop-blur-md px-3 py-1.5 text-[10px] font-mono text-[#F7F2F2] shadow-[0_0_14px_rgba(224,27,34,0.2)] rounded-[2px]">
+                  <Clock3 className="w-3.5 h-3.5 text-[#E01B22] shrink-0" />
+                  <Link to="/events" onClick={dismissRegistrationNotice} className="hover:text-[#FF4545] text-center">
+                    REGISTRATIONS CLOSE IN {registrationDaysLeft} {registrationDaysLeft === 1 ? 'DAY' : 'DAYS'}. FILL YOUR SLOT.
+                  </Link>
+                  <button onClick={dismissRegistrationNotice} aria-label="Dismiss registration notice" className="text-[#A79798] hover:text-white">
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
-        </div>
-      )}
+        );
+      })()}
 
       {/* Announcements Ticker (Renders ONLY if active announcements exist) */}
       <Ticker />
@@ -118,8 +127,8 @@ export const MainLayout: React.FC = () => {
         onClose={() => setCommandSearchOpen(false)}
       />
 
-      {/* Spider-Man Protocol Companion on Scroll (Desktop & Mobile) */}
-      <SpidermanCompanion />
+      {/* Spider-Man Protocol Companion on Scroll (Desktop & Mobile) - Disabled on Dashboard */}
+      {!location.pathname.startsWith('/dashboard') && <SpidermanCompanion />}
     </div>
   );
 };

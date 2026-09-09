@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { GoogleLogin } from '@react-oauth/google';
+import { useGoogleLogin } from '@react-oauth/google';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { ArrowRight, AlertCircle, ShieldCheck, Eye, EyeOff, KeyRound } from 'lucide-react';
@@ -64,22 +64,23 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
-    if (!credentialResponse.credential) {
-      setError('Google did not return a valid sign-in credential.');
-      return;
-    }
-    setError(null);
-    setGoogleLoading(true);
-    try {
-      const res = await api.auth.googleLogin(credentialResponse.credential);
-      finishLogin(res.data.user, res.data.token);
-    } catch (err: any) {
-      setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
-    } finally {
-      setGoogleLoading(false);
-    }
-  };
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      setError(null);
+      setGoogleLoading(true);
+      try {
+        const res = await api.auth.googleLogin({ accessToken: tokenResponse.access_token });
+        finishLogin(res.data.user, res.data.token);
+      } catch (err: any) {
+        setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
+      } finally {
+        setGoogleLoading(false);
+      }
+    },
+    onError: () => {
+      setError('Google sign-in was cancelled or failed. Please try again.');
+    },
+  });
 
 
   return (
@@ -166,20 +167,46 @@ export const LoginPage: React.FC = () => {
           <div className="space-y-4">
             <div className="flex items-center gap-3 text-[10px] font-mono text-[#6B5A5C] uppercase tracking-[0.2em]">
               <span className="h-px flex-1 bg-[#2A1A1D]" />
-              <span>OR</span>
+              <span>OR AUTHENTICATE WITH</span>
               <span className="h-px flex-1 bg-[#2A1A1D]" />
             </div>
-            <div className={`flex justify-center ${googleLoading ? 'pointer-events-none opacity-60' : ''}`}>
-              <GoogleLogin
-                onSuccess={handleGoogleSuccess}
-                onError={() => setError('Google sign-in was cancelled or failed. Please try again.')}
-                theme="filled_black"
-                shape="rectangular"
-                size="large"
-                text="continue_with"
-                width="320"
-              />
-            </div>
+            
+            <button
+              type="button"
+              onClick={() => loginWithGoogle()}
+              disabled={googleLoading}
+              className="w-full py-3 px-4 bg-[#0A0607] hover:bg-[#18090D] border border-[#2A1A1D] hover:border-[#E01B22] text-[#F7F2F2] hover:text-white font-mono font-bold text-xs tracking-wider uppercase rounded-[2px] transition-all duration-300 hover:shadow-[0_0_20px_rgba(224,27,34,0.3)] flex items-center justify-center gap-3 group disabled:opacity-60 disabled:pointer-events-none relative overflow-hidden"
+            >
+              {googleLoading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-[#E01B22] border-t-transparent rounded-full animate-spin" />
+                  <span className="text-[#A79798]">CONNECTING TO GOOGLE...</span>
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 shrink-0 transition-transform group-hover:scale-110 duration-200" viewBox="0 0 24 24">
+                    <path
+                      fill="#EA4335"
+                      d="M12 5c1.56 0 2.96.54 4.07 1.43l3.05-3.05C17.27 1.62 14.8 1 12 1 7.37 1 3.48 3.65 1.63 7.51l3.66 2.84C6.17 7.42 8.85 5 12 5z"
+                    />
+                    <path
+                      fill="#4285F4"
+                      d="M23.49 12.27c0-.79-.07-1.54-.19-2.27H12v4.51h6.47c-.29 1.48-1.14 2.73-2.4 3.58l3.68 2.85c2.14-1.98 3.74-4.89 3.74-8.67z"
+                    />
+                    <path
+                      fill="#FBBC05"
+                      d="M5.29 14.65c-.23-.68-.36-1.41-.36-2.15s.13-1.47.36-2.15L1.63 7.51C.59 9.58 0 11.97 0 14.5s.59 4.92 1.63 6.99l3.66-2.84z"
+                    />
+                    <path
+                      fill="#34A853"
+                      d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.68-2.85c-1.07.72-2.44 1.16-4.25 1.16-3.15 0-5.83-2.42-6.71-5.35L1.63 16.89C3.48 20.75 7.37 24 12 24z"
+                    />
+                  </svg>
+                  <span>CONTINUE WITH GOOGLE</span>
+                  <div className="absolute right-0 top-0 bottom-0 w-1 bg-[#E01B22]/40 group-hover:bg-[#E01B22] transition-colors" />
+                </>
+              )}
+            </button>
           </div>
         ) : null}
 

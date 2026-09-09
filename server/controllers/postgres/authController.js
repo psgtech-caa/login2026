@@ -516,36 +516,55 @@ const loginUser = async (req, res) => {
 
 const googleLogin = async (req, res) => {
   try {
-    const { credential } = req.body || {};
+    const { credential, accessToken } = req.body || {};
     const clientId = process.env.GOOGLE_CLIENT_ID;
     if (!clientId) {
       return res.status(503).json({ message: 'Google sign-in is not configured.' });
     }
-    if (!credential || typeof credential !== 'string') {
-      return res.status(400).json({ message: 'A Google sign-in credential is required.' });
+
+    let email = null;
+    let googleId = null;
+
+    if (credential && typeof credential === 'string') {
+      const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: clientId });
+      const payload = ticket.getPayload();
+      if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+        return res.status(401).json({ message: 'Google account verification failed.' });
+      }
+      email = payload.email.trim().toLowerCase();
+      googleId = payload.sub;
+    } else if (accessToken && typeof accessToken === 'string') {
+      const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
+      if (!userInfoRes.ok) {
+        return res.status(401).json({ message: 'Failed to verify Google access token.' });
+      }
+      const userInfo = await userInfoRes.json();
+      if (!userInfo?.sub || !userInfo.email || userInfo.email_verified !== true) {
+        return res.status(401).json({ message: 'Google account verification failed.' });
+      }
+      email = userInfo.email.trim().toLowerCase();
+      googleId = userInfo.sub;
+    } else {
+      return res.status(400).json({ message: 'A Google sign-in credential or access token is required.' });
     }
 
-    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: clientId });
-    const payload = ticket.getPayload();
-    if (!payload?.sub || !payload.email || payload.email_verified !== true) {
-      return res.status(401).json({ message: 'Google account verification failed.' });
-    }
-
-    const email = payload.email.trim().toLowerCase();
-    let user = await userModel.findOne({ where: { google_id: payload.sub } });
+    let user = await userModel.findOne({ where: { google_id: googleId } });
     if (!user) {
       user = await userModel.findOne({ where: { email } });
       if (!user) {
         return res.status(404).json({ message: 'No account found with this Google account. Please register first.' });
       }
-      if (user.google_id && user.google_id !== payload.sub) {
+      if (user.google_id && user.google_id !== googleId) {
         return res.status(409).json({ message: 'This email is linked to a different Google account.' });
       }
-      await user.update({ google_id: payload.sub });
+      await user.update({ google_id: googleId });
     }
 
     return authenticateUser(user, res);
   } catch (error) {
+    console.error("Google authentication error:", error);
     return res.status(401).json({ message: 'Google authentication failed. Please try again.' });
   }
 };

@@ -28,8 +28,9 @@ const startServer = async () => {
 
     console.log('Database startup mutations are disabled; preserving existing database data.');
 
-    app.listen(PORT, () => {
-      console.log(`LOGIN 2026 Server running on port ${PORT}`);
+    const HOST = process.env.HOST || '0.0.0.0';
+    app.listen(PORT, HOST, () => {
+      console.log(`LOGIN 2026 Server running on http://${HOST}:${PORT}`);
     });
   } catch (error) {
     console.error("Server startup failed:", error);
