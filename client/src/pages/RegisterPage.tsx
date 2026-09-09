@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Link, useSearchParams, useNavigate } from 'react-router-dom';
+import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -55,12 +55,15 @@ type AlumniForm = z.infer<typeof alumniSchema>;
 export const RegisterPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [userType, setUserType] = useState<'PARTICIPANT' | 'ALUMNI'>('PARTICIPANT');
   const [loading, setLoading] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [infoMessage, setInfoMessage] = useState<string | null>(location.state?.infoMessage || null);
+  const [prefillEmail] = useState<string>(location.state?.prefillEmail || '');
 
   // Success state
   const [alumniSuccessData, setAlumniSuccessData] = useState<{ name: string; email: string; batch_year?: string } | null>(null);
@@ -77,7 +80,7 @@ export const RegisterPage: React.FC = () => {
   const participantForm = useForm<ParticipantForm>({
     resolver: zodResolver(participantSchema),
     defaultValues: {
-      name: '', email: '', otp: '', phone: '', college_name: '', department: '', roll_no: '',
+      name: '', email: prefillEmail, otp: '', phone: '', college_name: '', department: '', roll_no: '',
       gender: '', year_of_study: '1st Year', accommodation_required: false, password: '', confirmPassword: '',
     },
   });
@@ -85,7 +88,7 @@ export const RegisterPage: React.FC = () => {
   const alumniForm = useForm<AlumniForm>({
     resolver: zodResolver(alumniSchema),
     defaultValues: {
-      name: '', email: '', otp: '', phone: '', gender: '', batch_year: '', place: '', current_organization: '',
+      name: '', email: prefillEmail, otp: '', phone: '', gender: '', batch_year: '', place: '', current_organization: '',
       accommodation_required: false,
     },
   });
@@ -467,6 +470,17 @@ END:VCALENDAR`;
 
          
 
+          {/* Info Message (e.g. from Google Login redirect) */}
+          {infoMessage && (
+            <div className="bg-[#1FA971]/10 border border-[#1FA971]/30 p-4 rounded-[2px] flex items-center gap-3 text-xs font-mono text-[#1FA971] mb-4">
+              <Sparkles className="w-5 h-5 shrink-0" />
+              <span>{infoMessage}</span>
+              <button onClick={() => setInfoMessage(null)} className="ml-auto text-[#A79798] hover:text-[#F7F2F2]">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+          )}
+
           {/* Server Error */}
           {serverError && (
             <div className="bg-[#4A050A] border border-[#E01B22] p-4 rounded-[2px] flex items-center gap-3 text-xs font-mono text-[#FF2A2A]">
@@ -561,7 +575,7 @@ END:VCALENDAR`;
                 <div className="bg-[#0A0607] border border-[#2A1A1D] p-3.5 rounded-[2px]">
                   <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
                     <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                    <span>Request limited free accommodation for the night of 18 September.</span>
+                    <span>Need Accommodation (Limited free accommodation available for the night of 18 September)</span>
                   </label>
                 </div>
               </>
@@ -608,7 +622,7 @@ END:VCALENDAR`;
                   <div className="flex items-end pb-1">
                     <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
                       <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                      <span>Request limited free accommodation for participants.</span>
+                      <span>Need Accommodation (Limited free accommodation available)</span>
                     </label>
                   </div>
                 </div>

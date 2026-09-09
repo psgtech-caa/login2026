@@ -70,15 +70,22 @@ const renderBrandTemplate = ({ title, subtitle, preview, body, ctaText, ctaLink 
 
 const createTransporter = ({ mailType = "general" } = {}) => {
   const isOtp = String(mailType).toLowerCase() === "otp";
-  const host = process.env.SMTP_HOST;
-  const user = isOtp ? process.env.SMTP_OTP_USER : process.env.SMTP_USER;
-  const pass = isOtp ? process.env.SMTP_OTP_PASS : process.env.SMTP_PASS;
+  const host = (process.env.SMTP_HOST || "").trim();
+  const rawUser = isOtp ? (process.env.SMTP_OTP_USER || process.env.SMTP_USER) : process.env.SMTP_USER;
+  const rawPass = isOtp ? (process.env.SMTP_OTP_PASS || process.env.SMTP_PASS) : process.env.SMTP_PASS;
+
+  const user = (rawUser || "").trim().replace(/^["']|["']$/g, '');
+  const pass = (rawPass || "").trim().replace(/^["']|["']$/g, '');
 
   if (host && user && pass) {
+    const port = Number(process.env.SMTP_PORT) || 465;
     return nodemailer.createTransport({
       host,
-      port: process.env.SMTP_PORT || 587,
-      secure: process.env.SMTP_SECURE === "true",
+      port,
+      secure: process.env.SMTP_SECURE === "true" || port === 465,
+      connectionTimeout: 8000,
+      greetingTimeout: 8000,
+      socketTimeout: 8000,
       auth: {
         user,
         pass,

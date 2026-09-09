@@ -1,19 +1,16 @@
 import React, { useState } from 'react';
-import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import { useGoogleLogin } from '@react-oauth/google';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { ArrowRight, AlertCircle, ShieldCheck, Eye, EyeOff, KeyRound } from 'lucide-react';
+import { AlertCircle, ShieldCheck, KeyRound, User, Eye, EyeOff } from 'lucide-react';
 import { SEOHead } from '../components/common/SEOHead';
 
 export const LoginPage: React.FC = () => {
   const navigate = useNavigate();
   const { setAuth } = useAuthStore();
-
-  const location = useLocation();
-  
-  const [loginId, setLoginId] = useState(location.state?.prefillLoginId || '');
-  const [password, setPassword] = useState(location.state?.prefillPassword || '');
+  const [identifier, setIdentifier] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -38,27 +35,24 @@ export const LoginPage: React.FC = () => {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasswordLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(null);
-
-    if (!loginId.trim() || !password) {
-      setError('LOGIN ID / Email and password are required.');
+    if (!identifier.trim()) {
+      setError('Please enter your LOGIN ID or Email Address.');
+      return;
+    }
+    if (!password) {
+      setError('Please enter your Password.');
       return;
     }
 
+    setLoading(true);
     try {
-      setLoading(true);
-      const trimmed = loginId.trim();
-      const payload = trimmed.includes('@')
-        ? { email: trimmed.toLowerCase(), password }
-        : { loginId: trimmed.toUpperCase(), password };
-
-      const res = await api.auth.login(payload);
-      const { token, user } = res.data;
-      finishLogin(user, token);
+      const res = await api.auth.login({ loginId: identifier.trim(), password });
+      finishLogin(res.data.user, res.data.token);
     } catch (err: any) {
-      setError(err.response?.data?.message || 'Invalid credentials.');
+      setError(err.response?.data?.message || 'Invalid login credentials. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -72,7 +66,12 @@ export const LoginPage: React.FC = () => {
         const res = await api.auth.googleLogin({ accessToken: tokenResponse.access_token });
         finishLogin(res.data.user, res.data.token);
       } catch (err: any) {
-        setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
+        if (err.response?.status === 404) {
+          const googleEmail = err.response.data?.email;
+          navigate('/register', { state: { prefillEmail: googleEmail, infoMessage: 'No account found with this Google account. Please create an account first.' } });
+        } else {
+          setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
+        }
       } finally {
         setGoogleLoading(false);
       }
@@ -82,28 +81,27 @@ export const LoginPage: React.FC = () => {
     },
   });
 
-
   return (
     <div className="min-h-[85vh] py-12 px-4 sm:px-6 lg:px-8 flex items-center justify-center bg-[#0A0607] relative overflow-hidden">
       <SEOHead
         title="Participant Portal Sign In | LOGIN 2026 PSG Tech"
-        description="Sign in to your LOGIN 2026 participant dashboard to view event registrations, schedule, certificates, and scores."
+        description="Sign in to your LOGIN 2026 participant dashboard using your LOGIN ID or Email to view event registrations, schedule, certificates, and scores."
         canonicalUrl="/login"
         noIndex={true}
       />
       {/* Background glow */}
       <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-[#4A050A]/20 via-transparent to-transparent pointer-events-none" />
 
-      <div className="max-w-md w-full bg-[#130C0E] border border-[#2A1A1D] p-6 sm:p-8 rounded-[2px] shadow-2xl space-y-7 animate-scale-in relative corner-bracket-container">
+      <div className="max-w-md w-full bg-[#130C0E] border border-[#2A1A1D] p-6 sm:p-8 rounded-[2px] shadow-2xl space-y-6 animate-scale-in relative corner-bracket-container">
         <div className="corner-bracket-tl" />
         <div className="corner-bracket-br" />
         
-        <div className="text-center space-y-3">
-          <div className="w-14 h-14 mx-auto rounded-full border border-[#E01B22]/40 bg-[#0A0607] flex items-center justify-center animate-pulse-glow">
-            <ShieldCheck className="w-7 h-7 text-[#E01B22]" />
+        <div className="text-center space-y-2">
+          <div className="w-12 h-12 mx-auto rounded-full border border-[#E01B22]/40 bg-[#0A0607] flex items-center justify-center animate-pulse-glow">
+            <ShieldCheck className="w-6 h-6 text-[#E01B22]" />
           </div>
-          <h1 className="text-xl sm:text-2xl font-display font-extrabold text-[#F7F2F2] tracking-wider">PORTAL AUTHENTICATION</h1>
-          <p className="text-xs font-mono text-[#6B5A5C]">Sign in with your LOGIN ID to access the platform</p>
+          <h1 className="text-xl sm:text-2xl font-display font-extrabold text-[#F7F2F2] tracking-wider uppercase">PORTAL AUTHENTICATION</h1>
+          <p className="text-xs font-mono text-[#6B5A5C]">Sign in with Email or LOGIN ID</p>
         </div>
 
         {error && (
@@ -113,28 +111,30 @@ export const LoginPage: React.FC = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-5 text-xs font-body">
+        {/* Password Login Form */}
+        <form onSubmit={handlePasswordLogin} className="space-y-4">
           <div>
-            <label className="block text-[#A79798] mb-1.5 font-semibold text-xs">
-              LOGIN ID or Email Address *
+            <label className="block text-[11px] font-mono text-[#A79798] uppercase font-bold mb-1.5 flex items-center gap-1.5">
+              <User className="w-3.5 h-3.5 text-[#E01B22]" />
+              Email or LOGIN ID *
             </label>
-            <div className="relative">
-              <input
-                type="text"
-                value={loginId}
-                onChange={(e) => setLoginId(e.target.value)}
-                placeholder="LOGIN101 or user@domain.com"
-                required
-                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-3 pl-11 text-[#F7F2F2] outline-none input-glow text-sm font-mono tracking-wider"
-              />
-              <KeyRound className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6B5A5C]" />
-            </div>
+            <input
+              type="text"
+              value={identifier}
+              onChange={(e) => setIdentifier(e.target.value)}
+              placeholder="e.g. LOGIN101 or email@example.com"
+              required
+              className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] text-[#F7F2F2] px-3.5 py-2.5 rounded-[2px] font-mono text-xs focus:outline-none transition-colors placeholder-[#4A3D40]"
+            />
           </div>
 
           <div>
-            <div className="flex justify-between items-center mb-1.5">
-              <label className="text-[#A79798] font-semibold text-xs">Password *</label>
-              <Link to="/forgot-password" className="text-[11px] text-[#E01B22] hover:text-[#FF2A2A] link-underline transition-colors">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="text-[11px] font-mono text-[#A79798] uppercase font-bold flex items-center gap-1.5">
+                <KeyRound className="w-3.5 h-3.5 text-[#E01B22]" />
+                Password *
+              </label>
+              <Link to="/forgot-password" className="text-[10px] font-mono text-[#E01B22] hover:text-[#FF2A2A] transition-colors">
                 Forgot password?
               </Link>
             </div>
@@ -145,9 +145,14 @@ export const LoginPage: React.FC = () => {
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
                 required
-                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] rounded-[2px] px-3.5 py-3 pr-11 text-[#F7F2F2] outline-none input-glow text-sm"
+                className="w-full bg-[#0A0607] border border-[#2A1A1D] focus:border-[#E01B22] text-[#F7F2F2] px-3.5 py-2.5 pr-10 rounded-[2px] font-mono text-xs focus:outline-none transition-colors placeholder-[#4A3D40]"
               />
-              <button type="button" onClick={() => setShowPassword(!showPassword)} aria-label={showPassword ? 'Hide password' : 'Show password'} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#A79798] hover:text-[#F7F2F2]">
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-[#9A9AA2] hover:text-white transition-colors"
+                title={showPassword ? 'Hide password' : 'Show password'}
+              >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
@@ -156,21 +161,34 @@ export const LoginPage: React.FC = () => {
           <button
             type="submit"
             disabled={loading}
-            className="shimmer-btn w-full py-3.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-bold font-mono rounded-[2px] transition-all hover:shadow-[0_0_25px_rgba(224,27,34,0.4)] flex items-center justify-center gap-2 mt-2 text-sm disabled:opacity-60"
+            className="w-full py-3 px-4 bg-[#E01B22] hover:bg-[#FF2A2A] text-white font-mono font-bold text-xs tracking-wider uppercase rounded-[2px] transition-all duration-300 shadow-[0_0_20px_rgba(224,27,34,0.3)] hover:shadow-[0_0_30px_rgba(224,27,34,0.5)] flex items-center justify-center gap-2 disabled:opacity-60"
           >
-            {loading ? 'AUTHENTICATING...' : 'SIGN IN'}
-            <ArrowRight className="w-4 h-4" />
+            {loading ? (
+              <>
+                <span className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                <span>VERIFYING CREDENTIALS...</span>
+              </>
+            ) : (
+              <span>SIGN IN →</span>
+            )}
           </button>
         </form>
 
-        {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3 text-[10px] font-mono text-[#6B5A5C] uppercase tracking-[0.2em]">
-              <span className="h-px flex-1 bg-[#2A1A1D]" />
-              <span>OR AUTHENTICATE WITH</span>
-              <span className="h-px flex-1 bg-[#2A1A1D]" />
+        {/* Divider */}
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID && (
+          <div className="relative flex items-center justify-center my-2">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#2A1A1D]" />
             </div>
-            
+            <span className="relative px-3 bg-[#130C0E] font-mono text-[10px] text-[#6B5A5C] tracking-widest uppercase">
+              OR
+            </span>
+          </div>
+        )}
+
+        {/* Google Sign In Option */}
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+          <div className="w-full">
             <button
               type="button"
               onClick={() => loginWithGoogle()}
@@ -210,7 +228,7 @@ export const LoginPage: React.FC = () => {
           </div>
         ) : null}
 
-        <div className="text-center text-xs text-[#6B5A5C] border-t border-[#2A1A1D] pt-5">
+        <div className="text-center text-xs text-[#6B5A5C] border-t border-[#2A1A1D] pt-4">
           Don't have an account yet?{' '}
           <Link to="/register" className="text-[#E01B22] hover:text-[#FF2A2A] font-bold link-underline transition-colors">
             Create Participant account
@@ -221,3 +239,5 @@ export const LoginPage: React.FC = () => {
     </div>
   );
 };
+
+export default LoginPage;

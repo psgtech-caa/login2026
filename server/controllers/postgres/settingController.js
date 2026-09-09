@@ -1,28 +1,29 @@
 const settingModel = require("../../models/postgres/settingModel");
 
 const getSettings = async (req, res) => {
+  const map = {
+    payment_url: "https://events.psginstitutions.in/EMS/register/E5294158179",
+    registration_amount: "150",
+    contact_email: "login2026@psgtech.ac.in",
+    contact_phone: "+91 81482 51567",
+    show_winners: "false",
+  };
+
   try {
     const settings = await settingModel.findAll();
-    const map = {};
     settings.forEach((s) => {
       map[s.key] = s.value;
     });
-
-    // Provide default fallback values if settings table is empty
-    if (!map.payment_url) map.payment_url = "https://events.psginstitutions.in/EMS/register/E5294158179";
-    if (!map.registration_amount) map.registration_amount = "150";
-    if (!map.contact_email) map.contact_email = "login2026@psgtech.ac.in";
-    if (!map.contact_phone) map.contact_phone = "+91 81482 51567";
-    if (map.show_winners === undefined) map.show_winners = "false";
-
     return res.json(map);
   } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch settings", error: error.message });
+    try { await settingModel.sync(); } catch (_) {}
+    return res.json(map);
   }
 };
 
 const updateSettings = async (req, res) => {
   try {
+    try { await settingModel.sync(); } catch (_) {}
     const updates = req.body;
     for (const [key, value] of Object.entries(updates)) {
       const [setting] = await settingModel.findOrCreate({

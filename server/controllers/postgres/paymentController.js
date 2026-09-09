@@ -3,6 +3,7 @@ const userModel = require("../../models/postgres/userModel");
 const { sendPaymentVerificationEmail, sendPaymentPendingEmail } = require("../../services/emailService");
 const { parseCsv, extractTransactionId } = require("../../utils/csvParser");
 const xlsx = require("xlsx");
+const telegramService = require("../../services/telegramService");
 
 const generateStudentIdCode = async (userId) => {
   const paddedId = String(userId).padStart(4, "0");
@@ -100,6 +101,15 @@ const createPayment = async (req, res) => {
         eventName: 'LOGIN 2026 Registration',
         portalUrl: `${process.env.FRONTEND_URL || 'http://localhost:5173'}/dashboard`,
       }).catch(() => {});
+
+      telegramService.notifyPaymentRequested({
+        name: user.name,
+        userId: user.student_id_code || user.login_id || user.id,
+        email: user.email,
+        amount: payment.amount,
+        paymentRequestId: payment.transaction_reference || payment.id,
+        requestedAt: payment.updatedAt || payment.createdAt || new Date(),
+      }).catch(() => {});
     }
 
     return res.status(201).json({
@@ -158,6 +168,15 @@ const verifyPayment = async (req, res) => {
           await user.save();
         }
         sendPaymentVerificationEmail(user);
+
+        telegramService.notifyPaymentConfirmed({
+          name: user.name,
+          userId: user.student_id_code || user.login_id || user.id,
+          email: user.email,
+          amount: payment.amount,
+          paymentId: payment.transaction_reference || payment.id,
+          confirmedAt: payment.verified_at || new Date(),
+        }).catch(() => {});
       }
       return res.json({ message: "Payment verified successfully", payment });
     } else if (targetStatus === "REJECTED") {
@@ -316,6 +335,15 @@ const bulkVerify = async (req, res) => {
         }
         if (user) {
           sendPaymentVerificationEmail(user).catch(() => {});
+
+          telegramService.notifyPaymentConfirmed({
+            name: user.name,
+            userId: user.student_id_code || user.login_id || user.id,
+            email: user.email,
+            amount: payment.amount,
+            paymentId: payment.transaction_reference || payment.id,
+            confirmedAt: payment.verified_at || new Date(),
+          }).catch(() => {});
         }
 
         results.verified.push(id);

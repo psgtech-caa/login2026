@@ -24,7 +24,8 @@ const getActiveAnnouncements = async (req, res) => {
     });
     return res.json(announcements);
   } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch announcements", error: error.message });
+    try { await announcementModel.sync(); } catch (_) {}
+    return res.json([]);
   }
 };
 

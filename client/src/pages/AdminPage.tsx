@@ -82,10 +82,11 @@ export const AdminPage: React.FC = () => {
   // Edit User Modal State
   const [editModalUser, setEditModalUser] = useState<any>(null);
 
-  // User List Filters
+  // User & Participant List Filters
   const [userSearch, setUserSearch] = useState('');
   const [userRoleFilter, setUserRoleFilter] = useState('ALL');
-  const [participantFilter, setParticipantFilter] = useState<'ALL' | 'ACCOMMODATION' | 'PAID' | 'UNPAID'>('ALL');
+  const [participantSearch, setParticipantSearch] = useState('');
+  const [participantFilter, setParticipantFilter] = useState<'ALL' | 'ACCOMMODATION' | 'PAID' | 'PENDING' | 'UNPAID'>('ALL');
 
   const filteredUsers = useMemo(() => {
     return users
@@ -103,6 +104,34 @@ export const AdminPage: React.FC = () => {
         );
       });
   }, [users, userRoleFilter, userSearch]);
+
+  const filteredParticipants = useMemo(() => {
+    return users
+      .filter((u) => u.role === 'participant')
+      .filter((u) => {
+        const isPaid = u.payments?.some((p: any) => p.status === 'VERIFIED');
+        const isPending = u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
+
+        if (participantFilter === 'ACCOMMODATION' && !u.accommodation_required) return false;
+        if (participantFilter === 'PAID' && !isPaid) return false;
+        if (participantFilter === 'PENDING' && !isPending) return false;
+        if (participantFilter === 'UNPAID' && (isPaid || isPending)) return false;
+
+        if (participantSearch) {
+          const s = participantSearch.toLowerCase().trim();
+          const matchName = u.name?.toLowerCase().includes(s);
+          const matchEmail = u.email?.toLowerCase().includes(s);
+          const matchPhone = u.phone?.toLowerCase().includes(s);
+          const matchCollege = u.college_name?.toLowerCase().includes(s);
+          const matchDept = u.department?.toLowerCase().includes(s);
+          const matchRoll = u.roll_no?.toLowerCase().includes(s);
+          const matchLoginId = u.login_id?.toLowerCase().includes(s) || String(u.id).includes(s);
+          return matchName || matchEmail || matchPhone || matchCollege || matchDept || matchRoll || matchLoginId;
+        }
+
+        return true;
+      });
+  }, [users, participantFilter, participantSearch]);
 
   const eventOptions = useMemo(() => (events.length ? events : STATIC_EVENTS), [events]);
 
@@ -1246,35 +1275,11 @@ export const AdminPage: React.FC = () => {
                   PARTICIPANT REGISTRY &amp; ACCOMMODATION STATUS
                 </h2>
                 <p className="text-xs text-[#A79798] font-mono mt-0.5">
-                  Filter participants, view accommodation requests, and track payment status.
+                  Showing <strong className="text-[#F7F2F2]">{filteredParticipants.length}</strong> of {users.filter(u => u.role === 'participant').length} registered participants
                 </p>
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                <button
-                  onClick={() => setParticipantFilter('ALL')}
-                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
-                    participantFilter === 'ALL' ? 'bg-[#E01B22] text-white' : 'bg-[#1A1114] text-[#A79798] hover:text-white border border-[#2A1A1D]'
-                  }`}
-                >
-                  ALL ({users.filter(u => u.role === 'participant').length})
-                </button>
-                <button
-                  onClick={() => setParticipantFilter('ACCOMMODATION')}
-                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
-                    participantFilter === 'ACCOMMODATION' ? 'bg-[#E01B22] text-white' : 'bg-[#1A1114] text-[#E01B22] hover:text-white border border-[#E01B22]/40'
-                  }`}
-                >
-                  🏠 ACCOMMODATION ({users.filter(u => u.role === 'participant' && u.accommodation_required).length})
-                </button>
-                <button
-                  onClick={() => setParticipantFilter('PAID')}
-                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
-                    participantFilter === 'PAID' ? 'bg-[#1FA971] text-black' : 'bg-[#1A1114] text-[#1FA971] hover:text-white border border-[#1FA971]/40'
-                  }`}
-                >
-                  PAID ({users.filter(u => u.role === 'participant' && u.payments?.some((p: any) => p.status === 'VERIFIED')).length})
-                </button>
                 <button
                   onClick={exportAccommodationCSV}
                   className="px-3.5 py-1.5 bg-[#1A1114] hover:bg-[#2A1A1D] border border-[#3E2529] hover:border-[#E01B22] text-[#F7F2F2] font-mono text-xs font-bold rounded-[2px] flex items-center gap-1.5 transition-colors"
@@ -1290,28 +1295,103 @@ export const AdminPage: React.FC = () => {
               </div>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs font-body">
-                <thead className="bg-[#0A0607] text-[#6B5A5C] font-mono border-b border-[#3E2529]">
-                  <tr>
-                    <th className="p-3.5">ID</th>
-                    <th className="p-3.5">NAME &amp; EMAIL</th>
-                    <th className="p-3.5">COLLEGE &amp; DEPT</th>
-                    <th className="p-3.5">PHONE / ROLL NO</th>
-                    <th className="p-3.5">ACCOMMODATION</th>
-                    <th className="p-3.5">PAYMENT STATUS</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#2A1A1D]">
-                  {users
-                    .filter((u) => u.role === 'participant')
-                    .filter((u) => {
-                      if (participantFilter === 'ACCOMMODATION') return u.accommodation_required;
-                      if (participantFilter === 'PAID') return u.payments?.some((p: any) => p.status === 'VERIFIED');
-                      if (participantFilter === 'UNPAID') return !u.payments?.some((p: any) => p.status === 'VERIFIED');
-                      return true;
-                    })
-                    .map((u) => {
+            {/* Search & Filter Controls */}
+            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-[#0A0607] p-3 rounded-[2px] border border-[#2A1A1D]">
+              {/* Search Bar */}
+              <div className="relative flex-1 min-w-[280px]">
+                <Search className="w-4 h-4 text-[#E01B22] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <input
+                  type="text"
+                  value={participantSearch}
+                  onChange={(e) => setParticipantSearch(e.target.value)}
+                  placeholder="Search by name, email, phone, college, department, roll no, login ID..."
+                  className="w-full bg-[#130C0E] border border-[#2A1A1D] focus:border-[#E01B22] text-[#F7F2F2] text-xs font-mono pl-9 pr-8 py-2 rounded-[2px] outline-none transition-colors placeholder:text-[#6B5A5C]"
+                />
+                {participantSearch && (
+                  <button
+                    onClick={() => setParticipantSearch('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-mono text-[#A79798] hover:text-[#E01B22] p-1"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              {/* Status Filter Buttons */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <button
+                  onClick={() => setParticipantFilter('ALL')}
+                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
+                    participantFilter === 'ALL' ? 'bg-[#E01B22] text-white' : 'bg-[#1A1114] text-[#A79798] hover:text-white border border-[#2A1A1D]'
+                  }`}
+                >
+                  ALL ({users.filter(u => u.role === 'participant').length})
+                </button>
+                <button
+                  onClick={() => setParticipantFilter('PAID')}
+                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
+                    participantFilter === 'PAID' ? 'bg-[#1FA971] text-black' : 'bg-[#1A1114] text-[#1FA971] hover:text-white border border-[#1FA971]/40'
+                  }`}
+                >
+                  PAID ({users.filter(u => u.role === 'participant' && u.payments?.some((p: any) => p.status === 'VERIFIED')).length})
+                </button>
+                <button
+                  onClick={() => setParticipantFilter('PENDING')}
+                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
+                    participantFilter === 'PENDING' ? 'bg-[#E08A17] text-black' : 'bg-[#1A1114] text-[#E08A17] hover:text-white border border-[#E08A17]/40'
+                  }`}
+                >
+                  PENDING ({users.filter(u => u.role === 'participant' && u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review')).length})
+                </button>
+                <button
+                  onClick={() => setParticipantFilter('UNPAID')}
+                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
+                    participantFilter === 'UNPAID' ? 'bg-[#E01B22] text-white' : 'bg-[#1A1114] text-[#FF2A2A] hover:text-white border border-[#E01B22]/40'
+                  }`}
+                >
+                  UNPAID ({users.filter(u => u.role === 'participant' && !u.payments?.some((p: any) => p.status === 'VERIFIED' || p.status === 'PENDING' || p.status === 'review')).length})
+                </button>
+                <button
+                  onClick={() => setParticipantFilter('ACCOMMODATION')}
+                  className={`px-3 py-1.5 font-mono text-xs font-bold rounded-[2px] transition-colors ${
+                    participantFilter === 'ACCOMMODATION' ? 'bg-[#E01B22] text-white' : 'bg-[#1A1114] text-[#E01B22] hover:text-white border border-[#E01B22]/40'
+                  }`}
+                >
+                  🏠 ACCOMMODATION ({users.filter(u => u.role === 'participant' && u.accommodation_required).length})
+                </button>
+              </div>
+            </div>
+
+            {filteredParticipants.length === 0 ? (
+              <div className="py-12 text-center text-xs font-mono text-[#A79798] bg-[#0A0607] border border-[#2A1A1D] rounded-[2px]">
+                <p>No participants match your search query or selected filter.</p>
+                {(participantSearch || participantFilter !== 'ALL') && (
+                  <button
+                    onClick={() => {
+                      setParticipantSearch('');
+                      setParticipantFilter('ALL');
+                    }}
+                    className="mt-2 text-[#E01B22] hover:underline font-bold text-xs"
+                  >
+                    Reset all search &amp; filters
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-body">
+                  <thead className="bg-[#0A0607] text-[#6B5A5C] font-mono border-b border-[#3E2529]">
+                    <tr>
+                      <th className="p-3.5">ID</th>
+                      <th className="p-3.5">NAME &amp; EMAIL</th>
+                      <th className="p-3.5">COLLEGE &amp; DEPT</th>
+                      <th className="p-3.5">PHONE / ROLL NO</th>
+                      <th className="p-3.5">ACCOMMODATION</th>
+                      <th className="p-3.5">PAYMENT STATUS</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#2A1A1D]">
+                    {filteredParticipants.map((u) => {
                       const isPaid = u.payments?.some((p: any) => p.status === 'VERIFIED');
                       const isPending = u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
                       let statusLabel = isPaid ? 'PAID' : isPending ? 'PENDING' : 'UNPAID';
@@ -1346,9 +1426,10 @@ export const AdminPage: React.FC = () => {
                         </tr>
                       );
                     })}
-                </tbody>
-              </table>
-            </div>
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         )}
 

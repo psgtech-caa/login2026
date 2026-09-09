@@ -3,6 +3,7 @@ const router = express.Router();
 const viewController = require('../../controllers/viewController');
 const { User, Event, Payment, Registration, Announcement, LegacyEdition, LegacyItem, EventChangeLog } = require('../../models/postgres');
 const { sendCoordinatorCredentialsEmail, sendEventRegistrationConfirmation, sendEventChangeNotification } = require('../../services/emailService');
+const telegramService = require('../../services/telegramService');
 const bcrypt = require('bcryptjs');
 
 // 1. Public Views
@@ -104,6 +105,15 @@ router.post('/profile/payment-reference', async (req, res) => {
         status: 'PENDING'
       });
     }
+
+    telegramService.notifyPaymentRequested({
+      name: req.session.user.name,
+      userId: req.session.user.student_id_code || req.session.user.login_id || req.session.user.id,
+      email: req.session.user.email,
+      amount: 150.00,
+      paymentRequestId: transaction_reference,
+      requestedAt: new Date(),
+    }).catch(() => {});
 
     res.redirect('/profile?msg=Payment%20Reference%20Submitted%20Successfully');
   } catch (err) {
@@ -311,6 +321,17 @@ router.post('/admin/payments/:id/verify', async (req, res) => {
       if (user && !user.student_id_code) {
         const code = `LGN26-${String(user.id).padStart(4, '0')}`;
         await user.update({ student_id_code: code });
+      }
+
+      if (user) {
+        telegramService.notifyPaymentConfirmed({
+          name: user.name,
+          userId: user.student_id_code || user.login_id || user.id,
+          email: user.email,
+          amount: payment.amount,
+          paymentId: payment.transaction_reference || payment.id,
+          confirmedAt: new Date(),
+        }).catch(() => {});
       }
     }
 

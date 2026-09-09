@@ -15,12 +15,12 @@ const getInitials = (name: string): string => {
 
 export const CoordinatorsSection: React.FC<CoordinatorsSectionProps> = ({ isHomePage = false }) => {
   const websiteTeam = [
-    { name: 'NITHEESH MUTHU KRISHNAN C', role: 'MORAL SUPPORT', url: 'https://www.linkedin.com/in/nitheeshmk5/' },
-    { name: 'CHINNAYA K', role: 'FULL STACK DEVELOPER', url: 'https://www.linkedin.com/in/chinnaya-k-4b7819274/' },
-    { name: 'TINO BRITTY J', role: 'EMOTIONAL SUPPORT', url: 'https://www.linkedin.com/in/brittytino/' },
-    { name: 'BARATHVIKRAMAN S K', role: 'DEVOPS SUPPORT', url: 'https://www.linkedin.com/in/barathvikraman2662/' },
-    { name: 'SABARISH', role: 'DEVELOPER', url: 'https://www.linkedin.com/in/sabarish-s-0a7725261/' },
-    { name: 'KARTHEESVARAN', role: 'DEVELOPER', url: 'https://www.linkedin.com/in/karthik25mx354/' }
+    { name: 'NITHEESH MUTHU KRISHNAN C', role: 'MORAL SUPPORT', url: 'https://www.linkedin.com/in/nitheeshmk5/', image: '/assets/login_logo.webp' },
+    { name: 'CHINNAYA K', role: 'FULL STACK DEVELOPER', url: 'https://www.linkedin.com/in/chinnaya-k-4b7819274/', image: '/assets/login_logo.webp' },
+    { name: 'TINO BRITTY J', role: 'EMOTIONAL SUPPORT', url: 'https://www.linkedin.com/in/brittytino/', image: '/assets/login_logo.webp' },
+    { name: 'BARATHVIKRAMAN S K', role: 'DEVOPS SUPPORT', url: 'https://www.linkedin.com/in/barathvikraman2662/', image: '/assets/login_logo.webp' },
+    { name: 'SABARISH', role: 'DEVELOPER', url: 'https://www.linkedin.com/in/sabarish-s-0a7725261/', image: '/assets/login_logo.webp' },
+    { name: 'KARTHEESVARAN', role: 'DEVELOPER', url: 'https://www.linkedin.com/in/karthik25mx354/', image: '/assets/login_logo.webp' }
   ];
 
   const allGroups = [
@@ -248,16 +248,17 @@ export const CoordinatorsSection: React.FC<CoordinatorsSectionProps> = ({ isHome
 
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {websiteTeam.map((member) => {
-              const initials = getInitials(member.name);
               return (
                 <div
                   key={member.name}
                   className="group bg-[#130C0E] border border-[#2A1A1D] hover:border-[#E01B22]/50 rounded-[2px] p-4 flex items-center justify-between gap-3 shadow-lg hover:-translate-y-0.5 transition-all duration-300"
                 >
                   <div className="flex items-center gap-3.5 min-w-0">
-                    <div className="w-10 h-10 shrink-0 rounded-[2px] bg-[#1A1013] border border-[#3E2529] group-hover:border-[#E08A17]/60 flex items-center justify-center font-mono font-black text-xs text-[#E08A17]">
-                      {initials}
-                    </div>
+                    <img
+                      src={member.image || '/assets/login_logo.webp'}
+                      alt={member.name}
+                      className="w-10 h-10 shrink-0 rounded-[2px] bg-[#1A1013] border border-[#3E2529] group-hover:border-[#E08A17]/60 object-contain p-1.5"
+                    />
                     <div className="min-w-0">
                       <h4 className="font-display font-black text-xs text-[#F7F2F2] group-hover:text-[#E08A17] transition-colors uppercase tracking-wide truncate">
                         {member.name}

@@ -225,13 +225,13 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
 
                       {/* Category College Items */}
                       <div>
-                        {catItems.map((college) => {
+                        {catItems.map((college, idx) => {
                           const fullName = college.name;
                           const isSelected = value === fullName || value === `${college.name}, ${college.city}`;
 
                           return (
                             <div
-                              key={college.id}
+                              key={`${college.id}-${college.city || ''}-${idx}`}
                               onClick={() => handleSelectCollege(fullName)}
                               className={`px-3 py-2 text-xs font-mono cursor-pointer flex items-center justify-between transition-colors hover:bg-[#E01B22]/15 border-b border-[#2A1A1D]/20 last:border-b-0 ${
                                 isSelected ? 'bg-[#E01B22]/20 text-[#F7F2F2] font-semibold' : 'text-[#A79798] hover:text-[#F7F2F2]'

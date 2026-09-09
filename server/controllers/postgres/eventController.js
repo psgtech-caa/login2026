@@ -17,13 +17,24 @@ const findAllEvents = async (options = {}) => {
         SELECT * FROM "events"
         ORDER BY "date" ASC, "start_time" ASC
       `);
-      return rows;
+      if (Array.isArray(rows) && rows.length > 0) return rows;
     } catch (error) {
-      console.warn('[Events] Neon read failed; falling back to local PostgreSQL:', error.message);
+      console.warn('[Events] Neon read failed; falling back to local database:', error.message);
     }
   }
 
-  return eventModel.findAll(options);
+  try {
+    return await eventModel.findAll(options);
+  } catch (err) {
+    console.warn('[Events] Local query failed, syncing model:', err.message);
+    try {
+      await eventModel.sync();
+      return await eventModel.findAll(options);
+    } catch (syncErr) {
+      console.warn('[Events] Sync failed, returning catalog fallback:', syncErr.message);
+      return eventCatalog;
+    }
+  }
 };
 
 const getSlug = (value) => String(value || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
@@ -88,16 +99,22 @@ const createEvent = async (req, res) => {
 
 const getAllEvents = async (req, res) => {
   try {
-    const events = await findAllEvents({
+    let events = await findAllEvents({
       order: [["date", "ASC"], ["start_time", "ASC"]],
     });
+
+    if (!events || events.length === 0) {
+      events = eventCatalog;
+    }
+
     const orderedEvents = [...events].sort((a, b) => {
-      const rank = (event) => event.name.toLowerCase().includes("nostos") ? -1 : event.is_flagship || event.name.toLowerCase().includes("star of login") ? 1 : 0;
+      const rank = (event) => (event.name || '').toLowerCase().includes("nostos") ? -1 : event.is_flagship || (event.name || '').toLowerCase().includes("star of login") ? 1 : 0;
       return rank(a) - rank(b);
     });
     return res.json(orderedEvents.map(enrichEvent));
   } catch (error) {
-    return res.status(500).json({ message: "Failed to fetch events", error: error.message });
+    console.error("Failed to fetch events:", error.message || error);
+    return res.json(eventCatalog.map(enrichEvent));
   }
 };
 
