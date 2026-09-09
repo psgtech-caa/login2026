@@ -58,6 +58,7 @@ services:
       args:
         VITE_API_BASE_URL: /api
         VITE_API_URL: https://login.psgtech.ac.in
+        VITE_GOOGLE_CLIENT_ID: ${VITE_GOOGLE_CLIENT_ID}
     container_name: login2026_client
     restart: unless-stopped
     depends_on:

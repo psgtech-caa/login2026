@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const { OAuth2Client } = require("google-auth-library");
 const { Op } = require("sequelize");
 const { sequelize } = require("../../config/db/postgres");
 const userModel = require("../../models/postgres/userModel");
@@ -17,6 +18,7 @@ const {
 const alumniModel = require("../../models/postgres/alumniModel");
 
 const jwtSecret = process.env.JWT_SECRET;
+const googleClient = new OAuth2Client();
 
 /**
  * Validate password strength: min 8 chars, 1 uppercase, 1 lowercase, 1 digit, 1 special char.
@@ -179,6 +181,42 @@ const buildUserResponse = (user, hasPaidFee, registrations = []) => ({
   hasPaidFee,
   registrations: registrations.map((r) => ({ worldId: r.event_id })),
 });
+
+const authenticateUser = async (user, res) => {
+  if (!user.is_active) {
+    return res.status(403).json({ message: "User account is inactive" });
+  }
+
+  const normalizedRole = normalizeRole(user.role);
+  if (normalizedRole === 'alumni' || String(user.user_type || '').toUpperCase() === 'ALUMNI') {
+    return res.status(403).json({ message: 'Alumni accounts are not available for dashboard login.' });
+  }
+
+  const isProduction = (process.env.APP_ENV || process.env.NODE_ENV || '').toLowerCase() === 'production';
+  const token = jwt.sign(
+    { id: user.id, role: normalizedRole, user_type: user.user_type },
+    jwtSecret,
+    { expiresIn: "24h" }
+  );
+
+  res.cookie("token", token, {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+    maxAge: 24 * 60 * 60 * 1000,
+  });
+
+  const payment = await paymentModel.findOne({
+    where: { student_id: user.id, status: ["PENDING", "VERIFIED"] }
+  });
+  const registrations = await registrationModel.findAll({ where: { student_id: user.id } });
+
+  return res.status(200).json({
+    message: "Login successful",
+    token,
+    user: buildUserResponse(user, !!payment, registrations),
+  });
+};
 
 const registerUser = async (req, res) => {
   const transaction = await sequelize.transaction();
@@ -459,12 +497,6 @@ const loginUser = async (req, res) => {
       });
     }
 
-    if (!user.is_active) {
-      return res.status(403).json({
-        message: "User account is inactive",
-      });
-    }
-
     const passwordMatch = await bcrypt.compare(password, user.password);
 
     if (!passwordMatch) {
@@ -473,50 +505,48 @@ const loginUser = async (req, res) => {
       });
     }
 
-    const normalizedRole = normalizeRole(user.role);
-    if (normalizedRole === 'alumni' || String(user.user_type || '').toUpperCase() === 'ALUMNI') {
-      return res.status(403).json({ message: 'Alumni accounts are not available for dashboard login.' });
-    }
-
-    const isProduction = (process.env.APP_ENV || process.env.NODE_ENV || '').toLowerCase() === 'production';
-
-    const token = jwt.sign(
-      {
-        id: user.id,
-        role: normalizedRole,
-        user_type: user.user_type,
-      },
-      jwtSecret,
-      {
-        expiresIn: "24h",
-      }
-    );
-
-    res.cookie("token", token, {
-      httpOnly: true,
-      secure: isProduction,
-      sameSite: isProduction ? "none" : "lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
-    const payment = await paymentModel.findOne({
-      where: { student_id: user.id, status: ["PENDING", "VERIFIED"] }
-    });
-
-    const registrations = await registrationModel.findAll({
-      where: { student_id: user.id }
-    });
-
-    return res.status(200).json({
-      message: "Login successful",
-      token,
-      user: buildUserResponse(user, !!payment, registrations),
-    });
+    return authenticateUser(user, res);
   } catch (error) {
     return res.status(500).json({
       message: "Login failed",
       error: error.message,
     });
+  }
+};
+
+const googleLogin = async (req, res) => {
+  try {
+    const { credential } = req.body || {};
+    const clientId = process.env.GOOGLE_CLIENT_ID;
+    if (!clientId) {
+      return res.status(503).json({ message: 'Google sign-in is not configured.' });
+    }
+    if (!credential || typeof credential !== 'string') {
+      return res.status(400).json({ message: 'A Google sign-in credential is required.' });
+    }
+
+    const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: clientId });
+    const payload = ticket.getPayload();
+    if (!payload?.sub || !payload.email || payload.email_verified !== true) {
+      return res.status(401).json({ message: 'Google account verification failed.' });
+    }
+
+    const email = payload.email.trim().toLowerCase();
+    let user = await userModel.findOne({ where: { google_id: payload.sub } });
+    if (!user) {
+      user = await userModel.findOne({ where: { email } });
+      if (!user) {
+        return res.status(404).json({ message: 'No account found with this Google account. Please register first.' });
+      }
+      if (user.google_id && user.google_id !== payload.sub) {
+        return res.status(409).json({ message: 'This email is linked to a different Google account.' });
+      }
+      await user.update({ google_id: payload.sub });
+    }
+
+    return authenticateUser(user, res);
+  } catch (error) {
+    return res.status(401).json({ message: 'Google authentication failed. Please try again.' });
   }
 };
 
@@ -676,6 +706,7 @@ module.exports = {
   sendOtp,
   registerUser,
   loginUser,
+  googleLogin,
   logoutUser,
   forgotPassword,
   resetPassword,

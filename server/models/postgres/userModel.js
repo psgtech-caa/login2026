@@ -24,6 +24,12 @@ const userModel = sequelize.define(
       },
     },
 
+    google_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+      unique: true,
+    },
+
     phone: {
       type: DataTypes.STRING,
       allowNull: true,

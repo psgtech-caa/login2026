@@ -15,6 +15,7 @@ router.post("/register", registrationLimiter, authController.registerUser);
 router.post("/check-email", emailCheckLimiter, authController.checkEmail);
 router.post("/send-otp", otpLimiter, authController.sendOtp);
 router.post("/login", loginLimiter, authController.loginUser);
+router.post("/google", loginLimiter, authController.googleLogin);
 router.post("/logout", authController.logoutUser);
 router.post("/forgot-password", passwordResetLimiter, authController.forgotPassword);
 router.post("/reset-password", passwordResetLimiter, authController.resetPassword);

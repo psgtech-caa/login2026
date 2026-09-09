@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "node --watch server.js",
+    "migrate:google": "node migrations/001_add_google_id.js",
     "postinstall": "node -e \"console.log('Using PostgreSQL for app data; sqlite rebuild disabled to keep Docker installs stable.')\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
@@ -23,6 +24,7 @@
     "express-ejs-layouts": "^2.5.1",
     "express-rate-limit": "^8.7.0",
     "express-session": "^1.19.0",
+    "google-auth-library": "^11.0.2",
     "jsonwebtoken": "^9.0.3",
     "multer": "^2.2.0",
     "nodemailer": "^9.0.5",

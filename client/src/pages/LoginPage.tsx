@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
 import { ArrowRight, AlertCircle, ShieldCheck, Eye, EyeOff, KeyRound } from 'lucide-react';
@@ -15,7 +16,27 @@ export const LoginPage: React.FC = () => {
   const [password, setPassword] = useState(location.state?.prefillPassword || '');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const finishLogin = (user: any, token: string) => {
+    const normalizedRole = String(user.role || 'participant').toLowerCase();
+    if (String(user.user_type || '').toUpperCase() === 'ALUMNI') {
+      setError('Alumni accounts do not have portal login access.');
+      return;
+    }
+
+    setAuth(true, token, { ...user, role: normalizedRole });
+    if (user.must_change_password) {
+      navigate('/change-password');
+    } else if (['admin', 'registration_desk'].includes(normalizedRole)) {
+      navigate('/dashboard/admin');
+    } else if (normalizedRole === 'coordinator') {
+      navigate('/dashboard/coordinator');
+    } else {
+      navigate('/dashboard');
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -35,28 +56,28 @@ export const LoginPage: React.FC = () => {
 
       const res = await api.auth.login(payload);
       const { token, user } = res.data;
-
-      const normalizedRole = String(user.role || 'participant').toLowerCase();
-      if (String(user.user_type || '').toUpperCase() === 'ALUMNI') {
-        setError('Alumni accounts do not have portal login access.');
-        return;
-      }
-
-      setAuth(true, token, { ...user, role: normalizedRole });
-
-      if (user.must_change_password) {
-        navigate('/change-password');
-      } else if (['admin', 'registration_desk'].includes(normalizedRole)) {
-        navigate('/dashboard/admin');
-      } else if (['coordinator'].includes(normalizedRole)) {
-        navigate('/dashboard/coordinator');
-      } else {
-        navigate('/dashboard');
-      }
+      finishLogin(user, token);
     } catch (err: any) {
       setError(err.response?.data?.message || 'Invalid credentials.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse: { credential?: string }) => {
+    if (!credentialResponse.credential) {
+      setError('Google did not return a valid sign-in credential.');
+      return;
+    }
+    setError(null);
+    setGoogleLoading(true);
+    try {
+      const res = await api.auth.googleLogin(credentialResponse.credential);
+      finishLogin(res.data.user, res.data.token);
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Google sign-in failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -141,6 +162,26 @@ export const LoginPage: React.FC = () => {
           </button>
         </form>
 
+        {import.meta.env.VITE_GOOGLE_CLIENT_ID ? (
+          <div className="space-y-4">
+            <div className="flex items-center gap-3 text-[10px] font-mono text-[#6B5A5C] uppercase tracking-[0.2em]">
+              <span className="h-px flex-1 bg-[#2A1A1D]" />
+              <span>OR</span>
+              <span className="h-px flex-1 bg-[#2A1A1D]" />
+            </div>
+            <div className={`flex justify-center ${googleLoading ? 'pointer-events-none opacity-60' : ''}`}>
+              <GoogleLogin
+                onSuccess={handleGoogleSuccess}
+                onError={() => setError('Google sign-in was cancelled or failed. Please try again.')}
+                theme="filled_black"
+                shape="rectangular"
+                size="large"
+                text="continue_with"
+                width="320"
+              />
+            </div>
+          </div>
+        ) : null}
 
         <div className="text-center text-xs text-[#6B5A5C] border-t border-[#2A1A1D] pt-5">
           Don't have an account yet?{' '}
