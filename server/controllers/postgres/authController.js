@@ -1,7 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { OAuth2Client } = require("google-auth-library");
-const { Op } = require("sequelize");
+const { Op, QueryTypes } = require("sequelize");
 const { sequelize } = require("../../config/db/postgres");
 const userModel = require("../../models/postgres/userModel");
 const paymentModel = require("../../models/postgres/paymentModel");
@@ -108,7 +108,7 @@ const pairPendingTeamInvite = async (userId, email) => {
 const generateLoginId = async (transaction) => {
   const result = await sequelize.query(
     `SELECT login_id FROM users WHERE login_id IS NOT NULL ORDER BY id DESC LIMIT 50`,
-    { type: sequelize.constructor.QueryTypes.SELECT, transaction }
+    { type: QueryTypes.SELECT, transaction }
   );
 
   let maxNum = LOGIN_ID_START - 1;
@@ -267,6 +267,8 @@ const authenticateUser = async (user, res, loginType = 'password', identifier = 
 
 const registerUser = async (req, res) => {
   const transaction = await sequelize.transaction();
+  let registrationStage = "request_received";
+  let transactionCommitted = false;
   try {
     const {
       name,
@@ -370,8 +372,10 @@ const registerUser = async (req, res) => {
       return res.status(400).json({ message: "OTP is required and must be a 6-digit code." });
     }
 
+    registrationStage = "generating_login_id";
     const loginId = isAlumni ? null : await generateLoginId(transaction);
 
+    registrationStage = "validating_otp";
     const validOtp = await otpModel.findOne({ where: { email: finalEmail, otp: trimmedOtp }, transaction });
     if (!validOtp) {
       await transaction.rollback();
@@ -386,6 +390,7 @@ const registerUser = async (req, res) => {
     // Delete OTP so it cannot be reused
     await validOtp.destroy({ transaction });
 
+    registrationStage = "checking_existing_account";
     const existingAlumni = isAlumni && email
       ? await alumniModel.findOne({ where: { email: finalEmail }, transaction })
       : null;
@@ -397,6 +402,7 @@ const registerUser = async (req, res) => {
     // Only check for an existing user when registering a participant or staff account.
     if (email) {
       const existingUser = await userModel.findOne({
+        attributes: { exclude: ["google_id"] },
         where: { email: finalEmail },
         transaction,
       });
@@ -410,6 +416,7 @@ const registerUser = async (req, res) => {
     }
 
     if (isAlumni) {
+      registrationStage = "creating_alumni";
       const alumni = await alumniModel.create({
         name,
         email: finalEmail,
@@ -420,7 +427,9 @@ const registerUser = async (req, res) => {
         current_organization,
         accommodation_required: Boolean(accommodation_required),
       }, { transaction });
+      registrationStage = "committing_alumni";
       await transaction.commit();
+      transactionCommitted = true;
       const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
       sendAlumniWelcomeEmail({
         name: alumni.name,
@@ -443,6 +452,8 @@ const registerUser = async (req, res) => {
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const normalizedRole = "participant";
+    const registrationTimestamp = new Date();
+    registrationStage = "creating_participant";
     const user = await userModel.create(
       {
         name,
@@ -461,13 +472,49 @@ const registerUser = async (req, res) => {
         accommodation_required: Boolean(accommodation_required),
         role: normalizedRole,
         login_id: loginId,
+        createdAt: registrationTimestamp,
+        updatedAt: registrationTimestamp,
       },
-      { transaction }
+      {
+        fields: [
+          "name",
+          "email",
+          "phone",
+          "password",
+          "college_name",
+          "department",
+          "roll_no",
+          "user_type",
+          "gender",
+          "year_of_study",
+          "batch_year",
+          "place",
+          "current_organization",
+          "accommodation_required",
+          "role",
+          "login_id",
+          "createdAt",
+          "updatedAt",
+        ],
+        transaction,
+      }
     );
 
+    registrationStage = "committing_participant";
     await transaction.commit();
+    transactionCommitted = true;
 
-    await pairPendingTeamInvite(user.id, user.email);
+    registrationStage = "pairing_pending_team_invite";
+    try {
+      await pairPendingTeamInvite(user.id, user.email);
+    } catch (inviteError) {
+      console.error("Registration post-commit team pairing failed:", {
+        stage: registrationStage,
+        userId: user.id,
+        error: inviteError.message || inviteError,
+        stack: inviteError.stack,
+      });
+    }
 
     // Send welcome email with calendar invite only if email is provided
     if (email) {
@@ -504,7 +551,24 @@ const registerUser = async (req, res) => {
       loginId
     });
   } catch (error) {
-    try { await transaction.rollback(); } catch (_) {}
+    const rollback = transactionCommitted
+      ? "skipped_transaction_already_committed"
+      : await transaction.rollback()
+        .then(() => "rolled_back")
+        .catch((rollbackError) => `rollback_failed: ${rollbackError.message}`);
+    console.error("Failed to register user:", {
+      stage: registrationStage,
+      rollback,
+      email: typeof req.body?.email === "string" ? req.body.email.trim().toLowerCase() : undefined,
+      userType: req.body?.user_type || "PARTICIPANT",
+      hasOtp: Boolean(req.body?.otp),
+      errorName: error.name,
+      errorCode: error.code || error.parent?.code,
+      errorMessage: error.message,
+      databaseDetail: error.parent?.detail,
+      databaseConstraint: error.parent?.constraint,
+      stack: error.stack,
+    });
     return res.status(500).json({
       message: "Failed to register user",
       error: error.message,
@@ -538,6 +602,7 @@ const loginUser = async (req, res) => {
     try {
       if (isSqlite) {
         user = await userModel.findOne({
+          attributes: { exclude: ["google_id"] },
           where: {
             [Op.or]: [
               { login_id: inputVal },
@@ -548,6 +613,7 @@ const loginUser = async (req, res) => {
         });
       } else {
         user = await userModel.findOne({
+          attributes: { exclude: ["google_id"] },
           where: {
             [Op.or]: [
               sequelize.where(sequelize.fn("LOWER", sequelize.col("login_id")), inputLower),
@@ -558,7 +624,10 @@ const loginUser = async (req, res) => {
         });
       }
     } catch (_) {
-      user = await userModel.findOne({ where: { email: inputLower } });
+      user = await userModel.findOne({
+        attributes: { exclude: ["google_id"] },
+        where: { email: inputLower },
+      });
     }
 
     if (!user) {
@@ -625,8 +694,6 @@ const googleLogin = async (req, res) => {
     }
 
     let email = null;
-    let googleId = null;
-
     if (credential && typeof credential === 'string') {
       const ticket = await googleClient.verifyIdToken({ idToken: credential, audience: clientId });
       const payload = ticket.getPayload();
@@ -634,7 +701,6 @@ const googleLogin = async (req, res) => {
         return res.status(401).json({ message: 'Google account verification failed.' });
       }
       email = payload.email.trim().toLowerCase();
-      googleId = payload.sub;
     } else if (accessToken && typeof accessToken === 'string') {
       const userInfoRes = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
         headers: { Authorization: `Bearer ${accessToken}` },
@@ -647,38 +713,24 @@ const googleLogin = async (req, res) => {
         return res.status(401).json({ message: 'Google account verification failed.' });
       }
       email = userInfo.email.trim().toLowerCase();
-      googleId = userInfo.sub;
     } else {
       return res.status(400).json({ message: 'A Google sign-in credential or access token is required.' });
     }
 
-    let user = await userModel.findOne({ where: { google_id: googleId } });
+    const user = await userModel.findOne({
+      attributes: { exclude: ['google_id'] },
+      where: { email },
+    });
     if (!user) {
-      user = await userModel.findOne({ where: { email } });
-      if (!user) {
-        telegramService.notifyLoginAttempt({
-          identifier: email,
-          success: false,
-          reason: 'No account found for this Google email',
-          loginType: 'google',
-          time: new Date(),
-        }).catch(() => {});
+      telegramService.notifyLoginAttempt({
+        identifier: email,
+        success: false,
+        reason: 'No account found for this Google email',
+        loginType: 'google',
+        time: new Date(),
+      }).catch(() => {});
 
-        return res.status(404).json({ message: 'No account found with this Google account. Please register first.', email });
-      }
-      if (user.google_id && user.google_id !== googleId) {
-        telegramService.notifyLoginAttempt({
-          identifier: email,
-          success: false,
-          user,
-          reason: 'Linked to different Google account',
-          loginType: 'google',
-          time: new Date(),
-        }).catch(() => {});
-
-        return res.status(409).json({ message: 'This email is linked to a different Google account.' });
-      }
-      await user.update({ google_id: googleId });
+      return res.status(404).json({ message: 'No account found with this Google account. Please register first.', email });
     }
 
     return authenticateUser(user, res, 'google', email);
@@ -827,6 +879,7 @@ const checkEmail = async (req, res) => {
 
     const normalizedEmail = email.trim().toLowerCase();
     const user = await userModel.findOne({
+      attributes: { exclude: ["google_id"] },
       where: { email: normalizedEmail },
     });
 

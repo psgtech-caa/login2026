@@ -133,6 +133,40 @@ export const AdminPage: React.FC = () => {
       });
   }, [users, participantFilter, participantSearch]);
 
+  const participantGroups = useMemo(() => {
+    const groups = new Map<string, { label: string; eventName: string; users: any[] }>();
+    const individuals: any[] = [];
+
+    filteredParticipants.forEach((user) => {
+      const memberships = (user.teamMemberships || []).filter(
+        (membership: any) => membership.status === 'accepted' && membership.team
+      );
+
+      if (memberships.length === 0) {
+        individuals.push(user);
+        return;
+      }
+
+      memberships.forEach((membership: any) => {
+        const team = membership.team;
+        const key = String(team.id);
+        if (!groups.has(key)) {
+          groups.set(key, {
+            label: team.name || `Team #${team.id}`,
+            eventName: team.event?.name || 'Event not assigned',
+            users: [],
+          });
+        }
+        groups.get(key)!.users.push(user);
+      });
+    });
+
+    return [
+      ...Array.from(groups.values()).sort((a, b) => a.label.localeCompare(b.label)),
+      ...(individuals.length ? [{ label: 'INDIVIDUAL PARTICIPANTS', eventName: '', users: individuals }] : []),
+    ];
+  }, [filteredParticipants]);
+
   const eventOptions = useMemo(() => (events.length ? events : STATIC_EVENTS), [events]);
 
   const fetchData = async () => {
@@ -300,6 +334,7 @@ export const AdminPage: React.FC = () => {
         college: editModalUser.college,
         department: editModalUser.department,
         role: editModalUser.role,
+        accommodation_required: Boolean(editModalUser.accommodation_required),
       });
       setEditModalUser(null);
       fetchData();
@@ -1388,16 +1423,26 @@ export const AdminPage: React.FC = () => {
                       <th className="p-3.5">PHONE / ROLL NO</th>
                       <th className="p-3.5">ACCOMMODATION</th>
                       <th className="p-3.5">PAYMENT STATUS</th>
+                      <th className="p-3.5">EDIT</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2A1A1D]">
-                    {filteredParticipants.map((u) => {
-                      const isPaid = u.payments?.some((p: any) => p.status === 'VERIFIED');
-                      const isPending = u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
-                      let statusLabel = isPaid ? 'PAID' : isPending ? 'PENDING' : 'UNPAID';
-                      let statusColor = isPaid ? 'text-[#1FA971]' : isPending ? 'text-[#E08A17]' : 'text-[#E01B22]';
-                      return (
-                        <tr key={u.id} className="hover:bg-[#1A1114] transition-colors">
+                    {participantGroups.map((group) => (
+                      <React.Fragment key={group.label}>
+                        <tr className="bg-[#1A1114] border-y border-[#3E2529]">
+                          <td colSpan={6} className="p-3 font-mono">
+                            <span className="font-bold text-[#E08A17]">{group.label}</span>
+                            {group.eventName && <span className="ml-3 text-[10px] text-[#A79798]">{group.eventName}</span>}
+                            <span className="ml-3 text-[10px] text-[#6B5A5C]">{group.users.length} participant{group.users.length === 1 ? '' : 's'}</span>
+                          </td>
+                        </tr>
+                        {group.users.map((u) => {
+                          const isPaid = u.payments?.some((p: any) => p.status === 'VERIFIED');
+                          const isPending = u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
+                          const statusLabel = isPaid ? 'PAID' : isPending ? 'PENDING' : 'UNPAID';
+                          const statusColor = isPaid ? 'text-[#1FA971]' : isPending ? 'text-[#E08A17]' : 'text-[#E01B22]';
+                          return (
+                            <tr key={`${group.label}-${u.id}`} className="hover:bg-[#1A1114] transition-colors">
                           <td className="p-3.5 font-mono text-[#6B5A5C]">#{u.login_id || u.id}</td>
                           <td className="p-3.5">
                             <div className="font-bold text-[#F7F2F2]">{u.name}</div>
@@ -1423,9 +1468,21 @@ export const AdminPage: React.FC = () => {
                             )}
                           </td>
                           <td className={`p-3.5 font-mono font-bold ${statusColor}`}>{statusLabel}</td>
-                        </tr>
-                      );
-                    })}
+                          <td className="p-3.5">
+                            <button
+                              type="button"
+                              onClick={() => setEditModalUser(u)}
+                              title="Edit participant accommodation"
+                              className="p-1.5 text-[#E08A17] hover:text-[#F7F2F2] border border-[#E08A17]/40 hover:border-[#E08A17] rounded-[2px]"
+                            >
+                              <Pencil className="w-3.5 h-3.5" />
+                            </button>
+                          </td>
+                            </tr>
+                          );
+                        })}
+                      </React.Fragment>
+                    ))}
                   </tbody>
                 </table>
               </div>
@@ -1939,6 +1996,15 @@ export const AdminPage: React.FC = () => {
                     className="w-full bg-[#130C0E] border border-[#2A1A1D] p-2 text-[#F7F2F2] outline-none focus:border-[#E01B22]"
                   />
                 </div>
+                <label className="flex items-center gap-3 border border-[#2A1A1D] bg-[#130C0E] p-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={Boolean(editModalUser.accommodation_required)}
+                    onChange={(e) => setEditModalUser({ ...editModalUser, accommodation_required: e.target.checked })}
+                    className="h-4 w-4 accent-[#E01B22]"
+                  />
+                  <span className="font-semibold text-[#F7F2F2]">Accommodation required</span>
+                </label>
               </form>
             </div>
             <div className="p-4 border-t border-[#2A1A1D] bg-[#130C0E] flex justify-end gap-3">

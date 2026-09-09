@@ -33,6 +33,7 @@ server {
 
     root /usr/share/nginx/html;
     index index.html;
+    add_header Cross-Origin-Opener-Policy "same-origin-allow-popups" always;
 
     location /api/ {
         proxy_pass http://login2026_server:5000;

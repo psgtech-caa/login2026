@@ -1,15 +1,18 @@
 const userModel = require("../../models/postgres/userModel");
+const { sequelize } = require("../../config/db/postgres");
 const paymentModel = require("../../models/postgres/paymentModel");
 const registrationModel = require("../../models/postgres/registrationModel");
 const eventCoordinatorModel = require("../../models/postgres/eventCoordinatorModel");
 const eventModel = require("../../models/postgres/eventModel");
+const teamMemberModel = require("../../models/postgres/teamMemberModel");
+const teamModel = require("../../models/postgres/teamModel");
 const alumniModel = require("../../models/postgres/alumniModel");
 
 const getAllUsers = async (req, res) => {
   try {
     const users = await userModel.findAll({
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "google_id"],
       },
       include: [
         {
@@ -20,7 +23,20 @@ const getAllUsers = async (req, res) => {
         {
           model: paymentModel,
           as: "payments",
-        }
+        },
+        {
+          model: teamMemberModel,
+          as: "teamMemberships",
+          where: { status: "accepted" },
+          required: false,
+          attributes: ["id", "team_id", "student_id", "role", "status"],
+          include: [{
+            model: teamModel,
+            as: "team",
+            attributes: ["id", "name", "event_id"],
+            include: [{ model: eventModel, as: "event", attributes: ["id", "name"] }],
+          }],
+        },
       ],
       order: [["createdAt", "DESC"]],
     });
@@ -35,7 +51,7 @@ const getAllUsers = async (req, res) => {
 const getMyProfile = async (req, res) => {
   try {
     const user = await userModel.findByPk(req.user.id, {
-      attributes: { exclude: ["password"] },
+      attributes: { exclude: ["password", "google_id"] },
     });
 
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -176,7 +192,7 @@ const getUserById = async (req, res) => {
   try {
     const user = await userModel.findByPk(req.params.id, {
       attributes: {
-        exclude: ["password"],
+        exclude: ["password", "google_id"],
       },
     });
 
@@ -197,12 +213,15 @@ const getUserById = async (req, res) => {
 
 const updateUserDetails = async (req, res) => {
   try {
-    const user = await userModel.findByPk(req.params.id);
+    const user = await userModel.findByPk(req.params.id, {
+      attributes: { exclude: ["google_id"] },
+    });
     if (!user) return res.status(404).json({ message: "User not found" });
 
     const allowedFields = [
       "name", "email", "phone", "college_name", "college", "department", "roll_no",
       "gender", "year_of_study", "batch_year", "place", "current_organization", "login_id", "role",
+      "accommodation_required",
     ];
     const updates = {};
     for (const field of allowedFields) {
@@ -281,6 +300,7 @@ const updateUserStatus = async (req, res) => {
 };
 
 const createUserByAdmin = async (req, res) => {
+  const transaction = await sequelize.transaction();
   try {
     const { name, email, phone, password, role, college_name, department, event_id, login_id } = req.body;
     if (!name || !email || !password) {
@@ -312,14 +332,24 @@ const createUserByAdmin = async (req, res) => {
 
     const assignedRole = normalizeRole(role);
 
-    const existing = await userModel.findOne({ where: { email: email.toLowerCase().trim() } });
+    const existing = await userModel.findOne({
+      attributes: { exclude: ["google_id"] },
+      where: { email: email.toLowerCase().trim() },
+      transaction,
+    });
     if (existing) {
+      await transaction.rollback();
       return res.status(400).json({ message: "User with this email already exists" });
     }
 
     if (login_id) {
-      const existingLoginId = await userModel.findOne({ where: { login_id: login_id.trim() } });
+      const existingLoginId = await userModel.findOne({
+        attributes: { exclude: ["google_id"] },
+        where: { login_id: login_id.trim() },
+        transaction,
+      });
       if (existingLoginId) {
+        await transaction.rollback();
         return res.status(400).json({ message: "User with this Login ID already exists" });
       }
     }
@@ -338,18 +368,39 @@ const createUserByAdmin = async (req, res) => {
       department: department ? department.trim() : "Computer Applications",
       user_type: assignedRole === "participant" ? "PARTICIPANT" : "STAFF",
       must_change_password: false,
+    }, {
+      fields: [
+        "name",
+        "email",
+        "phone",
+        "password",
+        "login_id",
+        "role",
+        "college_name",
+        "department",
+        "user_type",
+        "must_change_password",
+        "createdAt",
+        "updatedAt",
+      ],
+      transaction,
     });
 
     const paddedId = String(newUser.id).padStart(4, "0");
     const student_id_code = `LGN26-${paddedId}`;
-    await newUser.update({ student_id_code });
+    await newUser.update({ student_id_code }, { transaction });
 
     if (["coordinator", "registration_desk"].includes(assignedRole) && event_id) {
-      const event = await eventModel.findByPk(event_id);
+      const event = await eventModel.findByPk(event_id, { transaction });
       if (event) {
-        await eventCoordinatorModel.create({ event_id: Number(event_id), user_id: newUser.id });
+        await eventCoordinatorModel.create(
+          { event_id: Number(event_id), user_id: newUser.id },
+          { transaction }
+        );
       }
     }
+
+    await transaction.commit();
 
     return res.status(201).json({
       message: "User created successfully",
@@ -360,6 +411,8 @@ const createUserByAdmin = async (req, res) => {
       },
     });
   } catch (error) {
+    await transaction.rollback().catch(() => {});
+    console.error("Admin user creation failed:", error.message);
     return res.status(500).json({ message: "Failed to create user", error: error.message });
   }
 };
