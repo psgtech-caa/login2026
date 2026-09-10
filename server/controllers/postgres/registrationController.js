@@ -546,19 +546,23 @@ const getEventRegistrations = async (req, res) => {
 
     const attendanceByStudent = new Map();
     for (const attendance of attendances) {
-      attendanceByStudent.set(attendance.student_id, attendance.status || "not_marked");
+      attendanceByStudent.set(attendance.student_id, {
+        status: attendance.status || "not_marked",
+        marked_at: attendance.marked_at || null,
+      });
     }
 
     const payload = registrations.map((registration) => {
       const row = registration.toJSON();
       const payment = paymentByStudent.get(registration.student_id) || null;
-      const attendanceStatus = attendanceByStudent.get(registration.student_id) || "not_marked";
+      const attendance = attendanceByStudent.get(registration.student_id) || { status: "not_marked", marked_at: null };
 
       row.student = row.student || null;
       row.payment_status = payment ? payment.status : "NOT_SUBMITTED";
       row.payment_amount = payment ? payment.amount : null;
       row.payment_reference = payment ? payment.transaction_reference : null;
-      row.attendance_status = String(attendanceStatus || "not_marked").toUpperCase();
+      row.attendance_status = String(attendance.status || "not_marked").toUpperCase();
+      row.attendance_marked_at = attendance.marked_at;
 
       return row;
     });

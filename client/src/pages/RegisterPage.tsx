@@ -108,7 +108,7 @@ export const RegisterPage: React.FC = () => {
       setCheckingEmail(true);
       const res = await api.auth.checkEmail(val);
       if (res.data?.exists) {
-        const msg = 'This email address is already registered in our database.';
+        const msg = 'This email address is already registered. Please go to login.';
         setEmailExistsError(msg);
         setError('email', { type: 'manual', message: msg });
       } else {
@@ -161,7 +161,7 @@ export const RegisterPage: React.FC = () => {
   const onSubmit = async (data: any) => {
     setServerError(null);
     if (emailExistsError) {
-      setServerError('This email address is already registered in our database.');
+      setServerError('This email address is already registered. Please go to login.');
       return;
     }
 
@@ -219,7 +219,7 @@ export const RegisterPage: React.FC = () => {
       }
     } catch (err: any) {
       if (err.response?.status === 409) {
-        setServerError('This email address is already registered.');
+        setServerError('This email address is already registered. Please go to login.');
       } else {
         setServerError(err.response?.data?.message || 'Registration failed. Please check your details and try again.');
       }
@@ -486,6 +486,11 @@ END:VCALENDAR`;
             <div className="bg-[#4A050A] border border-[#E01B22] p-4 rounded-[2px] flex items-center gap-3 text-xs font-mono text-[#FF2A2A]">
               <AlertCircle className="w-5 h-5 shrink-0 text-[#E01B22]" />
               <span>{serverError}</span>
+              {serverError.includes('already registered') && (
+                <Link to="/login" className="ml-auto shrink-0 text-[#F7F2F2] underline font-bold hover:text-[#E08A17]">
+                  GO TO LOGIN
+                </Link>
+              )}
             </div>
           )}
 
@@ -743,6 +748,11 @@ END:VCALENDAR`;
               {serverError && (
                 <div className="p-3 bg-[#E01B22]/10 border border-[#E01B22]/30 text-[#FF2A2A] text-xs font-mono rounded-[2px]">
                   {serverError}
+                  {serverError.includes('already registered') && (
+                    <Link to="/login" className="ml-3 text-[#F7F2F2] underline font-bold hover:text-[#E08A17]">
+                      GO TO LOGIN
+                    </Link>
+                  )}
                 </div>
               )}
 

@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, User, Calendar, ClipboardList, Users, Bell,
   LogOut, ChevronRight, CreditCard, Trophy,
-  UserPlus, Megaphone, Upload, CheckSquare, Shield, GraduationCap, Award, Settings
+  UserPlus, Megaphone, Upload, CheckSquare, Shield, GraduationCap, Award, Settings, QrCode
 } from 'lucide-react';
 
 // ── Nav item definitions per role ──────────────────────────────────────────
@@ -17,6 +17,7 @@ const participantNavItems = [
   { to: '/dashboard/events', icon: Calendar, label: 'Events' },
   { to: '/dashboard/payment', icon: CreditCard, label: 'Registration Fee' },
   { to: '/dashboard/registrations', icon: ClipboardList, label: 'My Registrations' },
+  { to: '/dashboard/attendance', icon: QrCode, label: 'Scan Attendance' },
   { to: '/dashboard/certificates', icon: Award, label: 'E-Certificates' },
   { to: '/dashboard/winners', icon: Trophy, label: 'Winners & Results' },
   { to: '/dashboard/teams', icon: Users, label: 'My Teams' },
@@ -33,6 +34,7 @@ const adminNavItems = [
   { to: '/dashboard/admin/payments', icon: CreditCard, label: 'Payments' },
   { to: '/dashboard/admin/csv-upload', icon: Upload, label: 'Upload Payment CSV' },
   { to: '/dashboard/admin/events', icon: Calendar, label: 'Events' },
+  { to: '/dashboard/coordinator/attendance', icon: QrCode, label: 'Attendance QR' },
   { to: '/dashboard/admin/announcements', icon: Megaphone, label: 'Announcements' },
   { to: '/dashboard/admin/settings', icon: Settings, label: 'System Settings' },
 ];

@@ -33,6 +33,7 @@ import { MyPaymentPage } from '../pages/dashboard/MyPaymentPage';
 import { MyTeamsPage } from '../pages/dashboard/MyTeamsPage';
 import { NotificationsPage } from '../pages/dashboard/NotificationsPage';
 import { CertificatesPage } from '../pages/dashboard/CertificatesPage';
+import { AttendanceScanPage } from '../pages/dashboard/AttendanceScanPage';
 
 // Admin pages (rendered inside DashboardLayout)
 import { AdminPage } from '../pages/AdminPage';
@@ -89,6 +90,7 @@ export const router = createBrowserRouter([
           { path: 'events', element: <ProtectedRoute requireRole="participant"><DashboardEventsPage /></ProtectedRoute> },
           { path: 'payment', element: <ProtectedRoute requireRole="participant"><MyPaymentPage /></ProtectedRoute> },
           { path: 'registrations', element: <ProtectedRoute requireRole="participant"><MyRegistrationsPage /></ProtectedRoute> },
+          { path: 'attendance', element: <ProtectedRoute requireRole="participant"><AttendanceScanPage /></ProtectedRoute> },
           { path: 'certificates', element: <ProtectedRoute requireRole="participant"><CertificatesPage /></ProtectedRoute> },
           { path: 'winners', element: <ProtectedRoute requireRole=""><WinnersPage /></ProtectedRoute> },
           { path: 'teams', element: <ProtectedRoute requireRole="participant"><MyTeamsPage /></ProtectedRoute> },

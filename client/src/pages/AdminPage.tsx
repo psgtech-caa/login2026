@@ -87,6 +87,9 @@ export const AdminPage: React.FC = () => {
   const [userRoleFilter, setUserRoleFilter] = useState('ALL');
   const [participantSearch, setParticipantSearch] = useState('');
   const [participantFilter, setParticipantFilter] = useState<'ALL' | 'ACCOMMODATION' | 'PAID' | 'PENDING' | 'UNPAID'>('ALL');
+  const [participantSort, setParticipantSort] = useState<'name_asc' | 'name_desc' | 'college_asc' | 'login_asc' | 'payment_status'>('name_asc');
+  const [participantCollegeFilter, setParticipantCollegeFilter] = useState('ALL');
+  const [participantDepartmentFilter, setParticipantDepartmentFilter] = useState('ALL');
 
   const filteredUsers = useMemo(() => {
     return users
@@ -105,6 +108,22 @@ export const AdminPage: React.FC = () => {
       });
   }, [users, userRoleFilter, userSearch]);
 
+  const participantCollegeOptions = useMemo(() => {
+    const values = users
+      .filter((u) => u.role === 'participant' && u.college_name)
+      .map((u) => u.college_name)
+      .filter((value, index, arr) => arr.indexOf(value) === index);
+    return [...values].sort((a, b) => String(a).localeCompare(String(b)));
+  }, [users]);
+
+  const participantDepartmentOptions = useMemo(() => {
+    const values = users
+      .filter((u) => u.role === 'participant' && u.department)
+      .map((u) => u.department)
+      .filter((value, index, arr) => arr.indexOf(value) === index);
+    return [...values].sort((a, b) => String(a).localeCompare(String(b)));
+  }, [users]);
+
   const filteredParticipants = useMemo(() => {
     return users
       .filter((u) => u.role === 'participant')
@@ -116,6 +135,8 @@ export const AdminPage: React.FC = () => {
         if (participantFilter === 'PAID' && !isPaid) return false;
         if (participantFilter === 'PENDING' && !isPending) return false;
         if (participantFilter === 'UNPAID' && (isPaid || isPending)) return false;
+        if (participantCollegeFilter !== 'ALL' && (u.college_name || '') !== participantCollegeFilter) return false;
+        if (participantDepartmentFilter !== 'ALL' && (u.department || '') !== participantDepartmentFilter) return false;
 
         if (participantSearch) {
           const s = participantSearch.toLowerCase().trim();
@@ -131,41 +152,37 @@ export const AdminPage: React.FC = () => {
 
         return true;
       });
-  }, [users, participantFilter, participantSearch]);
+  }, [users, participantFilter, participantSearch, participantCollegeFilter, participantDepartmentFilter]);
 
-  const participantGroups = useMemo(() => {
-    const groups = new Map<string, { label: string; eventName: string; users: any[] }>();
-    const individuals: any[] = [];
+  const participantRows = useMemo(() => {
+    const rows = [...filteredParticipants];
 
-    filteredParticipants.forEach((user) => {
-      const memberships = (user.teamMemberships || []).filter(
-        (membership: any) => membership.status === 'accepted' && membership.team
-      );
+    rows.sort((a, b) => {
+      const getPaymentRank = (user: any) => {
+        const isPaid = user.payments?.some((p: any) => p.status === 'VERIFIED');
+        const isPending = user.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
+        if (isPaid) return 1;
+        if (isPending) return 2;
+        return 3;
+      };
 
-      if (memberships.length === 0) {
-        individuals.push(user);
-        return;
+      switch (participantSort) {
+        case 'name_desc':
+          return String(b.name || '').localeCompare(String(a.name || '')) || String(a.login_id || a.id || '').localeCompare(String(b.login_id || b.id || ''));
+        case 'college_asc':
+          return String(a.college_name || '').localeCompare(String(b.college_name || '')) || String(a.name || '').localeCompare(String(b.name || ''));
+        case 'login_asc':
+          return String(a.login_id || a.id || '').localeCompare(String(b.login_id || b.id || '')) || String(a.name || '').localeCompare(String(b.name || ''));
+        case 'payment_status':
+          return getPaymentRank(a) - getPaymentRank(b) || String(a.name || '').localeCompare(String(b.name || ''));
+        case 'name_asc':
+        default:
+          return String(a.name || '').localeCompare(String(b.name || '')) || String(a.login_id || a.id || '').localeCompare(String(b.login_id || b.id || ''));
       }
-
-      memberships.forEach((membership: any) => {
-        const team = membership.team;
-        const key = String(team.id);
-        if (!groups.has(key)) {
-          groups.set(key, {
-            label: team.name || `Team #${team.id}`,
-            eventName: team.event?.name || 'Event not assigned',
-            users: [],
-          });
-        }
-        groups.get(key)!.users.push(user);
-      });
     });
 
-    return [
-      ...Array.from(groups.values()).sort((a, b) => a.label.localeCompare(b.label)),
-      ...(individuals.length ? [{ label: 'INDIVIDUAL PARTICIPANTS', eventName: '', users: individuals }] : []),
-    ];
-  }, [filteredParticipants]);
+    return rows;
+  }, [filteredParticipants, participantSort]);
 
   const eventOptions = useMemo(() => (events.length ? events : STATIC_EVENTS), [events]);
 
@@ -1331,9 +1348,9 @@ export const AdminPage: React.FC = () => {
             </div>
 
             {/* Search & Filter Controls */}
-            <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3 bg-[#0A0607] p-3 rounded-[2px] border border-[#2A1A1D]">
+            <div className="flex flex-col xl:flex-row items-stretch xl:items-center justify-between gap-3 bg-[#0A0607] p-3 rounded-[2px] border border-[#2A1A1D]">
               {/* Search Bar */}
-              <div className="relative flex-1 min-w-[280px]">
+              <div className="relative flex-1 min-w-[260px]">
                 <Search className="w-4 h-4 text-[#E01B22] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
                 <input
                   type="text"
@@ -1350,6 +1367,42 @@ export const AdminPage: React.FC = () => {
                     ✕
                   </button>
                 )}
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <select
+                  value={participantCollegeFilter}
+                  onChange={(e) => setParticipantCollegeFilter(e.target.value)}
+                  className="bg-[#130C0E] border border-[#2A1A1D] text-[#F7F2F2] px-2.5 py-1.5 rounded-[2px] text-[10px] font-mono outline-none"
+                >
+                  <option value="ALL">ALL COLLEGES</option>
+                  {participantCollegeOptions.map((college) => (
+                    <option key={college} value={college}>{college}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={participantDepartmentFilter}
+                  onChange={(e) => setParticipantDepartmentFilter(e.target.value)}
+                  className="bg-[#130C0E] border border-[#2A1A1D] text-[#F7F2F2] px-2.5 py-1.5 rounded-[2px] text-[10px] font-mono outline-none"
+                >
+                  <option value="ALL">ALL DEPARTMENTS</option>
+                  {participantDepartmentOptions.map((dept) => (
+                    <option key={dept} value={dept}>{dept}</option>
+                  ))}
+                </select>
+
+                <select
+                  value={participantSort}
+                  onChange={(e) => setParticipantSort(e.target.value as typeof participantSort)}
+                  className="bg-[#130C0E] border border-[#2A1A1D] text-[#F7F2F2] px-2.5 py-1.5 rounded-[2px] text-[10px] font-mono outline-none"
+                >
+                  <option value="name_asc">SORT: NAME A–Z</option>
+                  <option value="name_desc">SORT: NAME Z–A</option>
+                  <option value="college_asc">SORT: COLLEGE</option>
+                  <option value="login_asc">SORT: LOGIN ID</option>
+                  <option value="payment_status">SORT: PAYMENT STATUS</option>
+                </select>
               </div>
 
               {/* Status Filter Buttons */}
@@ -1400,11 +1453,14 @@ export const AdminPage: React.FC = () => {
             {filteredParticipants.length === 0 ? (
               <div className="py-12 text-center text-xs font-mono text-[#A79798] bg-[#0A0607] border border-[#2A1A1D] rounded-[2px]">
                 <p>No participants match your search query or selected filter.</p>
-                {(participantSearch || participantFilter !== 'ALL') && (
+                {(participantSearch || participantFilter !== 'ALL' || participantCollegeFilter !== 'ALL' || participantDepartmentFilter !== 'ALL' || participantSort !== 'name_asc') && (
                   <button
                     onClick={() => {
                       setParticipantSearch('');
                       setParticipantFilter('ALL');
+                      setParticipantCollegeFilter('ALL');
+                      setParticipantDepartmentFilter('ALL');
+                      setParticipantSort('name_asc');
                     }}
                     className="mt-2 text-[#E01B22] hover:underline font-bold text-xs"
                   >
@@ -1427,22 +1483,14 @@ export const AdminPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-[#2A1A1D]">
-                    {participantGroups.map((group) => (
-                      <React.Fragment key={group.label}>
-                        <tr className="bg-[#1A1114] border-y border-[#3E2529]">
-                          <td colSpan={6} className="p-3 font-mono">
-                            <span className="font-bold text-[#E08A17]">{group.label}</span>
-                            {group.eventName && <span className="ml-3 text-[10px] text-[#A79798]">{group.eventName}</span>}
-                            <span className="ml-3 text-[10px] text-[#6B5A5C]">{group.users.length} participant{group.users.length === 1 ? '' : 's'}</span>
-                          </td>
-                        </tr>
-                        {group.users.map((u) => {
-                          const isPaid = u.payments?.some((p: any) => p.status === 'VERIFIED');
-                          const isPending = u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
-                          const statusLabel = isPaid ? 'PAID' : isPending ? 'PENDING' : 'UNPAID';
-                          const statusColor = isPaid ? 'text-[#1FA971]' : isPending ? 'text-[#E08A17]' : 'text-[#E01B22]';
-                          return (
-                            <tr key={`${group.label}-${u.id}`} className="hover:bg-[#1A1114] transition-colors">
+                    {participantRows.map((u) => {
+                      const isPaid = u.payments?.some((p: any) => p.status === 'VERIFIED');
+                      const isPending = u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
+                      const statusLabel = isPaid ? 'PAID' : isPending ? 'PENDING' : 'UNPAID';
+                      const statusColor = isPaid ? 'text-[#1FA971]' : isPending ? 'text-[#E08A17]' : 'text-[#E01B22]';
+
+                      return (
+                        <tr key={u.id} className="hover:bg-[#1A1114] transition-colors">
                           <td className="p-3.5 font-mono text-[#6B5A5C]">#{u.login_id || u.id}</td>
                           <td className="p-3.5">
                             <div className="font-bold text-[#F7F2F2]">{u.name}</div>
@@ -1478,11 +1526,9 @@ export const AdminPage: React.FC = () => {
                               <Pencil className="w-3.5 h-3.5" />
                             </button>
                           </td>
-                            </tr>
-                          );
-                        })}
-                      </React.Fragment>
-                    ))}
+                        </tr>
+                      );
+                    })}
                   </tbody>
                 </table>
               </div>

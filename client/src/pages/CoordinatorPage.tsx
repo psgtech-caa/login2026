@@ -3,9 +3,12 @@ import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { Trophy, Users, Search, CheckCircle2, XCircle, Lock, Unlock, Save, RefreshCw, AlertCircle, QrCode, Maximize2 } from 'lucide-react';
 import { SafeQRCode } from '../components/common/SafeQRCode';
+import { useAuthStore, isRegistrationDeskRole } from '../store/authStore';
 
 export const CoordinatorPage: React.FC = () => {
   const { section } = useParams<{ section?: string }>();
+  const { user } = useAuthStore();
+  const isDesk = isRegistrationDeskRole(user?.role);
   
   type CoordSection = 'OVERVIEW' | 'EVENTS' | 'ATTENDANCE' | 'REGISTRATIONS' | 'PAYMENTS';
   const getSection = (s?: string): CoordSection => {
@@ -433,6 +436,22 @@ export const CoordinatorPage: React.FC = () => {
             </div>
           )}
 
+          {isDesk && selectedEvent?.day && (
+            <div className="bg-[#130C0E] border border-[#E08A17]/60 p-5 rounded-[2px] flex flex-col md:flex-row items-center justify-between gap-5">
+              <div className="space-y-2 text-center md:text-left">
+                <div className="flex items-center justify-center md:justify-start gap-2">
+                  <QrCode className="w-5 h-5 text-[#E08A17]" />
+                  <span className="text-xs font-mono font-bold text-[#E08A17] uppercase tracking-widest">DAY {selectedEvent.day} ATTENDANCE QR</span>
+                </div>
+                <p className="text-xs font-mono text-[#A79798]">Show this QR at registration desk check-in. It marks all of a participant's registered events for this day.</p>
+                <span className="text-[10px] font-mono text-[#E08A17]">LOGIN2K26-ATTENDANCE-DAY-{selectedEvent.day}</span>
+              </div>
+              <div className="bg-white p-3 rounded-[4px] border-4 border-[#E08A17] shrink-0">
+                <SafeQRCode value={`LOGIN2K26-ATTENDANCE-DAY-${selectedEvent.day}`} size={150} bgColor="#FFFFFF" fgColor="#000000" />
+              </div>
+            </div>
+          )}
+
           {/* Fullscreen QR Modal */}
           {showFullQR && selectedEventId && (
             <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-6 space-y-6">
@@ -584,6 +603,11 @@ export const CoordinatorPage: React.FC = () => {
                           <p className="text-[10px] font-mono text-[#A79798] truncate" title={student?.college_name}>
                             {student?.college_name || 'N/A'}
                           </p>
+                          {item.attendance_marked_at && isPresent && (
+                            <p className="text-[10px] font-mono text-[#1FA971]">
+                              {new Date(item.attendance_marked_at).toLocaleString()}
+                            </p>
+                          )}
                           {item.team_name && (
                             <p className="text-[10px] font-mono text-[#F7F2F2] bg-[#1A1114] px-1.5 py-0.5 inline-block rounded-sm mt-1">
                               Team: {item.team_name}

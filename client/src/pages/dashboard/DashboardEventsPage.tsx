@@ -379,7 +379,7 @@ export const DashboardEventsPage: React.FC = () => {
                     <div className="w-full py-2.5 bg-[#E08A17]/15 border border-[#E08A17]/60 text-[#E08A17] font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 text-center">
                       🏆 INVITE-ONLY FLAGSHIP EVENT
                     </div>
-                  ) : isRejected ? (
+                  ) : isRejected && pStatus !== 'VERIFIED' ? (
                     <button
                       onClick={() => navigate('/dashboard/payment')}
                       className="w-full py-2.5 bg-[#9B0A12]/20 hover:bg-[#9B0A12]/40 border border-[#FF2A2A] text-[#FF2A2A] font-mono text-xs font-bold rounded-[2px] flex items-center justify-center gap-2 transition-colors"
