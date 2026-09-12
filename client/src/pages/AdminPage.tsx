@@ -624,9 +624,10 @@ export const AdminPage: React.FC = () => {
       return;
     }
     const csvRows = [
-      ['LOGIN_ID', 'NAME', 'EMAIL', 'PHONE', 'COLLEGE', 'DEPARTMENT', 'ROLL_NO', 'ACCOMMODATION', 'PAYMENT_STATUS'],
+      ['LOGIN_ID', 'NAME', 'EMAIL', 'PHONE', 'COLLEGE', 'DEPARTMENT', 'ROLL_NO', 'GENDER', 'ACCOMMODATION', 'PAYMENT_STATUS'],
       ...participantList.map((u) => {
         const paymentStatus = u.payments?.some((p: any) => p.status === 'VERIFIED') ? 'PAID' : u.payments?.some((p: any) => p.status === 'PENDING') ? 'PENDING' : 'UNPAID';
+        const normalizedGender = String(u.gender || '').trim();
         return [
           u.login_id || u.id,
           u.name || '',
@@ -635,6 +636,7 @@ export const AdminPage: React.FC = () => {
           u.college_name || '',
           u.department || '',
           u.roll_no || '',
+          normalizedGender || 'N/A',
           u.accommodation_required ? 'YES' : 'NO',
           paymentStatus
         ];
@@ -1480,6 +1482,7 @@ export const AdminPage: React.FC = () => {
                       <th className="p-3.5">NAME &amp; EMAIL</th>
                       <th className="p-3.5">COLLEGE &amp; DEPT</th>
                       <th className="p-3.5">PHONE / ROLL NO</th>
+                      <th className="p-3.5">GENDER</th>
                       <th className="p-3.5">ACCOMMODATION</th>
                       <th className="p-3.5">PAYMENT STATUS</th>
                       <th className="p-3.5">EDIT</th>
@@ -1491,6 +1494,7 @@ export const AdminPage: React.FC = () => {
                       const isPending = u.payments?.some((p: any) => p.status === 'PENDING' || p.status === 'review');
                       const statusLabel = isPaid ? 'PAID' : isPending ? 'PENDING' : 'UNPAID';
                       const statusColor = isPaid ? 'text-[#1FA971]' : isPending ? 'text-[#E08A17]' : 'text-[#E01B22]';
+                      const genderValue = String(u.gender || '').trim();
 
                       return (
                         <tr key={u.id} className="hover:bg-[#1A1114] transition-colors">
@@ -1508,6 +1512,9 @@ export const AdminPage: React.FC = () => {
                           <td className="p-3.5 font-mono text-[#A79798]">
                             <div>{u.phone || '-'}</div>
                             <div className="text-[10px] text-[#6B5A5C]">{u.roll_no || '-'}</div>
+                          </td>
+                          <td className="p-3.5 font-mono text-[#F7F2F2]">
+                            {genderValue ? genderValue.toUpperCase() : 'N/A'}
                           </td>
                           <td className="p-3.5 font-mono">
                             {u.accommodation_required ? (
