@@ -1,6 +1,7 @@
 const attendanceModel = require("../../models/postgres/attendanceModel");
 const eventModel = require("../../models/postgres/eventModel");
 const registrationModel = require("../../models/postgres/registrationModel");
+const { refreshRegistrationAttendanceSummary } = require("../../services/registrationAttendanceSummaryService");
 
 const normalizeAttendanceStatus = (status) => {
   if (typeof status !== "string") return null;
@@ -48,6 +49,8 @@ const markAttendance = async (req, res) => {
         marked_at: new Date(),
       });
     }
+
+    await refreshRegistrationAttendanceSummary();
 
     return res.json({ message: "Attendance updated", attendance });
   } catch (error) {
@@ -142,6 +145,8 @@ const markSelfAttendanceByQR = async (req, res) => {
         marked_at: new Date(),
       });
     }
+
+    await refreshRegistrationAttendanceSummary();
 
     return res.json({
       message: `Attendance marked as PRESENT for ${event.name}!`,

@@ -27,6 +27,7 @@ export const CoordinatorPage: React.FC = () => {
   const [roster, setRoster] = useState<any[]>([]);
   const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
   const [allPayments, setAllPayments] = useState<any[]>([]);
+  const [overallAttendanceRows, setOverallAttendanceRows] = useState<any[]>([]);
   
   const [loading, setLoading] = useState(true);
   const [rosterLoading, setRosterLoading] = useState(false);
@@ -47,28 +48,45 @@ export const CoordinatorPage: React.FC = () => {
     const fetchGlobalData = async () => {
       setLoading(true);
       try {
-        const [eventsRes, regsRes, paymentsRes] = await Promise.allSettled([
+        const [eventsRes, paymentsRes] = await Promise.allSettled([
           api.events.getAssigned(),
-          activeSection === 'REGISTRATIONS' || activeSection === 'OVERVIEW' ? api.events.getAll() : Promise.resolve({ data: [] }),
           activeSection === 'PAYMENTS' || activeSection === 'OVERVIEW' ? api.payments.getAll() : Promise.resolve({ data: [] })
         ]);
 
         if (eventsRes.status === 'fulfilled' && Array.isArray(eventsRes.value.data)) {
-          setEvents(eventsRes.value.data);
-          if (eventsRes.value.data.length > 0 && !selectedEventId) {
-            setSelectedEventId(eventsRes.value.data[0].id);
+          const assignedEvents = eventsRes.value.data;
+          setEvents(assignedEvents);
+          if (assignedEvents.length > 0 && !selectedEventId) {
+            setSelectedEventId(assignedEvents[0].id);
           }
-        }
-        
-        if (regsRes.status === 'fulfilled' && Array.isArray(regsRes.value.data)) {
-          // If we fetched all events, now we fetch registrations for each to build the total view
-          const allEvts = regsRes.value.data;
-          const regPromises = allEvts.map(async (e: any) => {
-            const r = await api.registrations.getEventRegistrations(e.id);
-            return { eventName: e.name, registrations: r.data || [] };
-          });
-          const allRegs = await Promise.all(regPromises);
-          setAllRegistrations(allRegs);
+
+          if (activeSection === 'REGISTRATIONS' || activeSection === 'OVERVIEW') {
+            const regPromises = assignedEvents.map(async (e: any) => {
+              const r = await api.registrations.getEventRegistrations(e.id);
+              return { eventName: e.name, registrations: r.data || [] };
+            });
+            const allRegs = await Promise.all(regPromises);
+            setAllRegistrations(allRegs);
+
+            const aggregated = assignedEvents.map((event: any) => {
+              const regs = allRegs.find((entry) => entry.eventName === event.name)?.registrations || [];
+              const present = regs.filter((r: any) => String(r.attendance_status || '').toUpperCase() === 'PRESENT' || Boolean(r.attended)).length;
+              return {
+                eventId: event.id,
+                eventName: event.name,
+                totalRegistered: regs.length,
+                presentCount: present,
+                absentCount: regs.length - present,
+                attendanceRate: regs.length ? Math.round((present / regs.length) * 100) : 0,
+              };
+            });
+
+            setOverallAttendanceRows(aggregated);
+          }
+        } else {
+          setEvents([]);
+          setAllRegistrations([]);
+          setOverallAttendanceRows([]);
         }
 
         if (paymentsRes.status === 'fulfilled' && Array.isArray(paymentsRes.value.data)) {
@@ -83,7 +101,7 @@ export const CoordinatorPage: React.FC = () => {
     };
 
     fetchGlobalData();
-  }, [activeSection]);
+  }, [activeSection, selectedEventId]);
 
   // 2. Fetch Roster & Results whenever selected event changes
   useEffect(() => {
@@ -217,9 +235,10 @@ export const CoordinatorPage: React.FC = () => {
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-5 rounded-[2px]">
               <p className="text-[10px] font-mono text-[#A79798] uppercase">Assigned Events</p>
               <p className="text-3xl font-display font-bold text-[#F7F2F2] mt-2">{events.length}</p>
+              {events.length === 0 && <p className="text-[10px] text-[#E08A17] font-mono mt-2">No event mapped</p>}
             </div>
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-5 rounded-[2px]">
-              <p className="text-[10px] font-mono text-[#A79798] uppercase">Global Registrations</p>
+              <p className="text-[10px] font-mono text-[#A79798] uppercase">Assigned Registrations</p>
               <p className="text-3xl font-display font-bold text-[#F7F2F2] mt-2">
                 {allRegistrations.reduce((sum, e) => sum + e.registrations.length, 0)}
               </p>
@@ -229,6 +248,42 @@ export const CoordinatorPage: React.FC = () => {
               <p className="text-3xl font-display font-bold text-[#F7F2F2] mt-2">{allPayments.length}</p>
             </div>
           </div>
+
+          {events.length > 0 && overallAttendanceRows.length > 0 && (
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
+              <div className="flex items-center justify-between gap-4 border-b border-[#2A1A1D] pb-3">
+                <h3 className="font-display font-bold text-base text-[#F7F2F2]">OVERALL PHYSICAL ATTENDANCE</h3>
+                <span className="font-mono text-[10px] text-[#A79798]">
+                  {overallAttendanceRows.reduce((sum, row) => sum + row.totalRegistered, 0)} PARTICIPANTS
+                </span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-body">
+                  <thead className="bg-[#0A0607] text-[#6B5A5C] font-mono border-b border-[#3E2529]">
+                    <tr>
+                      <th className="p-3.5">EVENT</th>
+                      <th className="p-3.5">REGISTERED</th>
+                      <th className="p-3.5">PRESENT</th>
+                      <th className="p-3.5">ABSENT</th>
+                      <th className="p-3.5">RATE</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[#2A1A1D]">
+                    {overallAttendanceRows.map((row) => (
+                      <tr key={row.eventId} className="hover:bg-[#1A1114] transition-colors">
+                        <td className="p-3.5 font-bold text-[#F7F2F2]">{row.eventName}</td>
+                        <td className="p-3.5 font-mono text-[#E08A17]">{row.totalRegistered}</td>
+                        <td className="p-3.5 font-mono text-[#1FA971]">{row.presentCount}</td>
+                        <td className="p-3.5 font-mono text-[#A79798]">{row.absentCount}</td>
+                        <td className="p-3.5 font-mono font-bold text-[#FF2A2A]">{row.attendanceRate}%</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
         </div>
       )}
 
@@ -249,7 +304,7 @@ export const CoordinatorPage: React.FC = () => {
             ))}
             {events.length === 0 && (
               <div className="col-span-full p-8 text-center bg-[#130C0E] border border-[#2A1A1D] text-[#A79798] font-mono text-sm">
-                No events assigned.
+                No event mapped for this coordinator.
               </div>
             )}
           </div>

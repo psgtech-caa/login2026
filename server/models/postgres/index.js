@@ -9,6 +9,7 @@ const TeamRequest = require("./teamRequestModel");
 const TeamInvitation = require("./teamInvitationModel");
 const Bonafide = require("./bonafideModel");
 const Attendance = require("./attendanceModel");
+const RegistrationAttendanceSummary = require("./registrationAttendanceSummaryModel");
 const Result = require("./resultModel");
 const Notification = require("./notificationModel");
 const Setting = require("./settingModel");
@@ -78,6 +79,9 @@ Attendance.belongsTo(User, { foreignKey: "student_id", as: "student" });
 Event.hasMany(Attendance, { foreignKey: "event_id", as: "attendance" });
 Attendance.belongsTo(Event, { foreignKey: "event_id", as: "event" });
 
+User.hasOne(RegistrationAttendanceSummary, { foreignKey: "student_id", as: "registrationAttendanceSummary" });
+RegistrationAttendanceSummary.belongsTo(User, { foreignKey: "student_id", as: "student" });
+
 // Results
 Event.hasOne(Result, { foreignKey: "event_id", as: "result" });
 Result.belongsTo(Event, { foreignKey: "event_id", as: "event" });
@@ -103,6 +107,7 @@ module.exports = {
   TeamInvitation,
   Bonafide,
   Attendance,
+  RegistrationAttendanceSummary,
   Result,
   Notification,
   Setting,

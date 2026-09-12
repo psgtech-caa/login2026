@@ -42,6 +42,7 @@ export const AdminPage: React.FC = () => {
   const [announcements, setAnnouncements] = useState<any[]>([]);
   const [events, setEvents] = useState<any[]>(STATIC_EVENTS);
   const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
+  const [registrationAttendanceSummary, setRegistrationAttendanceSummary] = useState<any[]>([]);
   const [showWinnersSetting, setShowWinnersSetting] = useState<boolean>(false);
   const [updatingSetting, setUpdatingSetting] = useState<boolean>(false);
   const [syncingToNeon, setSyncingToNeon] = useState(false);
@@ -188,18 +189,20 @@ export const AdminPage: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const [payRes, userRes, annoRes, eventRes, settingsRes] = await Promise.all([
+      const [payRes, userRes, annoRes, eventRes, settingsRes, summaryRes] = await Promise.all([
         api.payments.getAll(),
         api.users.getAll(),
         api.announcements.getActive(),
         api.events.getAll().catch(() => ({ data: STATIC_EVENTS })),
         api.settings.get().catch(() => ({ data: { show_winners: 'false' } })),
+        api.registrationAttendanceSummary.getAll().catch(() => ({ data: [] })),
       ]);
 
       if (Array.isArray(payRes.data)) setPayments(payRes.data);
       if (Array.isArray(userRes.data)) setUsers(userRes.data);
       if (Array.isArray(annoRes.data)) setAnnouncements(annoRes.data);
       if (settingsRes?.data) setShowWinnersSetting(settingsRes.data.show_winners === 'true');
+      if (Array.isArray(summaryRes.data)) setRegistrationAttendanceSummary(summaryRes.data);
 
       const resolvedEvents = Array.isArray(eventRes.data) && eventRes.data.length > 0 ? eventRes.data : STATIC_EVENTS;
       setEvents(resolvedEvents);
@@ -1246,7 +1249,7 @@ export const AdminPage: React.FC = () => {
                           </select>
                           {['coordinator', 'registration_desk'].includes(u.role) && (
                             <div className="text-[10px] text-[#E08A17] font-mono">
-                              Evt: {u.eventAssignments?.[0]?.event?.name || 'None'}
+                              Evt: {u.eventAssignments?.[0]?.event?.name || 'No event mapped'}
                             </div>
                           )}
                         </td>
@@ -1308,7 +1311,7 @@ export const AdminPage: React.FC = () => {
                       </td>
                       <td className="p-3.5 font-mono text-[#FF2A2A] font-bold uppercase">{u.role}</td>
                       <td className="p-3.5 font-mono text-[#E08A17]">
-                        {u.eventAssignments?.[0]?.event?.name || '-'}
+                        {u.eventAssignments?.[0]?.event?.name || 'No event mapped'}
                       </td>
                     </tr>
                   ))}
@@ -1581,6 +1584,54 @@ export const AdminPage: React.FC = () => {
                 <span className="text-[9px] text-[#A79798] font-mono">{totalAttended}/{totalEnrollments} checked in</span>
               </div>
             </div>
+
+            {(isDesk || user?.role === 'admin') && registrationAttendanceSummary.length > 0 && (
+              <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
+                <div className="flex items-center justify-between gap-4 border-b border-[#2A1A1D] pb-3">
+                  <h3 className="font-display font-bold text-base text-[#F7F2F2]">OVERALL REGISTRATION ATTENDANCE</h3>
+                  <span className="font-mono text-[10px] text-[#A79798]">{registrationAttendanceSummary.length} PARTICIPANTS</span>
+                </div>
+
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs font-body">
+                    <thead className="bg-[#0A0607] text-[#6B5A5C] font-mono border-b border-[#3E2529]">
+                      <tr>
+                        <th className="p-3.5">PARTICIPANT</th>
+                        <th className="p-3.5">COLLEGE</th>
+                        <th className="p-3.5">REGISTERED</th>
+                        <th className="p-3.5">PRESENT</th>
+                        <th className="p-3.5">OVERALL</th>
+                        <th className="p-3.5">STATUS</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#2A1A1D]">
+                      {registrationAttendanceSummary.map((row: any) => (
+                        <tr key={row.student_id} className="hover:bg-[#1A1114] transition-colors">
+                          <td className="p-3.5">
+                            <div className="font-bold text-[#F7F2F2]">{row.student?.name || 'Participant'}</div>
+                            <div className="text-[10px] text-[#A79798] font-mono">{row.student?.login_id || row.student_id}</div>
+                          </td>
+                          <td className="p-3.5 font-mono text-[#A79798]">{row.student?.college_name || '-'}</td>
+                          <td className="p-3.5 font-mono text-[#E08A17]">{row.total_registered_events ?? 0}</td>
+                          <td className="p-3.5 font-mono text-[#1FA971]">{row.total_present_events ?? 0}</td>
+                          <td className="p-3.5 font-mono font-bold text-[#FF2A2A]">{row.overall_attendance_percentage ?? 0}%</td>
+                          <td className="p-3.5">
+                            <span className={`px-2 py-0.5 rounded-[2px] font-mono text-[10px] font-bold ${
+                              row.overall_status === 'excellent' ? 'bg-[#1FA971]/20 text-[#1FA971]' :
+                              row.overall_status === 'good' ? 'bg-[#E08A17]/20 text-[#E08A17]' :
+                              row.overall_status === 'fair' ? 'bg-[#E08A17]/15 text-[#E08A17]' :
+                              'bg-[#1A1114] text-[#A79798]'
+                            }`}>
+                              {String(row.overall_status || 'not_marked').toUpperCase()}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
 
             {/* Arena Enrollment & Attendance Rate Breakdown */}
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">

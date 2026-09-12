@@ -121,6 +121,10 @@ export const api = {
     markByQR: async (data: { qr_code: string }) => await axiosInstance.post('/attendance/scan-qr', data),
   },
 
+  registrationAttendanceSummary: {
+    getAll: async () => await axiosInstance.get('/registration-attendance-summary/'),
+  },
+
   // Notifications Module
   notifications: {
     getMy: async () => await axiosInstance.get('/notifications/'),

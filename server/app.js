@@ -237,6 +237,7 @@ app.use("/api/announcements", require("./routes/postgres/announcementRoutes"));
 app.use("/api/settings", require("./routes/postgres/settingRoutes"));
 app.use("/api/db-sync", require("./routes/postgres/dbSyncRoutes"));
 app.use("/api/stats", require("./routes/postgres/statsRoutes"));
+app.use("/api/registration-attendance-summary", require("./routes/postgres/registrationAttendanceSummaryRoutes"));
 app.use("/api/upload", require("./routes/postgres/uploadRoutes"));
 
 app.get("/api/health", (req, res) => {
