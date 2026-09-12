@@ -580,7 +580,7 @@ END:VCALENDAR`;
                 <div className="bg-[#0A0607] border border-[#2A1A1D] p-3.5 rounded-[2px]">
                   <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
                     <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                    <span>Need Accommodation (Limited free accommodation available for the night of 18 September)</span>
+                    <span>Need Accommodation (For participants from outside Coimbatore only. Final confirmation will be on the event date for limited students.)</span>
                   </label>
                 </div>
               </>
@@ -627,7 +627,7 @@ END:VCALENDAR`;
                   <div className="flex items-end pb-1">
                     <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
                       <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                      <span>Need Accommodation (Limited free accommodation available)</span>
+                      <span>Need Accommodation (For participants from outside Coimbatore only. Final confirmation will be on the event date for limited students.)</span>
                     </label>
                   </div>
                 </div>

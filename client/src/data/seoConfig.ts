@@ -297,6 +297,6 @@ export const HOMEPAGE_FAQS = [
   {
     question: 'Are lunch, snacks, and accommodation provided for participants?',
     answer:
-      'Yes. Registered participants receive free lunch and snacks during the LOGIN 2026 event days, according to the official event schedule. Limited free accommodation will also be provided for participants, subject to availability.',
+      'Yes. Registered participants receive free lunch and snacks during the LOGIN 2026 event days, according to the official event schedule. Accommodation is provided only for participants from outside Coimbatore, and final confirmation will be given on the event date for limited students subject to availability.',
   },
 ];
