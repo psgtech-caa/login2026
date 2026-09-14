@@ -20,8 +20,20 @@ export const MainLayout: React.FC = () => {
   const [registrationDaysLeft, setRegistrationDaysLeft] = useState(0);
 
   const getRegistrationDaysLeft = () => {
-    const deadline = new Date('2026-09-12T23:59:59+05:30').getTime();
-    return Math.max(0, Math.ceil((deadline - Date.now()) / (1000 * 60 * 60 * 24)));
+    const candidateDeadlines = [
+      '2026-09-14T23:00:00+05:30',
+      '2026-09-15T23:59:59+05:30',
+      '2026-09-16T23:59:59+05:30',
+    ];
+
+    const nextDeadline = candidateDeadlines
+      .map((value) => new Date(value).getTime())
+      .filter((value) => value >= Date.now())
+      .sort((a, b) => a - b)[0];
+
+    if (!nextDeadline) return 0;
+
+    return Math.max(0, Math.ceil((nextDeadline - Date.now()) / (1000 * 60 * 60 * 24)));
   };
 
   useEffect(() => {

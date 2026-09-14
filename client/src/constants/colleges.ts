@@ -1423,6 +1423,13 @@ export const RAW_COLLEGES: Omit<CollegeItem, "category">[] = [
     type: 'ARTS & SCIENCE',
   },
   {
+    id: 'government_arts_college_Coimbatore',
+    name: 'Government Arts College, Coimbatore',
+    shortName: 'GACC',
+    city: 'Coimbatore',
+    type: 'ARTS & SCIENCE',
+  },
+  {
     id: 'government_college_for_men',
     name: 'Government College For Men',
     shortName: 'GCFM',

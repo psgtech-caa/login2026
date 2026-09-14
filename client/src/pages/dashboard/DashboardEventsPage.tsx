@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import type { Event } from '../../types/event';
+import { getEffectiveEventStatus } from '../../utils/eventAccess';
 import { Calendar, Users, User, Clock, MapPin, ArrowRight, Search, AlertCircle, CheckCircle2, Shield, Sparkles, AlertTriangle, Trash2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -190,7 +191,7 @@ export const DashboardEventsPage: React.FC = () => {
     else if (filter === 'INDIVIDUAL') matchesFilter = event.team_type === 'INDIVIDUAL';
     else if (filter === 'TEAM') matchesFilter = event.team_type === 'TEAM';
 
-    const eventStatus = String(event.status || '').trim().toLowerCase();
+    const eventStatus = getEffectiveEventStatus(event).toLowerCase();
     return matchesSearch && matchesFilter && eventStatus !== 'cancelled' && eventStatus !== 'completed';
   });
 

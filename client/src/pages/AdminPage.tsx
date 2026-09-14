@@ -4,6 +4,7 @@ import { api } from '../services/api';
 import { ENV } from '../services/env';
 import { useAuthStore, isRegistrationDeskRole } from '../store/authStore';
 import staticEventsData from '../data/events.json';
+import { getEffectiveEventStatus, toggleEventAccessOverride } from '../utils/eventAccess';
 import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil, Upload, CheckCircle2, XCircle, FileText, RefreshCw } from 'lucide-react';
 
 const STATIC_EVENTS = Array.isArray(staticEventsData) ? staticEventsData : [];
@@ -212,7 +213,7 @@ export const AdminPage: React.FC = () => {
         api.registrations.getEventRegistrations(evt.id).then((r) => ({
           eventId: evt.id,
           eventName: evt.name,
-          registrations: Array.isArray(r.data) ? r.data : [],
+          registrations: Array.isArray(r.data) ? flattenRegistrationEntries(r.data) : [],
         })).catch(() => ({ eventId: evt.id, eventName: evt.name, registrations: [] }))
       );
       const regResults = await Promise.all(regPromises);
@@ -499,6 +500,61 @@ export const AdminPage: React.FC = () => {
     }
   };
 
+  const flattenRegistrationEntries = (registrations: any[] = []) => {
+    const flattened: any[] = [];
+    const seen = new Set<string>();
+
+    registrations.forEach((reg) => {
+      const teamMembers = Array.isArray(reg.team_members) && reg.team_members.length > 0
+        ? reg.team_members
+        : (reg.student || reg.user)
+          ? [{ ...reg.student, ...reg.user, id: reg.student?.id ?? reg.user?.id ?? reg.student_id ?? reg.user_id }]
+          : [];
+
+      if (teamMembers.length === 0) {
+        const baseStudent = reg.student || reg.user || {};
+        const identity = `${reg.event_id ?? reg.eventId ?? 'event'}-${baseStudent.id ?? reg.student_id ?? reg.user_id ?? reg.id ?? 'solo'}`;
+        if (!seen.has(identity)) {
+          seen.add(identity);
+          flattened.push({ ...reg, student: baseStudent, user: baseStudent, team_name: reg.team_name || reg.team?.name || 'SOLO' });
+        }
+        return;
+      }
+
+      teamMembers.forEach((member: any, index: number) => {
+        const memberStudent = member.student || member.user || member || {};
+        const studentId = memberStudent.id ?? member.id ?? reg.student_id ?? reg.user_id ?? `${reg.id ?? 'row'}-${index}`;
+        const identity = `${reg.event_id ?? reg.eventId ?? 'event'}-${studentId}`;
+
+        if (seen.has(identity)) return;
+        seen.add(identity);
+
+        flattened.push({
+          ...reg,
+          id: `${reg.id ?? 'reg'}-${studentId}`,
+          student_id: memberStudent.id ?? reg.student_id ?? reg.user_id ?? studentId,
+          user_id: memberStudent.id ?? reg.user_id ?? reg.student_id ?? studentId,
+          student: memberStudent,
+          user: memberStudent,
+          team_name: reg.team_name || reg.team?.name || 'SOLO',
+          team_members: teamMembers,
+        });
+      });
+    });
+
+    return flattened;
+  };
+
+  const handleToggleEventRegistrationStatus = (evt: any) => {
+    const nextStatus = toggleEventAccessOverride(evt);
+    setEvents((prev) => prev.map((event) =>
+      String(event.id) === String(evt.id)
+        ? { ...event, status: nextStatus }
+        : event
+    ));
+    alert(`Registration for ${evt.name} is now ${nextStatus.toUpperCase()}. This is a UI-only override and does not alter the stored database data.`);
+  };
+
   // CSV Export for Payments Queue
   const exportPaymentsCSV = () => {
     const headers = ['User Name', 'Email', 'Phone', 'College', 'UTR Reference', 'Status', 'Student ID', 'Created At'];
@@ -525,11 +581,15 @@ export const AdminPage: React.FC = () => {
 
   // CSV Export for Event Registrations
   const exportEventRegistrationsCSV = () => {
-    const headers = ['Event Name', 'Participant Name', 'User ID', 'Email', 'Phone', 'College', 'Department', 'Team Name', 'Attendance Status'];
+    const headers = ['Event Name', 'Participant Name', 'User ID', 'Email', 'Phone', 'College', 'Department', 'Team Name', 'Team Members', 'Attendance Status'];
     const rows: string[][] = [];
 
     allRegistrations.forEach((eventGroup) => {
       eventGroup.registrations.forEach((reg: any) => {
+        const teamMembers = Array.isArray(reg.team_members) && reg.team_members.length > 0
+          ? reg.team_members.map((member: any) => member.name || member.email || 'Member').join(' | ')
+          : '';
+
         rows.push([
           `"${eventGroup.eventName}"`,
           `"${reg.student?.name || reg.user?.name || 'Student'}"`,
@@ -539,6 +599,7 @@ export const AdminPage: React.FC = () => {
           `"${reg.student?.college_name || reg.user?.college_name || '-'}"`,
           `"${reg.student?.department || reg.user?.department || '-'}"`,
           `"${reg.team?.name || reg.team_name || 'Solo'}"`,
+          `"${teamMembers}"`,
           `"${reg.attendance_status || (reg.attended ? 'PRESENT' : 'REGISTERED')}"`,
         ]);
       });
@@ -953,7 +1014,12 @@ export const AdminPage: React.FC = () => {
                                   {reg.student?.college_name || reg.user?.college_name || 'PSG Tech'}
                                 </td>
                                 <td className="py-2 px-3 font-mono text-[#E08A17]">
-                                  {reg.team?.name || reg.team_name || 'SOLO'}
+                                  <div>{reg.team?.name || reg.team_name || 'SOLO'}</div>
+                                  {Array.isArray(reg.team_members) && reg.team_members.length > 0 && (
+                                    <div className="text-[9px] text-[#A79798] mt-1">
+                                      {reg.team_members.map((member: any) => member.name || member.email || 'Member').join(', ')}
+                                    </div>
+                                  )}
                                 </td>
                                 <td className="py-2 px-3 font-mono text-[#A79798]">
                                   {reg.student?.accommodation_required || reg.user?.accommodation_required ? (
@@ -1770,9 +1836,18 @@ export const AdminPage: React.FC = () => {
         {/* TAB 6: EVENT MANAGEMENT */}
         {activeTab === 'EVENTS' && (
           <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-6">
-            <div>
-              <h2 className="text-lg font-display font-bold text-[#F7F2F2]">EVENT MANAGEMENT ({events.length})</h2>
-              <p className="text-xs text-[#A79798] font-mono mt-1">Updating an event venue or time automatically emails all enrolled participants.</p>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 className="text-lg font-display font-bold text-[#F7F2F2]">EVENT MANAGEMENT ({events.length})</h2>
+                <p className="text-xs text-[#A79798] font-mono mt-1">Updating an event venue or time automatically emails all enrolled participants.</p>
+              </div>
+              <button
+                onClick={() => handleToggleEventRegistrationStatus(events[0])}
+                disabled={!events.length}
+                className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-[10px] font-bold uppercase rounded-[2px]"
+              >
+                {events[0] && getEffectiveEventStatus(events[0]) === 'open' ? 'CLOSE ALL REGISTRATIONS' : 'OPEN ALL REGISTRATIONS'}
+              </button>
             </div>
 
             <div className="overflow-x-auto">
@@ -1788,23 +1863,38 @@ export const AdminPage: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-[#2A1A1D]">
-                  {events.map((evt) => (
-                    <tr key={evt.id} className="hover:bg-[#1A1114] transition-colors">
-                      <td className="p-3.5 font-bold text-[#F7F2F2]">{evt.name}</td>
-                      <td className="p-3.5 font-mono text-[#E08A17]">{evt.category}</td>
-                      <td className="p-3.5 font-mono text-[#A79798]">Day {evt.day} | {evt.date}</td>
-                      <td className="p-3.5 font-mono text-[#F7F2F2]">{evt.venue}</td>
-                      <td className="p-3.5 font-mono text-[#F7F2F2]">{evt.start_time}</td>
-                      <td className="p-3.5">
-                        <button
-                          onClick={() => handleUpdateEvent(evt.id, evt.venue, evt.start_time)}
-                          className="px-3.5 py-1.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono font-bold text-[10px] rounded-[2px]"
-                        >
-                          EDIT
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
+                  {events.map((evt) => {
+                    const effectiveStatus = getEffectiveEventStatus(evt);
+                    return (
+                      <tr key={evt.id} className="hover:bg-[#1A1114] transition-colors">
+                        <td className="p-3.5 font-bold text-[#F7F2F2]">{evt.name}</td>
+                        <td className="p-3.5 font-mono text-[#E08A17]">{evt.category}</td>
+                        <td className="p-3.5 font-mono text-[#A79798]">Day {evt.day} | {evt.date}</td>
+                        <td className="p-3.5 font-mono text-[#F7F2F2]">{evt.venue}</td>
+                        <td className="p-3.5 font-mono text-[#F7F2F2]">{evt.start_time}</td>
+                        <td className="p-3.5">
+                          <div className="flex flex-col gap-2">
+                            <button
+                              onClick={() => handleUpdateEvent(evt.id, evt.venue, evt.start_time)}
+                              className="px-3.5 py-1.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono font-bold text-[10px] rounded-[2px]"
+                            >
+                              EDIT
+                            </button>
+                            <button
+                              onClick={() => handleToggleEventRegistrationStatus(evt)}
+                              className={`px-3.5 py-1.5 font-mono font-bold text-[10px] rounded-[2px] ${
+                                effectiveStatus === 'open'
+                                  ? 'bg-[#132D20] text-[#8EE0B6] border border-[#1FA971]'
+                                  : 'bg-[#2A1012] text-[#FFB5B8] border border-[#E01B22]'
+                              }`}
+                            >
+                              {effectiveStatus === 'open' ? 'CLOSE REG' : 'OPEN REG'}
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

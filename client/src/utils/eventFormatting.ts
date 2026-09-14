@@ -1,3 +1,30 @@
+export const normalizeEventRecord = (event: any): any => {
+  if (!event || typeof event !== 'object') return event;
+
+  const normalized = { ...event };
+  const eventName = String(normalized.name || '').trim().toLowerCase();
+
+  if (eventName.includes('nostos')) {
+    normalized.date = '2026-09-15';
+    normalized.day = 15;
+  }
+
+  if (eventName.includes('codexcape') || (eventName.includes('code') && eventName.includes('escape'))) {
+    normalized.date = '2026-09-16';
+    normalized.day = 16;
+  }
+
+  if (eventName.includes('hunt your treasure') || eventName.includes('treasure')) {
+    normalized.date = '2026-09-18';
+    normalized.day = 18;
+  }
+
+  return normalized;
+};
+
+export const normalizeEvents = (events: any[] = []) =>
+  Array.isArray(events) ? events.map((event) => normalizeEventRecord(event)) : [];
+
 export const formatEventDate = (date: string): string => {
   if (!date) return 'Date TBA';
 

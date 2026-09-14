@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
+import { getEffectiveEventStatus } from '../../utils/eventAccess';
 import { Users, Plus, Send, UserPlus, Check, X, Crown, AlertCircle, CheckCircle2, Loader2, Trash2, PlusCircle, MinusCircle } from 'lucide-react';
 import { CollegeTeammatePicker } from '../../components/common/CollegeTeammatePicker';
 
@@ -21,7 +22,7 @@ const CreateTeamModal: React.FC<{ onClose: () => void; existingTeams?: any[] }> 
     queryFn: async () => { const res = await api.events.getAll(); return res.data || []; },
   });
 
-  const teamEvents = events.filter((e: any) => (e.team_type === 'TEAM' || (e.max_team_size && e.max_team_size > 1)) && e.status === 'open');
+  const teamEvents = events.filter((e: any) => (e.team_type === 'TEAM' || (e.max_team_size && e.max_team_size > 1)) && getEffectiveEventStatus(e) === 'open');
   const selectedEvent = events.find((e: any) => String(e.id) === String(eventId));
   const maxTeammateSlots = selectedEvent ? Math.max(1, (selectedEvent.max_team_size || 2) - 1) : 3;
 

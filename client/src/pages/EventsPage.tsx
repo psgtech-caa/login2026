@@ -7,7 +7,8 @@ import { ScheduleSection } from '../components/home/ScheduleSection';
 import { SEOHead } from '../components/common/SEOHead';
 import { getBreadcrumbSchema, SITE_CONFIG } from '../data/seoConfig';
 import defaultEvents from '../data/events.json';
-import { formatEventTiming } from '../utils/eventFormatting';
+import { formatEventTiming, normalizeEvents } from '../utils/eventFormatting';
+import { getEffectiveEventStatus } from '../utils/eventAccess';
 
 interface Event {
   id: number;
@@ -197,7 +198,7 @@ export const EventsPage: React.FC = () => {
 
   useEffect(() => {
     const loadEvents = () => api.events.getAll().then((res) => {
-      if (Array.isArray(res.data) && res.data.length > 0) setEvents(res.data);
+      if (Array.isArray(res.data) && res.data.length > 0) setEvents(normalizeEvents(res.data));
     }).catch(() => {});
 
     loadEvents();
@@ -351,6 +352,7 @@ export const EventsPage: React.FC = () => {
               const isRegistered = userRegistrations.includes(event.id);
               const isTeam = event.team_type === 'TEAM' || event.max_team_size > 1;
               const isExtraction = event.name.toLowerCase().includes('extraction') || (event as any).slug === 'the-extraction';
+              const effectiveStatus = getEffectiveEventStatus(event);
 
               return (
                 <div
@@ -584,9 +586,9 @@ export const EventsPage: React.FC = () => {
                               <span className="px-3.5 py-2 bg-[#1A1114] border border-[#E01B22] text-[#E01B22] font-mono text-xs font-bold rounded-[2px]">
                                 Invite-Only
                               </span>
-                            ) : event.status !== 'open' ? (
+                            ) : effectiveStatus !== 'open' ? (
                               <span className="px-4 py-2 bg-[#130C0E] border border-[#2A1A1D] text-[#A79798] font-mono text-xs font-bold uppercase rounded-[2px] cursor-not-allowed">
-                                Registration Filled
+                                Registration Closed
                               </span>
                             ) : !isAuthenticated ? (
                               <button

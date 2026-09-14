@@ -133,15 +133,8 @@ const createRegistration = async (req, res) => {
       return res.status(400).json({ message: "Registrations for this event are closed." });
     }
 
-    // 4. Max Slots Check
-    if (event.max_participants) {
-      const currentCount = await registrationModel.count({
-        where: { event_id: numericEventId, status: "registered" },
-      });
-      if (currentCount >= event.max_participants) {
-        return res.status(400).json({ message: "Registrations closed — maximum slot limit reached." });
-      }
-    }
+    // 4. No enforced per-event hard cap: event capacity values are informational only.
+    // Registrations remain open beyond any fixed max_participants value unless the event is closed or its deadline has passed.
 
     // 5. Existing Registration Check
     const existing = await registrationModel.findOne({
@@ -520,7 +513,7 @@ const getEventRegistrations = async (req, res) => {
 
     const studentIds = [...new Set(registrations.map((reg) => reg.student_id).filter(Boolean))];
 
-    const [payments, attendances] = await Promise.all([
+    const [payments, attendances, teams] = await Promise.all([
       studentIds.length
         ? paymentModel.findAll({
             where: { student_id: { [Op.in]: studentIds } },
@@ -535,6 +528,16 @@ const getEventRegistrations = async (req, res) => {
             },
           })
         : [],
+      teamModel.findAll({
+        where: { event_id: req.params.eventId },
+        include: [{
+          model: teamMemberModel,
+          as: "members",
+          where: { status: "accepted" },
+          required: false,
+          include: [{ model: userModel, as: "student", attributes: ["id", "login_id", "name", "email", "phone", "college_name", "department", "roll_no"] }],
+        }],
+      }),
     ]);
 
     const paymentByStudent = new Map();
@@ -552,10 +555,16 @@ const getEventRegistrations = async (req, res) => {
       });
     }
 
-    const payload = registrations.map((registration) => {
+    const teamByName = new Map(
+      teams.map((team) => [String(team.name || "").trim().toLowerCase(), team])
+    );
+
+    const payload = await Promise.all(registrations.map(async (registration) => {
       const row = registration.toJSON();
       const payment = paymentByStudent.get(registration.student_id) || null;
       const attendance = attendanceByStudent.get(registration.student_id) || { status: "not_marked", marked_at: null };
+      const teamKey = String(row.team_name || "").trim().toLowerCase();
+      const team = teamByName.get(teamKey) || null;
 
       row.student = row.student || null;
       row.payment_status = payment ? payment.status : "NOT_SUBMITTED";
@@ -563,9 +572,41 @@ const getEventRegistrations = async (req, res) => {
       row.payment_reference = payment ? payment.transaction_reference : null;
       row.attendance_status = String(attendance.status || "not_marked").toUpperCase();
       row.attendance_marked_at = attendance.marked_at;
+      row.team = team ? team.toJSON() : null;
+      row.team_members = [];
+
+      if (team) {
+        const members = Array.isArray(team.members) ? team.members : [];
+        const acceptedMembers = members
+          .filter((member) => member && member.student)
+          .map((member) => ({
+            id: member.student.id,
+            name: member.student.name,
+            email: member.student.email,
+            phone: member.student.phone,
+            login_id: member.student.login_id,
+            college_name: member.student.college_name,
+            department: member.student.department,
+            status: "accepted",
+          }));
+
+        const parsedPending = parseStoredTeamEmails(team.member_emails || "[]");
+        const pendingMembers = parsedPending.map((email) => ({
+          id: null,
+          name: null,
+          email,
+          phone: null,
+          login_id: null,
+          college_name: null,
+          department: null,
+          status: "pending",
+        }));
+
+        row.team_members = [...acceptedMembers, ...pendingMembers];
+      }
 
       return row;
-    });
+    }));
 
     return res.json(payload);
   } catch (error) {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { api } from '../services/api';
 import { Trophy, Users, Search, CheckCircle2, XCircle, Lock, Unlock, Save, RefreshCw, AlertCircle, QrCode, Maximize2 } from 'lucide-react';
@@ -63,7 +63,7 @@ export const CoordinatorPage: React.FC = () => {
           if (activeSection === 'REGISTRATIONS' || activeSection === 'OVERVIEW') {
             const regPromises = assignedEvents.map(async (e: any) => {
               const r = await api.registrations.getEventRegistrations(e.id);
-              return { eventName: e.name, registrations: r.data || [] };
+              return { eventName: e.name, registrations: Array.isArray(r.data) ? flattenRegistrationEntries(r.data) : [] };
             });
             const allRegs = await Promise.all(regPromises);
             setAllRegistrations(allRegs);
@@ -142,6 +142,51 @@ export const CoordinatorPage: React.FC = () => {
     fetchEventData();
   }, [selectedEventId]);
 
+  const flattenRegistrationEntries = (registrations: any[] = []) => {
+    const flattened: any[] = [];
+    const seen = new Set<string>();
+
+    registrations.forEach((reg) => {
+      const teamMembers = Array.isArray(reg.team_members) && reg.team_members.length > 0
+        ? reg.team_members
+        : (reg.student || reg.user)
+          ? [{ ...reg.student, ...reg.user, id: reg.student?.id ?? reg.user?.id ?? reg.student_id ?? reg.user_id }]
+          : [];
+
+      if (teamMembers.length === 0) {
+        const baseStudent = reg.student || reg.user || {};
+        const identity = `${reg.event_id ?? 'event'}-${baseStudent.id ?? reg.student_id ?? reg.user_id ?? reg.id ?? 'solo'}`;
+        if (!seen.has(identity)) {
+          seen.add(identity);
+          flattened.push({ ...reg, student: baseStudent, user: baseStudent, team_name: reg.team_name || reg.team?.name || 'SOLO' });
+        }
+        return;
+      }
+
+      teamMembers.forEach((member: any, index: number) => {
+        const memberStudent = member.student || member.user || member || {};
+        const studentId = memberStudent.id ?? member.id ?? reg.student_id ?? reg.user_id ?? `${reg.id ?? 'row'}-${index}`;
+        const identity = `${reg.event_id ?? 'event'}-${studentId}`;
+
+        if (seen.has(identity)) return;
+        seen.add(identity);
+
+        flattened.push({
+          ...reg,
+          id: `${reg.id ?? 'reg'}-${studentId}`,
+          student_id: memberStudent.id ?? reg.student_id ?? reg.user_id ?? studentId,
+          user_id: memberStudent.id ?? reg.user_id ?? reg.student_id ?? studentId,
+          student: memberStudent,
+          user: memberStudent,
+          team_name: reg.team_name || reg.team?.name || 'SOLO',
+          team_members: teamMembers,
+        });
+      });
+    });
+
+    return flattened;
+  };
+
   const handleMarkAttendance = async (studentId: number, currentStatus: string) => {
     if (!selectedEventId) return;
     const newStatus = currentStatus === 'PRESENT' ? 'ABSENT' : 'PRESENT';
@@ -190,12 +235,17 @@ export const CoordinatorPage: React.FC = () => {
   const selectedEvent = events.find((e) => e.id === selectedEventId);
 
   // Filter roster by search & attendance
-  const filteredRoster = roster.filter((r) => {
+  const visibleRoster = useMemo(() => flattenRegistrationEntries(roster), [roster]);
+
+  const filteredRoster = visibleRoster.filter((r: any) => {
+    const student = r.student || r.user || {};
     const matchesSearch =
       !search ||
-      (r.user?.name && r.user.name.toLowerCase().includes(search.toLowerCase())) ||
-      (r.user?.login_id && r.user.login_id.toLowerCase().includes(search.toLowerCase())) ||
-      (r.user?.college_name && r.user.college_name.toLowerCase().includes(search.toLowerCase())) ||
+      (student.name && student.name.toLowerCase().includes(search.toLowerCase())) ||
+      (student.login_id && student.login_id.toLowerCase().includes(search.toLowerCase())) ||
+      (student.college_name && student.college_name.toLowerCase().includes(search.toLowerCase())) ||
+      (student.email && student.email.toLowerCase().includes(search.toLowerCase())) ||
+      (student.phone && student.phone.toLowerCase().includes(search.toLowerCase())) ||
       (r.team_name && r.team_name.toLowerCase().includes(search.toLowerCase()));
 
     const status = r.attendance_status || 'ABSENT';
@@ -206,6 +256,35 @@ export const CoordinatorPage: React.FC = () => {
 
     return matchesSearch && matchesFilter;
   });
+
+  const exportCoordinatorRoster = () => {
+    if (!filteredRoster.length) return;
+
+    const headers = ['EVENT', 'TEAM NAME', 'PARTICIPANT NAME', 'LOGIN ID', 'EMAIL', 'PHONE', 'COLLEGE', 'DEPARTMENT', 'PAYMENT STATUS', 'ATTENDANCE STATUS'];
+    const rows = filteredRoster.map((r: any) => {
+      const student = r.student || r.user || {};
+      return [
+        selectedEvent?.name || '',
+        r.team_name || r.team?.name || 'SOLO',
+        student.name || '',
+        student.login_id || '',
+        student.email || '',
+        student.phone || '',
+        student.college_name || '',
+        student.department || '',
+        r.payment_status || 'NOT_SUBMITTED',
+        r.attendance_status || 'ABSENT',
+      ];
+    });
+
+    const csv = 'data:text/csv;charset=utf-8,' + [headers.join(','), ...rows.map((row: any[]) => row.map((cell: any) => `"${String(cell).replace(/"/g, '""')}"`).join(','))].join('\n');
+    const link = document.createElement('a');
+    link.href = encodeURI(csv);
+    link.download = `LOGIN_2026_${(selectedEvent?.name || 'EVENT').replace(/\s+/g, '_')}_Roster_${new Date().toISOString().slice(0, 10)}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   const totalRegistered = roster.length;
   const presentCount = roster.filter((r) => r.attendance_status === 'PRESENT').length;
@@ -226,6 +305,15 @@ export const CoordinatorPage: React.FC = () => {
             {activeSection === 'PAYMENTS' && 'Payment Tracking'}
           </h1>
         </div>
+        {activeSection === 'REGISTRATIONS' && selectedEvent && (
+          <button
+            type="button"
+            onClick={exportCoordinatorRoster}
+            className="px-4 py-2 bg-[#1A1114] hover:bg-[#2A1A1D] border border-[#3E2529] hover:border-[#E01B22] text-[#F7F2F2] font-mono text-xs font-bold rounded-[2px] flex items-center gap-2 transition-colors shrink-0"
+          >
+            EXPORT CSV
+          </button>
+        )}
       </div>
 
       {/* ── OVERVIEW SECTION ── */}
@@ -329,7 +417,9 @@ export const CoordinatorPage: React.FC = () => {
                         <tr>
                           <th className="pb-2 font-normal">Student</th>
                           <th className="pb-2 font-normal">ID</th>
+                          <th className="pb-2 font-normal">Phone</th>
                           <th className="pb-2 font-normal">College</th>
+                          <th className="pb-2 font-normal">Dept</th>
                           <th className="pb-2 font-normal">Team</th>
                           <th className="pb-2 font-normal">Accommodation</th>
                           <th className="pb-2 font-normal">Payment</th>
@@ -337,30 +427,41 @@ export const CoordinatorPage: React.FC = () => {
                         </tr>
                       </thead>
                       <tbody className="text-[#F7F2F2]">
-                        {evt.registrations.slice(0, 10).map((r: any, j: number) => (
-                          <tr key={j} className="border-t border-[#2A1A1D]">
-                            <td className="py-2">{r.student?.name || r.user?.name}</td>
-                            <td className="py-2 text-[#A79798]">{r.student?.login_id || r.user?.login_id}</td>
-                            <td className="py-2 truncate max-w-[150px]">{r.student?.college_name || r.user?.college_name}</td>
-                            <td className="py-2">{r.team?.name || r.team_name || '-'}</td>
-                            <td className="py-2 font-mono text-[#A79798]">
-                              {r.student?.accommodation_required || r.user?.accommodation_required ? (
-                                <span className="text-[#E01B22]">YES</span>
-                              ) : 'NO'}
-                            </td>
-                            <td className="py-2 font-mono text-[#A79798]">
-                              {(r.payment_status || 'NOT_SUBMITTED').toUpperCase()}
-                            </td>
-                            <td className="py-2">{r.attendance_status || (r.attended ? 'PRESENT' : 'ABSENT')}</td>
-                          </tr>
-                        ))}
+                        {evt.registrations.map((r: any, j: number) => {
+                          const student = r.student || r.user || {};
+                          const teamMembers = Array.isArray(r.team_members) && r.team_members.length > 0 ? r.team_members : [];
+                          return (
+                            <tr key={j} className="border-t border-[#2A1A1D]">
+                              <td className="py-2">
+                                <div className="font-bold">{student.name || 'Participant'}</div>
+                                <div className="text-[10px] text-[#A79798]">{student.email || '-'}</div>
+                              </td>
+                              <td className="py-2 text-[#A79798]">{student.login_id || '-'}</td>
+                              <td className="py-2 font-mono text-[#A79798]">{student.phone || '-'}</td>
+                              <td className="py-2 truncate max-w-[150px]">{student.college_name || '-'}</td>
+                              <td className="py-2 text-[#A79798]">{student.department || '-'}</td>
+                              <td className="py-2">
+                                <div>{r.team?.name || r.team_name || '-'}</div>
+                                {teamMembers.length > 0 && (
+                                  <div className="text-[10px] text-[#E08A17] mt-1">
+                                    {teamMembers.map((member: any) => member.name || member.email || 'Member').join(', ')}
+                                  </div>
+                                )}
+                              </td>
+                              <td className="py-2 font-mono text-[#A79798]">
+                                {student.accommodation_required ? (
+                                  <span className="text-[#E01B22]">YES</span>
+                                ) : 'NO'}
+                              </td>
+                              <td className="py-2 font-mono text-[#A79798]">
+                                {(r.payment_status || 'NOT_SUBMITTED').toUpperCase()}
+                              </td>
+                              <td className="py-2">{r.attendance_status || (r.attended ? 'PRESENT' : 'ABSENT')}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
-                    {evt.registrations.length > 10 && (
-                      <div className="text-center pt-2 text-[#E08A17] text-[10px] mt-2 border-t border-[#2A1A1D]">
-                        + {evt.registrations.length - 10} more
-                      </div>
-                    )}
                   </div>
                 ) : (
                   <p className="text-xs font-mono text-[#6B5A5C] text-center py-4">No registrations yet</p>
@@ -630,7 +731,7 @@ export const CoordinatorPage: React.FC = () => {
               </div>
             ) : filteredRoster.length > 0 ? (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filteredRoster.map((item) => {
+                {filteredRoster.map((item: any) => {
                   const student = item.user || item.student;
                   const isPresent = item.attendance_status === 'PRESENT';
                   return (

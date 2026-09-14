@@ -6,6 +6,7 @@ import { Monitor, ArrowLeft, Clock, ShieldAlert, CheckCircle2, MapPin, Users, Ph
 import defaultEvents from '../data/events.json';
 import { SEOHead } from '../components/common/SEOHead';
 import { getBreadcrumbSchema, getEventDetailSchema, SITE_CONFIG } from '../data/seoConfig';
+import { normalizeEvents } from '../utils/eventFormatting';
 
 export const EventDetailsPage: React.FC = () => {
   const { id: slug } = useParams();
@@ -16,13 +17,15 @@ export const EventDetailsPage: React.FC = () => {
   
   // Initialize with static defaultEvents data synchronously for crawler optimization
   const [selectedEvent, setSelectedEvent] = useState<any>(() => {
-    return defaultEvents.find((e: any) => e.slug === slug || String(e.id) === String(slug)) || null;
+    const normalizedDefault = normalizeEvents(defaultEvents as any[]);
+    return normalizedDefault.find((e: any) => e.slug === slug || String(e.id) === String(slug)) || null;
   });
 
   useEffect(() => {
     api.events.getAll().then((res) => {
       if (Array.isArray(res.data)) {
-        const match = res.data.find((e: any) => e.slug === slug || String(e.id) === String(slug));
+        const normalized = normalizeEvents(res.data);
+        const match = normalized.find((e: any) => e.slug === slug || String(e.id) === String(slug));
         if (match) setSelectedEvent(match);
       }
     }).catch(() => {
