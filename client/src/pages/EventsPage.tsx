@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useSearchParams, useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import { useAuthStore } from '../store/authStore';
-import { CheckCircle2, Filter, Zap, Terminal, CalendarClock } from 'lucide-react';
+import { CheckCircle2, Filter, Zap, CalendarClock } from 'lucide-react';
 import { ScheduleSection } from '../components/home/ScheduleSection';
 import { SEOHead } from '../components/common/SEOHead';
 import { getBreadcrumbSchema, SITE_CONFIG } from '../data/seoConfig';
