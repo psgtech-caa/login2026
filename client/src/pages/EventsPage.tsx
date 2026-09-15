@@ -110,7 +110,7 @@ const EVENT_DETAILS: Record<string, EventDetail> = {
     name: "The Extraction",
     guardianName: "BLACKOUT-9",
     quote: "Operation BLACKOUT is active. Breach the vault and extract the payload.",
-    durationText: "3–4 Hours",
+    durationText: "2 Hours",
     shortDesc: "Step into a story-driven cybersecurity mission where you decode encrypted data, analyze digital clues, crack hashes, and complete extraction.",
     fullDesc: "Step into a story-driven cybersecurity mission where you decode encrypted data, analyze digital clues, crack hashes, and solve multi-layered challenges to complete the final extraction.",
     skills: ["Cybersecurity", "Cryptography", "Encoding", "Logical Thinking"],
@@ -460,14 +460,11 @@ export const EventsPage: React.FC = () => {
                     }`}>
                       {isExtraction ? (
                         <>
-                          <div className="absolute top-3 left-3 px-2 py-0.5 bg-[#0A0607]/90 border border-[#FF2A2A]/60 text-[#FF6B6B] font-mono text-[9px] font-extrabold tracking-widest rounded-[2px] z-10 flex items-center gap-1 backdrop-blur-sm shadow-md">
-                            <Terminal className="w-2.5 h-2.5 text-[#FF2A2A]" /> SYS // BLACKOUT-9
-                          </div>
                           <div className="absolute top-3 right-3 px-2.5 py-0.5 text-[10px] font-mono font-black bg-gradient-to-r from-[#E01B22] via-[#FF2A2A] to-[#E01B22] text-white rounded-[2px] shadow-[0_0_15px_rgba(224,27,34,0.8)] z-10 flex items-center gap-1 animate-pulse">
                             <Zap className="w-3 h-3 fill-current" /> EXCLUSIVE CTF ARENA
                           </div>
                           <div className="absolute bottom-1 right-3 text-[8px] font-mono text-[#FF4545]/70 tracking-widest uppercase font-bold select-none">
-                            OPERATION BLACKOUT // LIVE
+                            You Can Win Easily
                           </div>
                         </>
                       ) : event.is_flagship ? (
@@ -501,7 +498,7 @@ export const EventsPage: React.FC = () => {
                         {isExtraction ? (
                           <div className="text-xs font-mono font-bold text-[#FF4545] mt-1 flex items-center gap-1.5">
                             <span className="inline-block w-2 h-2 rounded-full bg-[#FF2A2A] animate-ping" />
-                            <span>Exclusive Cybersecurity CTF</span> • <span>1–2 Operatives</span> • <span>{detail.durationText}</span>
+                            <span>Exclusive CTF</span> • <span>1 or 2 Members</span> • <span>{detail.durationText}</span>
                           </div>
                         ) : (
                           <div className="text-xs font-mono font-semibold text-[#FF2A2A] mt-1">
@@ -543,7 +540,7 @@ export const EventsPage: React.FC = () => {
                               onClick={(e) => { e.stopPropagation(); navigate('/events/the-extraction'); }}
                               className="px-3.5 py-2 text-xs font-mono font-bold border border-[#FF2A2A]/40 hover:border-[#FF2A2A] text-[#FF6B6B] hover:text-[#FFF] bg-[#2A0E15]/60 hover:bg-[#3E121E] rounded-[2px] transition-all"
                             >
-                              Mission Briefing
+                              View Details
                             </button>
 
                             {user?.role === 'admin' || user?.role === 'coordinator' ? (
@@ -562,7 +559,7 @@ export const EventsPage: React.FC = () => {
                                 onClick={(e) => { e.stopPropagation(); navigate('/events/the-extraction'); }}
                                 className="px-4 py-2 bg-gradient-to-r from-[#E01B22] via-[#FF2A2A] to-[#B00E14] hover:from-[#FF4545] hover:to-[#E01B22] text-white font-mono text-xs font-black uppercase rounded-[2px] transition-all shadow-[0_0_20px_rgba(224,27,34,0.6)] hover:shadow-[0_0_30px_rgba(255,42,42,0.9)] flex items-center gap-1.5"
                               >
-                                <Terminal className="w-3.5 h-3.5" /> ENTER CTF MISSION →
+                                ENTER CTF MISSION
                               </button>
                             )}
                           </>
