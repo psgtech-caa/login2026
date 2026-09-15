@@ -3733,6 +3733,13 @@ export const RAW_COLLEGES: Omit<CollegeItem, "category">[] = [
     type: 'ENGINEERING',
   },
   {
+    id: 'rajalakshmi_institute_of_technology',
+    name: 'Rajalakshmi Institute of Technology,Chennai',
+    shortName: 'RIT',
+    city: 'Chennai',
+    type: 'ENGINEERING',
+  },
+  {
     id: 'rajasthan',
     name: 'Rajasthan',
     shortName: 'RAJ',
