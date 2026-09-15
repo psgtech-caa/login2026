@@ -191,6 +191,8 @@ export const CoordinatorPage: React.FC = () => {
     if (!selectedEventId) return;
     const newStatus = currentStatus === 'PRESENT' ? 'ABSENT' : 'PRESENT';
 
+    if (newStatus === 'ABSENT' && !window.confirm('Revert this participant attendance from PRESENT to ABSENT?')) return;
+
     try {
       await api.attendance.mark({
         event_id: selectedEventId,
@@ -592,18 +594,38 @@ export const CoordinatorPage: React.FC = () => {
             </div>
           )}
 
-          {isDesk && selectedEvent?.day && (
-            <div className="bg-[#130C0E] border border-[#E08A17]/60 p-5 rounded-[2px] flex flex-col md:flex-row items-center justify-between gap-5">
-              <div className="space-y-2 text-center md:text-left">
-                <div className="flex items-center justify-center md:justify-start gap-2">
-                  <QrCode className="w-5 h-5 text-[#E08A17]" />
-                  <span className="text-xs font-mono font-bold text-[#E08A17] uppercase tracking-widest">DAY {selectedEvent.day} ATTENDANCE QR</span>
-                </div>
-                <p className="text-xs font-mono text-[#A79798]">Show this QR at registration desk check-in. It marks all of a participant's registered events for this day.</p>
-                <span className="text-[10px] font-mono text-[#E08A17]">LOGIN2K26-ATTENDANCE-DAY-{selectedEvent.day}</span>
+          {isDesk && (
+            <div className="space-y-4">
+              <div>
+                <h2 className="text-base font-display font-bold text-[#F7F2F2]">REGISTRATION DESK DAY ATTENDANCE</h2>
+                <p className="text-[11px] font-mono text-[#A79798] mt-1">
+                  Show the matching day QR at check-in. It marks all registered events for that day.
+                </p>
               </div>
-              <div className="bg-white p-3 rounded-[4px] border-4 border-[#E08A17] shrink-0">
-                <SafeQRCode value={`LOGIN2K26-ATTENDANCE-DAY-${selectedEvent.day}`} size={150} bgColor="#FFFFFF" fgColor="#000000" />
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                {[
+                  { label: 'DAY 01', date: '18 SEP 2026', dayNumber: 18 },
+                  { label: 'DAY 02', date: '19 SEP 2026', dayNumber: 19 },
+                ].map((day) => {
+                  const qrValue = `LOGIN2K26-ATTENDANCE-DAY-${day.dayNumber}`;
+                  return (
+                    <div key={day.label} className="bg-[#130C0E] border border-[#E08A17]/60 p-5 rounded-[2px] flex flex-col sm:flex-row items-center justify-between gap-5">
+                      <div className="space-y-2 text-center sm:text-left">
+                        <div className="flex items-center justify-center sm:justify-start gap-2">
+                          <QrCode className="w-5 h-5 text-[#E08A17]" />
+                          <span className="text-xs font-mono font-bold text-[#E08A17] uppercase tracking-widest">
+                            {day.label} ATTENDANCE QR
+                          </span>
+                        </div>
+                        <p className="text-[11px] font-mono text-[#A79798]">{day.date}</p>
+                        <span className="text-[10px] font-mono text-[#E08A17]">{qrValue}</span>
+                      </div>
+                      <div className="bg-white p-3 rounded-[4px] border-4 border-[#E08A17] shrink-0">
+                        <SafeQRCode value={qrValue} size={150} bgColor="#FFFFFF" fgColor="#000000" />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}
@@ -780,7 +802,7 @@ export const CoordinatorPage: React.FC = () => {
                         }`}
                       >
                         {isPresent ? (
-                          <><XCircle className="w-3.5 h-3.5" /> Mark Absent</>
+                          <><XCircle className="w-3.5 h-3.5" /> Revert to Absent</>
                         ) : (
                           <><CheckCircle2 className="w-3.5 h-3.5" /> Mark Present</>
                         )}

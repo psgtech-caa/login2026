@@ -4,7 +4,7 @@ import { api } from '../services/api';
 import { ENV } from '../services/env';
 import { useAuthStore, isRegistrationDeskRole } from '../store/authStore';
 import staticEventsData from '../data/events.json';
-import { getEffectiveEventStatus, toggleEventAccessOverride } from '../utils/eventAccess';
+import { getEffectiveEventStatus, setEventAccessOverride, toggleEventAccessOverride } from '../utils/eventAccess';
 import { Plus, Trash2, Download, Search, ShieldAlert, Radio, Trophy, Pencil, Upload, CheckCircle2, XCircle, FileText, RefreshCw } from 'lucide-react';
 
 const STATIC_EVENTS = Array.isArray(staticEventsData) ? staticEventsData : [];
@@ -371,15 +371,21 @@ export const AdminPage: React.FC = () => {
     try {
       await api.payments.verify(rejectModalPaymentId, {
         status: 'REJECTED',
-        rejection_reason: rejectionReason,
+        rejection_reason: rejectionReason.trim(),
       });
 
       setRejectModalPaymentId(null);
       setRejectionReason('');
-      fetchData();
+      await fetchData();
+      alert('Payment rejected successfully. The participant can resubmit payment details.');
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to reject payment.');
     }
+  };
+
+  const cancelRejectPayment = () => {
+    setRejectModalPaymentId(null);
+    setRejectionReason('');
   };
 
   const handleVerifyPayment = async (paymentId: number) => {
@@ -553,6 +559,15 @@ export const AdminPage: React.FC = () => {
         : event
     ));
     alert(`Registration for ${evt.name} is now ${nextStatus.toUpperCase()}. This is a UI-only override and does not alter the stored database data.`);
+  };
+
+  const handleToggleAllEventRegistrationStatus = () => {
+    if (!events.length) return;
+
+    const nextStatus = events.every((event) => getEffectiveEventStatus(event) === 'open') ? 'closed' : 'open';
+    events.forEach((event) => setEventAccessOverride(event.id, nextStatus));
+    setEvents((prev) => prev.map((event) => ({ ...event, status: nextStatus })));
+    alert(`All event registrations are now ${nextStatus.toUpperCase()}. This is a UI-only override and does not alter the stored database data.`);
   };
 
   // CSV Export for Payments Queue
@@ -1842,11 +1857,13 @@ export const AdminPage: React.FC = () => {
                 <p className="text-xs text-[#A79798] font-mono mt-1">Updating an event venue or time automatically emails all enrolled participants.</p>
               </div>
               <button
-                onClick={() => handleToggleEventRegistrationStatus(events[0])}
+                onClick={handleToggleAllEventRegistrationStatus}
                 disabled={!events.length}
                 className="px-4 py-2 bg-[#E01B22] hover:bg-[#FF2A2A] text-[#F7F2F2] font-mono text-[10px] font-bold uppercase rounded-[2px]"
               >
-                {events[0] && getEffectiveEventStatus(events[0]) === 'open' ? 'CLOSE ALL REGISTRATIONS' : 'OPEN ALL REGISTRATIONS'}
+                {events.length > 0 && events.every((event) => getEffectiveEventStatus(event) === 'open')
+                  ? 'CLOSE ALL REGISTRATIONS'
+                  : 'OPEN ALL REGISTRATIONS'}
               </button>
             </div>
 
@@ -1917,7 +1934,7 @@ export const AdminPage: React.FC = () => {
 
             <div className="flex justify-end gap-3 pt-2">
               <button
-                onClick={() => setRejectModalPaymentId(null)}
+                onClick={cancelRejectPayment}
                 className="px-4 py-2 text-xs font-mono text-[#A79798]"
               >
                 Cancel

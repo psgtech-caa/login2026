@@ -293,6 +293,7 @@ export const DashboardEventsPage: React.FC = () => {
             const guardian = getEventGuardian(event.name);
             const isRegistered = registeredEventIds.has(String(event.id));
             const isRejected = rejectedEventIds.has(String(event.id));
+            const eventStatus = getEffectiveEventStatus(event).toLowerCase();
 
             return (
               <motion.div
@@ -400,7 +401,7 @@ export const DashboardEventsPage: React.FC = () => {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  ) : String(event.status || '').trim().toLowerCase() !== 'open' ? (
+                  ) : eventStatus !== 'open' ? (
                     <button
                       disabled
                       className="w-full py-2.5 bg-[#1A1114] text-[#A79798] border border-[#2A1A1D] font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 cursor-not-allowed"

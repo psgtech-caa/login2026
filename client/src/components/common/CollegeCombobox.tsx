@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useId } from 'react';
-import { Search, ChevronDown, Check, Building2, PlusCircle } from 'lucide-react';
+import { Search, ChevronDown, Check, Building2 } from 'lucide-react';
 import { CATEGORIZED_COLLEGES, CollegeItem } from '../../constants/colleges';
 
 interface CollegeComboboxProps {
@@ -22,15 +22,11 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [isOtherSelected, setIsOtherSelected] = useState(false);
-  const [customCollege, setCustomCollege] = useState('');
 
   const containerRef = useRef<HTMLDivElement>(null);
   const searchInputRef = useRef<HTMLInputElement>(null);
-  const customInputRef = useRef<HTMLInputElement>(null);
 
   const searchInputId = useId();
-  const customInputId = useId();
 
   // Determine initial state if value exists
   useEffect(() => {
@@ -39,13 +35,7 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
     const matchedKnown = CATEGORIZED_COLLEGES.find(
       (c) => c.name === value || `${c.name}, ${c.city}` === value
     );
-
-    if (matchedKnown) {
-      setIsOtherSelected(false);
-    } else if (value && value !== 'Other') {
-      setIsOtherSelected(true);
-      setCustomCollege(value);
-    }
+    if (!matchedKnown) onChange('');
   }, []);
 
   // Close dropdown on click outside
@@ -67,25 +57,17 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
   }, [isOpen]);
 
   const handleSelectCollege = (collegeName: string) => {
-    if (collegeName === 'Other') {
-      setIsOtherSelected(true);
-      onChange(customCollege || '');
+    const normalizedCollegeName = collegeName.toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (normalizedCollegeName.includes('nittrichy') || normalizedCollegeName.includes('coimbatoreinstituteoftechnology')) {
+      window.alert('Registration closed for your college.');
       setIsOpen(false);
-      setTimeout(() => customInputRef.current?.focus(), 100);
+      setSearchQuery('');
       return;
     }
 
-    setIsOtherSelected(false);
-    setCustomCollege('');
     onChange(collegeName);
     setIsOpen(false);
     setSearchQuery('');
-  };
-
-  const handleCustomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-    setCustomCollege(val);
-    onChange(val);
   };
 
   const normalizeSearchText = (text: string) =>
@@ -134,9 +116,7 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
     );
   };
 
-  const displayLabel = isOtherSelected
-    ? customCollege || 'Other College'
-    : value || 'Search or select your college...';
+  const displayLabel = value || 'Search or select your college...';
 
   return (
     <div className={`relative space-y-2 ${className}`} ref={containerRef}>
@@ -200,14 +180,7 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
           <div className="max-h-[280px] overflow-y-auto custom-scrollbar">
             {filteredColleges.length === 0 ? (
               <div className="p-4 text-center text-xs font-mono text-[#A79798]">
-                <p>No matching colleges found.</p>
-                <button
-                  type="button"
-                  onClick={() => handleSelectCollege('Other')}
-                  className="mt-2 text-[#E01B22] hover:underline font-bold text-xs inline-flex items-center gap-1.5"
-                >
-                  <PlusCircle className="w-3.5 h-3.5" /> Select "Other" to enter college name
-                </button>
+                No matching colleges found.
               </div>
             ) : (
               <>
@@ -262,39 +235,9 @@ export const CollegeCombobox: React.FC<CollegeComboboxProps> = ({
                   );
                 })}
 
-                {/* Other Option at the bottom */}
-                <div
-                  onClick={() => handleSelectCollege('Other')}
-                  className={`px-3 py-2.5 text-xs font-mono cursor-pointer flex items-center gap-2 transition-colors hover:bg-[#E01B22]/20 bg-[#130C0E] border-t border-[#2A1A1D] ${
-                    isOtherSelected ? 'text-[#E01B22] font-bold' : 'text-[#A79798] hover:text-[#F7F2F2]'
-                  }`}
-                >
-                  <PlusCircle className="w-3.5 h-3.5 text-[#E01B22]" />
-                  <span className="font-semibold">+ Other / Not Listed Above</span>
-                </div>
               </>
             )}
           </div>
-        </div>
-      )}
-
-      {/* Dynamic Input for "Other" Selection */}
-      {isOtherSelected && (
-        <div className="mt-2 animate-in fade-in duration-200">
-          <label htmlFor={customInputId} className="block text-[11px] font-mono text-[#E08A17] font-bold mb-1 tracking-wider uppercase">
-            ENTER YOUR COLLEGE NAME *
-          </label>
-          <input
-            id={customInputId}
-            ref={customInputRef}
-            type="text"
-            value={customCollege}
-            onChange={handleCustomChange}
-            placeholder="Type full official college & campus name..."
-            className={`w-full bg-[#0A0607] border ${
-              error ? 'border-[#E01B22]' : 'border-[#E08A17]'
-            } text-[#F7F2F2] p-2.5 rounded-[2px] outline-none font-mono text-xs focus:ring-1 focus:ring-[#E08A17]`}
-          />
         </div>
       )}
 

@@ -34,6 +34,7 @@ import { MyTeamsPage } from '../pages/dashboard/MyTeamsPage';
 import { NotificationsPage } from '../pages/dashboard/NotificationsPage';
 import { CertificatesPage } from '../pages/dashboard/CertificatesPage';
 import { AttendanceScanPage } from '../pages/dashboard/AttendanceScanPage';
+import { DayAttendanceQrPage } from '../pages/dashboard/DayAttendanceQrPage';
 
 // Admin pages (rendered inside DashboardLayout)
 import { AdminPage } from '../pages/AdminPage';
@@ -104,6 +105,10 @@ export const router = createBrowserRouter([
           {
             path: 'admin/:section',
             element: <ProtectedRoute requireRole="admin"><AdminPage /></ProtectedRoute>,
+          },
+          {
+            path: 'admin/day-attendance',
+            element: <ProtectedRoute requireRole="admin"><DayAttendanceQrPage /></ProtectedRoute>,
           },
 
           // Coordinator routes — section driven by URL path

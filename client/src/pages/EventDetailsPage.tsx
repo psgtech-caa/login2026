@@ -7,6 +7,7 @@ import defaultEvents from '../data/events.json';
 import { SEOHead } from '../components/common/SEOHead';
 import { getBreadcrumbSchema, getEventDetailSchema, SITE_CONFIG } from '../data/seoConfig';
 import { normalizeEvents } from '../utils/eventFormatting';
+import { getEffectiveEventStatus } from '../utils/eventAccess';
 
 export const EventDetailsPage: React.FC = () => {
   const { id: slug } = useParams();
@@ -71,6 +72,7 @@ export const EventDetailsPage: React.FC = () => {
 
   const detail = selectedEvent.detail || {};
   const isRegistered = userRegistrations.includes(selectedEvent.id) || survivor?.registrations?.some((r: any) => r.worldId === selectedEvent.id);
+  const isRegistrationClosed = getEffectiveEventStatus(selectedEvent).toLowerCase() !== 'open';
 
   const handleRegisterClick = () => {
     if (!isAuthenticated) {
@@ -278,6 +280,12 @@ export const EventDetailsPage: React.FC = () => {
                     >
                       VIEW DASHBOARD →
                     </button>
+                  </div>
+                ) : isRegistrationClosed ? (
+                  <div className="bg-[#1A1114] border border-[#2A1A1D] p-3.5 text-center rounded-[2px]">
+                    <span className="text-[#A79798] font-mono text-xs font-bold uppercase tracking-wider">
+                      REGISTRATION CLOSED
+                    </span>
                   </div>
                 ) : (
                   <button

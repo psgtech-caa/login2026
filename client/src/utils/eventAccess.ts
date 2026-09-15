@@ -1,4 +1,5 @@
 const EVENT_ACCESS_STORAGE_KEY = 'login2026_event_access_overrides';
+const FRONTEND_CLOSED_EVENT_NAMES = ['nostos', 'codexcape', 'hunt your treasure', 'debug arena', 'in the slot'];
 
 export type EventAccessStatus = 'open' | 'closed';
 
@@ -36,7 +37,12 @@ export const resetEventAccessOverrides = () => {
 export const getEffectiveEventStatus = (event: any): string => {
   const baseStatus = String(event?.status || '').trim().toLowerCase();
   const override = getEventAccessOverrides()[String(event?.id)];
-  return override ? String(override).trim().toLowerCase() : baseStatus;
+  if (override) return String(override).trim().toLowerCase();
+
+  const eventName = String(event?.name || '').trim().toLowerCase();
+  if (FRONTEND_CLOSED_EVENT_NAMES.some((name) => eventName.includes(name))) return 'closed';
+
+  return baseStatus;
 };
 
 export const toggleEventAccessOverride = (event: any): EventAccessStatus => {

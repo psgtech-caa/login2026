@@ -3880,6 +3880,13 @@ export const RAW_COLLEGES: Omit<CollegeItem, "category">[] = [
     type: 'ARTS & SCIENCE',
   },
   {
+    id: 'sardar_vallabhbhai_patel_international_school_of_textiles_and_management',
+    name: 'Sardar Vallabhbhai Patel International School Of Textiles & Management',
+    shortName: 'SVPISTM',
+    city: 'Coimbatore',
+    type: 'UNIVERSITY',
+  },
+  {
     id: 's_veerasamy_chettiar_college_of_engineering_and_technology',
     name: 'S Veerasamy Chettiar College of Engineering and Technology',
     shortName: 'SVCC',

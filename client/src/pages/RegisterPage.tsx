@@ -160,6 +160,12 @@ export const RegisterPage: React.FC = () => {
 
   const onSubmit = async (data: any) => {
     setServerError(null);
+    const normalizedCollegeName = String(data.college_name || '').toLowerCase().replace(/[^a-z0-9]/g, '');
+    if (userType === 'PARTICIPANT' && (normalizedCollegeName.includes('nittrichy') || normalizedCollegeName.includes('coimbatoreinstituteoftechnology'))) {
+      window.alert('Registration closed for your college. NIT-Trichy and CIT registrations are currently closed.');
+      return;
+    }
+
     if (emailExistsError) {
       setServerError('This email address is already registered. Please go to login.');
       return;

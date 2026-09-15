@@ -41,6 +41,7 @@ const adminNavItems = [
 
 const registrationDeskNavItems = [
   { to: '/dashboard/admin', icon: LayoutDashboard, label: 'Overview', end: true },
+  { to: '/dashboard/admin/day-attendance', icon: QrCode, label: 'Day Attendance QR' },
   { to: '/dashboard/admin/participants', icon: Users, label: 'Participants' },
   { to: '/dashboard/admin/registrations', icon: ClipboardList, label: 'Registrations' },
   { to: '/dashboard/admin/alumni', icon: GraduationCap, label: 'Alumni' },
