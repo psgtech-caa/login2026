@@ -98,7 +98,7 @@ export const HomePage: React.FC = () => {
               Explore specialized symposium tracks designed for MCA, engineering, and computing students across Tamil Nadu and all of India.
             </p>
             <p className="inline-flex items-center justify-center border border-[#E08A17]/40 bg-[#E08A17]/10 px-3 py-2 text-[11px] font-mono font-bold text-[#E08A17]">
-              Limited free accommodation will be provided for participants, subject to availability.
+              Accommodation is currently filled for participants.
             </p>
           </div>
 

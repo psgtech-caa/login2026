@@ -469,7 +469,7 @@ const registerUser = async (req, res) => {
         batch_year,
         place,
         current_organization,
-        accommodation_required: Boolean(accommodation_required),
+        accommodation_required: false,
         role: normalizedRole,
         login_id: loginId,
         createdAt: registrationTimestamp,

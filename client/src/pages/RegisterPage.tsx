@@ -23,7 +23,6 @@ const participantSchema = z.object({
   roll_no: z.string().min(1, 'Roll / Reg No. is required'),
   gender: z.string().min(1, 'Please select your gender'),
   year_of_study: z.string().min(1, 'Please select your year of study'),
-  accommodation_required: z.boolean().optional(),
   password: z.string().min(6, 'Password must be at least 6 characters'),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -81,7 +80,7 @@ export const RegisterPage: React.FC = () => {
     resolver: zodResolver(participantSchema),
     defaultValues: {
       name: '', email: prefillEmail, otp: '', phone: '', college_name: '', department: '', roll_no: '',
-      gender: '', year_of_study: '1st Year', accommodation_required: false, password: '', confirmPassword: '',
+      gender: '', year_of_study: '1st Year', password: '', confirmPassword: '',
     },
   });
 
@@ -586,7 +585,7 @@ END:VCALENDAR`;
                 <div className="bg-[#0A0607] border border-[#2A1A1D] p-3.5 rounded-[2px]">
                   <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
                     <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                    <span>Need Accommodation (For participants from outside Coimbatore only. Final confirmation will be on the event date for limited students.)</span>
+                    <span>Need Accommodation (For alumni from outside Coimbatore only.)</span>
                   </label>
                 </div>
               </>
@@ -630,12 +629,7 @@ END:VCALENDAR`;
                     </select>
                     {errors.year_of_study && <p className={errorClass}>{(errors.year_of_study as any).message}</p>}
                   </div>
-                  <div className="flex items-end pb-1">
-                    <label className="flex items-center gap-3 text-xs font-mono text-[#F7F2F2] cursor-pointer">
-                      <input type="checkbox" {...register('accommodation_required')} className="h-4 w-4 accent-[#E01B22]" />
-                      <span>Need Accommodation (For participants from outside Coimbatore only. Final confirmation will be on the event date for limited students.)</span>
-                    </label>
-                  </div>
+                  <div className="flex items-end pb-1" />
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

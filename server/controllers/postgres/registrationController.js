@@ -21,6 +21,8 @@ const isExtractionBlindPair = (firstEvent, secondEvent) => {
     (firstName.includes('blind coding') && secondName.includes('the extraction'));
 };
 
+const isExtractionEvent = (event) => String(event?.name || '').toLowerCase().includes('the extraction');
+
 const findEventForRegistration = async (eventId) => {
   if (readFromNeon && neonSequelize) {
     try {
@@ -169,7 +171,7 @@ const createRegistration = async (req, res) => {
       if (!existingEvt) return false;
 
       // Same day check
-      if (!isExtractionBlindPair(event, existingEvt) && (existingEvt.day === event.day || existingEvt.date === event.date)) {
+      if (!isExtractionEvent(event) && !isExtractionBlindPair(event, existingEvt) && (existingEvt.day === event.day || existingEvt.date === event.date)) {
         if (event.start_time < existingEvt.end_time && existingEvt.start_time < event.end_time) {
           clashingEvent = existingEvt;
           return true;
@@ -305,7 +307,7 @@ const createRegistration = async (req, res) => {
           const teammateHasOverlap = teammateRegistrations.some((reg) => {
             const existingEvt = reg.event;
             if (!existingEvt) return false;
-            if (!isExtractionBlindPair(event, existingEvt) && (existingEvt.day === event.day || existingEvt.date === event.date)) {
+            if (!isExtractionEvent(event) && !isExtractionBlindPair(event, existingEvt) && (existingEvt.day === event.day || existingEvt.date === event.date)) {
               if (event.start_time < existingEvt.end_time && existingEvt.start_time < event.end_time) {
                 teammateClash = existingEvt;
                 return true;
