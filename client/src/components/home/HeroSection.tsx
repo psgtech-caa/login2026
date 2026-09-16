@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { useAuthStore } from '../../store/authStore';
 import { DecryptedText } from '../../animations/DecryptedText';
 import GradientWaves from '../../animations/GradientWaves';
@@ -67,6 +68,32 @@ export const HeroSection: React.FC<HeroSectionProps> = ({ onExploreEvents }) => 
           background: 'radial-gradient(ellipse at center, rgba(0, 0, 0, 0.45) 0%, rgba(0, 0, 0, 0.15) 50%, transparent 80%)',
         }}
       />
+
+      {/* Spider-Man enters the hero with a short jump on first load. */}
+      <motion.div
+        initial={{ opacity: 0, y: 120, rotate: -6, scale: 0.9 }}
+        animate={{
+          opacity: 1,
+          y: [120, -28, 0, -8, 0],
+          rotate: [-6, 4, -2, 1, 0],
+          scale: [0.9, 1.04, 1, 1.01, 1],
+        }}
+        transition={{
+          duration: 1.5,
+          ease: 'easeOut',
+          times: [0, 0.45, 0.7, 0.86, 1],
+        }}
+        className="absolute bottom-14 right-3 sm:right-8 lg:right-16 z-[1] pointer-events-none select-none"
+        aria-hidden="true"
+      >
+        <motion.img
+          src="/assets/spiderman1.webp"
+          alt=""
+          className="w-24 sm:w-32 lg:w-44 h-auto object-contain drop-shadow-[0_10px_22px_rgba(224,27,34,0.65)]"
+          animate={{ y: [0, -3, 0] }}
+          transition={{ delay: 1.5, duration: 3.2, repeat: Infinity, ease: 'easeInOut' }}
+        />
+      </motion.div>
 
       {/* ── Main Composition Wrapper ── */}
       <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-4xl mx-auto px-4 flex-grow py-12">

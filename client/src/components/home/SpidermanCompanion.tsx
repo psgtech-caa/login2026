@@ -18,7 +18,7 @@ export const SpidermanCompanion: React.FC = () => {
   const [convoState, setConvoState] = useState<ConvoState>('initial');
   const [isMuted, setIsMuted] = useState<boolean>(soundFx.isMuted());
   const [isScrolledPastHero, setIsScrolledPastHero] = useState<boolean>(false);
-  const [speechBubbleText, setSpeechBubbleText] = useState<string>("Think you can survive?");
+  const [speechBubbleText, setSpeechBubbleText] = useState<string>("Try The Extraction CTF");
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -37,10 +37,10 @@ export const SpidermanCompanion: React.FC = () => {
   // Cycle provocative speech hints
   useEffect(() => {
     const hints = [
-      "Think you can survive?",
-      "Only less than 10% succeed.",
-      "Are you fast enough?",
-      "Unlock classified arena",
+      "Try The Extraction CTF",
+      "₹13,000+ prize pool",
+      "Solve real security challenges",
+      "Register for The Extraction",
     ];
     let idx = 0;
     const interval = setInterval(() => {
@@ -248,7 +248,7 @@ export const SpidermanCompanion: React.FC = () => {
                     <span className="block text-[8.5px] text-[#FF5555] font-black uppercase tracking-wider mb-1">
                       // DIRECT TRANSMISSION
                     </span>
-                    "Most people who register for LOGIN 2K26 can barely solve standard challenges. You probably can't either."
+                    "The Extraction is a cybersecurity CTF where you solve clues, break codes, and investigate digital evidence."
                   </div>
 
                   <div className="space-y-2 pt-1">
@@ -260,7 +260,7 @@ export const SpidermanCompanion: React.FC = () => {
                       onClick={() => handleSelectOption('challenge')}
                       className="w-full py-2.5 px-3 bg-[#240A0F] hover:bg-[#340F16] border border-[#FF2A2A] hover:border-[#FF4444] rounded-[2px] text-left text-white text-xs font-bold transition-all shadow-[0_0_12px_rgba(255,42,42,0.25)] flex items-center justify-between"
                     >
-                      <span>You think I can't? Try me.</span>
+                      <span>Tell me about The Extraction.</span>
                       <span className="text-[#FF5555]">&rarr;</span>
                     </button>
 
@@ -268,7 +268,7 @@ export const SpidermanCompanion: React.FC = () => {
                       onClick={() => handleSelectOption('challenge')}
                       className="w-full py-2.5 px-3 bg-[#140709] hover:bg-[#1F0B0E] border border-[#2A1A1D] hover:border-[#E01B22] rounded-[2px] text-left text-[#C8C2C2] hover:text-white text-xs font-medium transition-all flex items-center justify-between"
                     >
-                      <span>What is this even about?</span>
+                      <span>Can I join more than one event?</span>
                       <span className="text-[#8C8283]">&rarr;</span>
                     </button>
                   </div>
@@ -280,16 +280,19 @@ export const SpidermanCompanion: React.FC = () => {
                 <div className="space-y-4 animate-fadeIn">
                   <div className="p-3 bg-[#1E080D] border-l-2 border-[#FF2A2A] text-xs text-[#F0EBEB] leading-relaxed space-y-1.5">
                     <span className="block text-[8.5px] text-[#FF5555] font-black uppercase tracking-wider">
-                      // CLASSIFIED CTF OVERRIDE
+                      // EVENT INFORMATION
                     </span>
                     <p>
-                      "The Extraction CTF has a <strong className="text-[#FFD700]">₹13,000+ bounty</strong> with cryptographic bypasses and forensic payloads. less than 10% of teams will succeed in the first 30 minutes."
+                      The Extraction is a cybersecurity CTF with a <strong className="text-[#FFD700]">₹13,000+ prize pool</strong>. Solve coding, security, and digital forensics challenges at the CAT Lab.
+                    </p>
+                    <p>
+                      You can register for both <strong className="text-white">The Extraction</strong> and <strong className="text-white">Blind Coding</strong>. Their timings do not clash.
                     </p>
                   </div>
 
                   <div className="space-y-2 pt-1">
                     <div className="text-[8.5px] text-[#FF5555] font-bold tracking-wider uppercase">
-                      PROVE YOUR CLEARANCE:
+                      CHOOSE AN OPTION:
                     </div>
 
                     {/* Primary Rage Bait Route Button */}
@@ -297,7 +300,7 @@ export const SpidermanCompanion: React.FC = () => {
                       onClick={() => handleRoute('/events/the-extraction')}
                       className="w-full py-3 px-3.5 bg-[#E01B22] hover:bg-[#FF2A2A] text-white text-xs font-black uppercase tracking-wider rounded-[2px] shadow-[0_0_20px_rgba(224,27,34,0.7)] transition-all flex items-center justify-between"
                     >
-                      <span>TAKE THE ₹13,000 BOUNTY (ENTER CTF)</span>
+                      <span>EXPLORE THE EXTRACTION CTF</span>
                       <span className="text-white font-bold">&rarr;</span>
                     </button>
 
@@ -305,7 +308,7 @@ export const SpidermanCompanion: React.FC = () => {
                       onClick={() => handleRoute('/events')}
                       className="w-full py-2.5 px-3 bg-[#140709] hover:bg-[#200B0F] border border-[#2A1A1D] hover:border-[#E01B22] rounded-[2px] text-left text-[#C8C2C2] hover:text-white text-xs font-semibold transition-all flex items-center justify-between"
                     >
-                      <span>Explore other symposium arenas</span>
+                      <span>SEE OTHER EVENTS</span>
                       <span className="text-[#8C8283]">&rarr;</span>
                     </button>
 
@@ -313,7 +316,7 @@ export const SpidermanCompanion: React.FC = () => {
                       onClick={() => handleRoute('/register')}
                       className="w-full py-2.5 px-3 bg-[#140709] hover:bg-[#200B0F] border border-[#2A1A1D] hover:border-[#E01B22] rounded-[2px] text-left text-[#C8C2C2] hover:text-white text-xs font-semibold transition-all flex items-center justify-between"
                     >
-                      <span>Register squad pass (₹100)</span>
+                      <span>REGISTER FOR THE EXTRACTION (₹100)</span>
                       <span className="text-[#8C8283]">&rarr;</span>
                     </button>
                   </div>
