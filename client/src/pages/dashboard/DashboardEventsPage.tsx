@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import type { Event } from '../../types/event';
 import { getEffectiveEventStatus } from '../../utils/eventAccess';
+import { normalizeEvents } from '../../utils/eventFormatting';
 import { Calendar, Users, User, Clock, MapPin, ArrowRight, Search, AlertCircle, CheckCircle2, Shield, Sparkles, AlertTriangle, Trash2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
 
@@ -65,7 +66,7 @@ export const DashboardEventsPage: React.FC = () => {
 
   const { data: events = [], isLoading, isError: eventsLoadFailed } = useQuery({
     queryKey: ['events'],
-    queryFn: async () => { const res = await api.events.getAll(); return res.data || []; },
+    queryFn: async () => { const res = await api.events.getAll(); return normalizeEvents(res.data || []); },
   });
 
   const { data: userTeams = [] } = useQuery({

@@ -19,6 +19,13 @@ export const normalizeEventRecord = (event: any): any => {
     normalized.day = 18;
   }
 
+  if (eventName.includes('the extraction') || eventName === 'extraction') {
+    normalized.date = '2026-09-18';
+    normalized.day = 18;
+    normalized.start_time = '13:30:00';
+    normalized.end_time = '15:30:00';
+  }
+
   return normalized;
 };
 

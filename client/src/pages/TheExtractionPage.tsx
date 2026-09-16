@@ -91,10 +91,10 @@ export const TheExtractionPage: React.FC = () => {
     if (clean === targetDecoded) {
       soundFx.reveal();
       setSimSuccess(true);
-      setSimFeedback("CLEARANCE VERIFIED // BYPASS ACCEPTED: LEVEL-5 ACCESS GRANTED!");
+      setSimFeedback("Correct. The decoded message is valid.");
     } else {
       soundFx.glitch();
-      setSimFeedback("ACCESS DENIED // INCORRECT DECRYPTED PAYLOAD. TRY AGAIN.");
+      setSimFeedback("That answer is not correct. Try again.");
     }
   };
 
@@ -105,8 +105,8 @@ export const TheExtractionPage: React.FC = () => {
       role: 'Former RAW Field Agent',
       status: 'Inside East Coast Mall',
       image: '/characters/veera_determined.webp',
-      quote: "I've taken out the perimeter guards, but Saif locked the entire mall grid with triple-layer ciphers and biometric vaults. If you don't breach their network from CAT Lab, the hostages won't make it out. Move fast. I don't like waiting.",
-      tag: 'ALPHA OPERATIVE',
+      quote: "The mall systems are locked with ciphers and biometric security. Break into the network from the CAT Lab and help us get the hostages out.",
+      tag: 'FIELD AGENT',
     },
     {
       id: 'althaf',
@@ -114,17 +114,17 @@ export const TheExtractionPage: React.FC = () => {
       role: 'Crisis Command Lead',
       status: 'Joint Operations Command Center',
       image: '/characters/althaf_commanding.webp',
-      quote: "Listen up, Operatives! The government cannot launch a frontal assault without mass casualties. Veera is our lone wolf on the inside. You are CERT-In's finest cyber strike unit. Crack Saif's JWT tokens, expose the traitorous Home Minister, and feed Veera live bypass codes!",
-      tag: 'CRISIS COMMAND',
+      quote: "A direct attack could put the hostages at risk. Crack the JWT tokens, find the truth, and send the access codes to Veera.",
+      tag: 'CRISIS LEAD',
     },
     {
       id: 'umar',
       name: 'UMAR SAIF',
-      role: 'Terror Cell Mastermind',
+      role: 'Attack Leader',
       status: 'Atrium Command Post // Armed Sleeper Cells',
       image: '/characters/umar_threatening.webp',
-      quote: "Listen to me carefully. We have wired every corner of East Coast Mall with C4. Release my brother Umar Farooq immediately, or the logic bomb triggers. You think your little cyber team can bypass my killswitch? Try it.",
-      tag: 'HOSTILE THREAT',
+      quote: "The mall is protected by a logic bomb and several security systems. Find the bypass before the timer runs out.",
+      tag: 'ATTACK LEADER',
     },
     {
       id: 'preethi',
@@ -132,8 +132,8 @@ export const TheExtractionPage: React.FC = () => {
       role: 'Tactical Relay Agency',
       status: 'Comms Relay Coordinator',
       image: '/characters/preethi_hopeful.webp',
-      quote: "Veera is fighting on the frontlines while we patch your terminal directly into the mall's maintenance network. We have 9 encrypted security checkpoints. Unlock them one by one!",
-      tag: 'COMMS RELAY',
+      quote: "Your terminal is connected to the mall's maintenance network. Work through the nine encrypted checkpoints one by one.",
+      tag: 'COMMUNICATIONS',
     },
   ];
 
@@ -150,7 +150,7 @@ export const TheExtractionPage: React.FC = () => {
       description:
         'Operation BLACKOUT — collegiate cybersecurity Capture The Flag arena at PSG College of Technology, Coimbatore. Cryptographic vault breaches, reverse engineering, forensics, and authentication bypass challenges.',
       startDate: '2026-09-18T13:30:00+05:30',
-      endDate: '2026-09-18T16:00:00+05:30',
+      endDate: '2026-09-18T15:30:00+05:30',
       eventStatus: 'https://schema.org/EventScheduled',
       eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
       location: {
@@ -177,7 +177,7 @@ export const TheExtractionPage: React.FC = () => {
     <div className="min-h-screen bg-[#070204] text-[#F7F2F2] font-mono selection:bg-[#E01B22] selection:text-white pb-24 overflow-x-hidden">
       <SEOHead
         title="The Extraction CTF 2026 | Operation BLACKOUT Cybersecurity Arena | PSG Tech Coimbatore"
-        description="Engage in The Extraction — LOGIN 2026 story-driven cybersecurity CTF competition at PSG College of Technology. Crack hashes, bypass authentication gates, solve digital forensics puzzles, and neutralize Operation BLACKOUT."
+        description="The Extraction is a cybersecurity CTF at PSG College of Technology. Solve hash, authentication, reverse engineering, and digital forensics challenges."
         keywords={[
           'The Extraction CTF',
           'Operation BLACKOUT CTF',
@@ -260,7 +260,7 @@ export const TheExtractionPage: React.FC = () => {
         {/* ═══════════════════════════════════════════════════════════════════
             01. HERO SECTION: BALANCED 50/50 HCI LAYOUT
             - Left: Big, Impactful Extraction Poster Showcase
-            - Right: "LEANER. MEANER. STRONGER." Hook, Telemetry & ₹13,000 Bounty
+            - Right: Event summary, timings, and ₹13,000 prize pool
            ═══════════════════════════════════════════════════════════════════ */}
         <motion.section
           initial="hidden"
@@ -291,7 +291,7 @@ export const TheExtractionPage: React.FC = () => {
                 FLAGSHIP CTF ARENA
               </span>
               <span className="text-[#FF5555] font-black uppercase tracking-wider">
-                SECTOR 7 SIEGE // CAT LAB
+                CAT LAB // 18 SEP 2026
               </span>
             </div>
           </div>
@@ -302,46 +302,46 @@ export const TheExtractionPage: React.FC = () => {
             {/* Live Status Badge */}
             <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-[2px] bg-[#22070B] border border-[#FF2A2A] text-[#FF5555] text-[10px] sm:text-xs font-bold tracking-widest uppercase shadow-[0_0_15px_rgba(255,42,42,0.35)] w-fit">
               <Radio className="w-3.5 h-3.5 text-[#FF2A2A]" />
-              <span>LIVE CRISIS TRANSMISSION // SECTOR 7 LOCKDOWN</span>
+              <span>EVENT BRIEFING</span>
             </div>
 
             {/* Blockbuster Headline */}
             <div className="space-y-2">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-display font-black text-transparent bg-clip-text bg-gradient-to-r from-[#FFD700] via-[#FFFFFF] to-[#FF5555] tracking-tight uppercase leading-tight">
-                "HE IS LEANER. MEANER. STRONGER. BUT HE NEEDS YOUR KEYSTROKES TO SURVIVE."
+                SOLVE THE CLUES. BREAK INTO THE SYSTEM. COMPLETE THE EXTRACTION.
               </h1>
               <p className="text-xs sm:text-sm text-[#D8CECE] font-sans leading-relaxed">
-                East Coast Mall is under siege. 1,200 hostages. 15 armed sleeper cells. One former RAW agent trapped inside. <strong className="text-white font-bold">Veera Raghavan</strong> doesn't take prisoners — he extracts them. But he is blind without cyber backup. Will your squad crack the system, or will Chennai burn?
+                A team is trapped inside East Coast Mall, and its security systems are locked. <strong className="text-white font-bold">Veera Raghavan</strong> needs your help from the CAT Lab. Solve the challenges, find the access codes, and help the team complete the mission.
               </p>
             </div>
 
-            {/* ── TOTAL BOUNTY POOL (Exact 2 Prizes: ₹8,000 & ₹5,000) ── */}
+            {/* ── TOTAL PRIZE POOL ── */}
             <div className="p-4 bg-gradient-to-r from-[#200A0F] via-[#140608] to-[#200A0F] border-2 border-[#FFD700] rounded-[2px] shadow-[0_0_20px_rgba(255,215,0,0.15)]">
               <div className="text-[9.5px] sm:text-[10.5px] text-[#FFD700] font-black uppercase tracking-widest mb-2">
-                TOTAL EVENT BOUNTY POOL: ₹13,000
+                TOTAL PRIZE POOL: ₹13,000
               </div>
               <div className="grid grid-cols-2 gap-3 text-center">
                 <div className="p-3 bg-[#18080C] border border-[#FFD700]/60 rounded-[2px]">
                   <span className="text-[8.5px] px-2 py-0.5 bg-[#FFD700] text-black font-black uppercase rounded-[1px]">
-                    1ST PRIZE &bull; CHAMPION
+                    1ST PRIZE
                   </span>
                   <div className="text-2xl sm:text-3xl font-display font-black text-[#FFD700] mt-1">
                     ₹8,000
                   </div>
                   <div className="text-[10px] text-[#E5D8D8] mt-0.5 font-semibold">
-                    Cash Bounty + Trophy
+                    Cash prize + trophy
                   </div>
                 </div>
 
                 <div className="p-3 bg-[#18080C] border border-[#C0C0C0]/60 rounded-[2px]">
                   <span className="text-[8.5px] px-2 py-0.5 bg-[#C0C0C0] text-black font-black uppercase rounded-[1px]">
-                    2ND PRIZE &bull; RUNNER-UP
+                    2ND PRIZE
                   </span>
                   <div className="text-2xl sm:text-3xl font-display font-black text-[#C0C0C0] mt-1">
                     ₹5,000
                   </div>
                   <div className="text-[10px] text-[#E5D8D8] mt-0.5 font-semibold">
-                    Cash Bounty + Shield
+                    Cash prize + shield
                   </div>
                 </div>
               </div>
@@ -351,9 +351,9 @@ export const TheExtractionPage: React.FC = () => {
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-left">
               <div className="p-2.5 bg-[#130609] border border-[#2A1A1D] rounded-[2px]">
                 <div className="text-[8.5px] text-[#8C8283] uppercase flex items-center gap-1">
-                  <Users className="w-3 h-3 text-[#FF2A2A]" /> SQUAD
+                  <Users className="w-3 h-3 text-[#FF2A2A]" /> TEAM
                 </div>
-                <div className="text-xs font-bold text-white mt-0.5">1–2 Operatives</div>
+                <div className="text-xs font-bold text-white mt-0.5">1-2 members</div>
               </div>
 
               <div className="p-2.5 bg-[#130609] border border-[#2A1A1D] rounded-[2px]">
@@ -372,9 +372,9 @@ export const TheExtractionPage: React.FC = () => {
 
               <div className="p-2.5 bg-[#130609] border border-[#2A1A1D] rounded-[2px]">
                 <div className="text-[8.5px] text-[#8C8283] uppercase flex items-center gap-1">
-                  <Ticket className="w-3 h-3 text-[#10B981]" /> PASS ENTRY
+                  <Ticket className="w-3 h-3 text-[#10B981]" /> ENTRY FEE
                 </div>
-                <div className="text-xs font-bold text-[#10B981] mt-0.5">INCLUDED (₹100)</div>
+                <div className="text-xs font-bold text-[#10B981] mt-0.5">INCLUDED</div>
               </div>
             </div>
 
@@ -385,7 +385,7 @@ export const TheExtractionPage: React.FC = () => {
                 className="shimmer-btn w-full px-8 py-4 bg-[#E01B22] hover:bg-[#FF2A2A] text-white text-xs font-black uppercase tracking-wider rounded-[2px] shadow-[0_0_25px_rgba(224,27,34,0.7)] inline-flex items-center justify-center gap-2 transition-transform hover:scale-[1.02] focus:outline-none focus:ring-2 focus:ring-[#FF2A2A]"
               >
                 <Zap className="w-4 h-4" />
-                <span>ENLIST SQUAD // BECOME VEERA'S CYBER UNIT &rarr;</span>
+                <span>REGISTER FOR THE EXTRACTION &rarr;</span>
               </button>
             </div>
 
@@ -393,7 +393,7 @@ export const TheExtractionPage: React.FC = () => {
         </motion.section>
 
         {/* ═══════════════════════════════════════════════════════════════════
-            02. SECTION: CHARACTER TRANSMISSIONS & RADIO DISPATCH
+            02. SECTION: EVENT STORY AND COORDINATORS
            ═══════════════════════════════════════════════════════════════════ */}
         <motion.section
           initial="hidden"
@@ -405,7 +405,7 @@ export const TheExtractionPage: React.FC = () => {
           <div className="border-b border-[#2A1A1D] pb-2 flex items-center gap-2">
             <Radio className="w-4 h-4 text-[#FF2A2A]" />
             <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
-              INTERCEPTED RADIO COMMS & CHARACTER DOSSIER
+              EVENT STORY AND COORDINATORS
             </h2>
           </div>
 
@@ -467,7 +467,7 @@ export const TheExtractionPage: React.FC = () => {
 
                     <div className="p-3.5 bg-[#080204] border-l-4 border-[#FF2A2A] rounded-[2px] shadow-inner">
                       <div className="text-[8.5px] text-[#FF5555] font-black tracking-widest uppercase">
-                        // INTERCEPTED RADIO TRANSMISSION
+                        EVENT MESSAGE
                       </div>
                       <p className="text-xs sm:text-sm text-[#F0EBEB] italic font-sans leading-relaxed mt-0.5">
                         "{char.quote}"
@@ -481,7 +481,7 @@ export const TheExtractionPage: React.FC = () => {
         </motion.section>
 
         {/* ═══════════════════════════════════════════════════════════════════
-            03. SECTION: 3-ACT MISSION BLUEPRINT (9 TACTICAL LEVELS)
+            03. SECTION: CHALLENGE STRUCTURE (9 LEVELS)
            ═══════════════════════════════════════════════════════════════════ */}
         <motion.section
           initial="hidden"
@@ -494,10 +494,10 @@ export const TheExtractionPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Layers className="w-4 h-4 text-[#FF2A2A]" />
               <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
-                3-ACT MISSION BLUEPRINT & LEVEL ARCHITECTURE
+                CHALLENGE STRUCTURE
               </h2>
             </div>
-            <span className="text-[10px] text-[#A79798] font-mono">9 LEVELS &bull; 1 MASTER VAULT</span>
+            <span className="text-[10px] text-[#A79798] font-mono">9 LEVELS</span>
           </div>
 
           <div className="space-y-4">
@@ -505,25 +505,25 @@ export const TheExtractionPage: React.FC = () => {
             <div className="p-5 bg-[#140609] border-l-4 border-[#FF2A2A] border-y border-r border-[#2A1A1D] rounded-[2px] space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-[#FF5555] uppercase tracking-wider">
-                  ACT 1: BREACH DISCOVERY (Levels 1.1 – 1.3)
+                  ACT 1: FIND THE ENTRY (Levels 1.1 - 1.3)
                 </span>
-                <span className="text-[9.5px] text-[#FFD700] font-bold">EAST COAST MALL SIEGE</span>
+                <span className="text-[9.5px] text-[#FFD700] font-bold">START HERE</span>
               </div>
               <p className="text-xs text-[#C8C2C2] font-sans">
-                Saif's sleeper cells hijack the mall, trapping 1,200 civilians. Bypass biometric firedoors to allow Veera inside.
+                Find the first clues and bypass the mall's basic security systems.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 font-sans text-xs">
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#FF5555]">Level 1.1: Intercepted CCTV Comms</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Decode Base64, ROT13, and string reversal to pinpoint terrorist locations.</span>
+                  <strong className="text-white block font-mono text-xs text-[#FF5555]">Level 1.1: CCTV Messages</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Decode Base64, ROT13, and reversed text.</span>
                 </div>
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#FF5555]">Level 1.2: Fragmented Server Map</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Decode Decimal ASCII, Octal & Atbash to unlock firedoors.</span>
+                  <strong className="text-white block font-mono text-xs text-[#FF5555]">Level 1.2: Server Map</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Decode Decimal ASCII, Octal, and Atbash.</span>
                 </div>
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#FF5555]">Level 1.3: Time-Locked Vault</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Crack biometric auth with unique MD5 cryptographic signatures.</span>
+                  <strong className="text-white block font-mono text-xs text-[#FF5555]">Level 1.3: Locked Vault</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Use MD5 hashes to pass the biometric check.</span>
                 </div>
               </div>
             </div>
@@ -532,25 +532,25 @@ export const TheExtractionPage: React.FC = () => {
             <div className="p-5 bg-[#140609] border-l-4 border-[#E01B22] border-y border-r border-[#2A1A1D] rounded-[2px] space-y-2">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-[#E01B22] uppercase tracking-wider">
-                  ACT 2: INFILTRATION & MINISTERIAL TREASON (Levels 2.1 – 2.3)
+                  ACT 2: FOLLOW THE DATA (Levels 2.1 - 2.3)
                 </span>
                 <span className="text-[9.5px] text-[#3B82F6] font-bold">NEWS FEED HIJACK</span>
               </div>
               <p className="text-xs text-[#C8C2C2] font-sans">
-                The corrupt Home Minister colludes with Saif and stages an execution on live TV. Expose the treason.
+                Follow the evidence and find who is behind the attack.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 font-sans text-xs">
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#E01B22]">Level 2.1: Corrupted Hash Trail</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Crack MD5, SHA-1, SHA-256 hashes to expose Swiss bank transfers.</span>
+                  <strong className="text-white block font-mono text-xs text-[#E01B22]">Level 2.1: Hash Trail</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Crack MD5, SHA-1, and SHA-256 hashes.</span>
                 </div>
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#E01B22]">Level 2.2: JWT Inception</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Reverse-engineer hex-encoded JWT tokens to hijack the live broadcast.</span>
+                  <strong className="text-white block font-mono text-xs text-[#E01B22]">Level 2.2: JWT Tokens</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Read the hex-encoded JWT tokens to access the broadcast.</span>
                 </div>
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
                   <strong className="text-white block font-mono text-xs text-[#E01B22]">Level 2.3: Pattern Lock</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Calculate SHA-256 pattern locks to pose as militant negotiators.</span>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Use SHA-256 patterns to open the next stage.</span>
                 </div>
               </div>
             </div>
@@ -559,25 +559,25 @@ export const TheExtractionPage: React.FC = () => {
             <div className="p-5 bg-[#1A080C] border-l-4 border-[#FFD700] border-y border-r border-[#FFD700]/50 rounded-[2px] space-y-2 shadow-[0_0_20px_rgba(255,215,0,0.15)]">
               <div className="flex items-center justify-between">
                 <span className="text-xs font-black text-[#FFD700] uppercase tracking-wider">
-                  ACT 3: THE FINAL STRIKE & PAKISTAN MASTER VAULT (Levels 3.1 – 3.3)
+                  ACT 3: OPEN THE MASTER VAULT (Levels 3.1 - 3.3)
                 </span>
-                <span className="text-[9.5px] text-[#FF2A2A] font-bold">FINAL BOSS BATTLE</span>
+                <span className="text-[9.5px] text-[#FF2A2A] font-bold">FINAL STAGE</span>
               </div>
               <p className="text-xs text-[#C8C2C2] font-sans">
-                Saif triggers a fail-deadly logic bomb. Veera chases Umar Farooq across the border into Pakistan!
+                Complete the final checks, stop the logic bomb, and open the master vault.
               </p>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 pt-1 font-sans text-xs">
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#FFD700]">Level 3.1: Payload Quarantine</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Decode Binary + Hex + Base64 + ROT13 to open emergency exits.</span>
+                  <strong className="text-white block font-mono text-xs text-[#FFD700]">Level 3.1: Payload Check</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Decode Binary, Hex, Base64, and ROT13.</span>
                 </div>
                 <div className="p-2.5 bg-[#0B0305] border border-[#2A1A1D] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#FFD700]">Level 3.2: Logic Bomb Defusal</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Disarm Saif's 5-layer nested logic bomb pipeline before detonation.</span>
+                  <strong className="text-white block font-mono text-xs text-[#FFD700]">Level 3.2: Logic Check</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Solve the five-layer logic problem before time runs out.</span>
                 </div>
                 <div className="p-2.5 bg-[#1C0A0E] border-2 border-[#FFD700] rounded">
-                  <strong className="text-white block font-mono text-xs text-[#FFD700]">Level 3.3: PAKISTAN MASTER VAULT</strong>
-                  <span className="text-[#A79798] text-[11px] block mt-0.5">Multi-stage gauntlet (Hex ➔ JWT ➔ ROT13 ➔ Coordinates ➔ 6-digit Key).</span>
+                  <strong className="text-white block font-mono text-xs text-[#FFD700]">Level 3.3: Master Vault</strong>
+                  <span className="text-[#A79798] text-[11px] block mt-0.5">Complete the final steps: Hex, JWT, ROT13, coordinates, and a six-digit key.</span>
                 </div>
               </div>
             </div>
@@ -585,7 +585,7 @@ export const TheExtractionPage: React.FC = () => {
         </motion.section>
 
         {/* ═══════════════════════════════════════════════════════════════════
-            04. SECTION: LIVE SECTOR BREACH TERMINAL (INTERACTIVE MINI-CHALLENGE)
+            04. SECTION: PRACTICE TERMINAL
            ═══════════════════════════════════════════════════════════════════ */}
         <motion.section
           initial="hidden"
@@ -598,7 +598,7 @@ export const TheExtractionPage: React.FC = () => {
             <div className="flex items-center gap-2">
               <Terminal className="w-5 h-5 text-[#FF2A2A]" />
               <h2 className="text-sm font-bold text-white uppercase tracking-wider">
-                LIVE SECTOR BREACH TERMINAL // TEST YOUR READINESS
+                PRACTICE TERMINAL
               </h2>
             </div>
             <span className="text-[9px] px-2 py-0.5 bg-[#FF2A2A] text-white font-bold rounded-[1px]">
@@ -608,13 +608,13 @@ export const TheExtractionPage: React.FC = () => {
 
           <div className="p-4 bg-[#140608] border border-[#2A1A1D] rounded space-y-1.5">
             <div className="text-[10px] text-[#FF5555] font-bold uppercase">
-              &gt; INCOMING CIPHER PAYLOAD:
+              &gt; CIPHER TO DECODE:
             </div>
             <div className="p-3 bg-black/80 border border-[#FF2A2A]/40 rounded text-center text-sm sm:text-base font-black text-[#FFD700] tracking-widest">
               {targetEncoded}
             </div>
             <div className="text-[11px] text-[#A79798] font-sans">
-              Hint: Intercepted Base64 encoding. Decode the string above to prove your cipher clearance.
+              Hint: The text uses Base64. Decode it and enter the answer below.
             </div>
           </div>
 
@@ -632,7 +632,7 @@ export const TheExtractionPage: React.FC = () => {
                 type="submit"
                 className="px-6 py-3 bg-[#E01B22] hover:bg-[#FF2A2A] text-white font-black text-xs uppercase tracking-wider rounded-[2px] transition-all shrink-0 focus:outline-none focus:ring-2 focus:ring-[#FF2A2A]"
               >
-                SUBMIT BYPASS
+                CHECK ANSWER
               </button>
             </div>
 
@@ -658,7 +658,7 @@ export const TheExtractionPage: React.FC = () => {
         </motion.section>
 
         {/* ═══════════════════════════════════════════════════════════════════
-            05. SECTION: EVENT COORDINATORS & SQUAD ENLISTMENT HUB
+            05. SECTION: EVENT COORDINATORS
            ═══════════════════════════════════════════════════════════════════ */}
         <motion.section
           initial="hidden"
@@ -670,7 +670,7 @@ export const TheExtractionPage: React.FC = () => {
           <div className="border-b border-[#2A1A1D] pb-2 flex items-center gap-2">
             <Users className="w-4 h-4 text-[#FF2A2A]" />
             <h2 className="text-base sm:text-lg font-black text-white uppercase tracking-wider">
-              EVENT COORDINATORS & DIRECT COMMS
+              EVENT COORDINATORS
             </h2>
           </div>
 
@@ -686,7 +686,7 @@ export const TheExtractionPage: React.FC = () => {
                   Tino Britty J
                 </h3>
                 <p className="text-xs text-[#A79798] mt-0.5">
-                  Lead Organizer // The Extraction CTF Quest
+                  Helps with The Extraction event
                 </p>
               </div>
 
@@ -769,7 +769,7 @@ export const TheExtractionPage: React.FC = () => {
                   Srinithi J
                 </h3>
                 <p className="text-xs text-[#A79798] mt-0.5">
-                  Co-Organizer // The Extraction CTF Quest
+                  Helps with The Extraction event
                 </p>
               </div>
 
@@ -804,7 +804,7 @@ export const TheExtractionPage: React.FC = () => {
         </motion.section>
 
         {/* ═══════════════════════════════════════════════════════════════════
-            06. FINAL CALL TO ACTION: SQUAD ENLISTMENT
+            06. REGISTER FOR THE EVENT
            ═══════════════════════════════════════════════════════════════════ */}
         <motion.section
           initial="hidden"
@@ -815,10 +815,10 @@ export const TheExtractionPage: React.FC = () => {
         >
           <div className="text-left space-y-1">
             <h2 className="text-xl sm:text-2xl font-display font-black text-white uppercase tracking-wider">
-              READY TO ENTER THE EXTRACTION?
+              READY TO JOIN THE EXTRACTION?
             </h2>
             <p className="text-xs text-[#C8B8B8] font-sans">
-              ₹100 All-Inclusive Symposium Pass &bull; Solo or Duo Teams &bull; ₹13,000 Total Prize Pool (1st: ₹8,000 | 2nd: ₹5,000)
+              ₹100 event pass &bull; Teams of 1-2 &bull; ₹13,000 total prize pool
             </p>
           </div>
 
@@ -827,7 +827,7 @@ export const TheExtractionPage: React.FC = () => {
               onClick={handleActionClick}
               className="px-8 py-4 bg-[#FF2A2A] hover:bg-[#FF4545] text-white text-xs font-black uppercase tracking-wider rounded-[2px] transition-all shadow-[0_0_25px_rgba(255,42,42,0.8)] hover:scale-105 focus:outline-none focus:ring-2 focus:ring-[#FF2A2A]"
             >
-              REGISTER SQUAD NOW &rarr;
+              REGISTER NOW &rarr;
             </button>
           </div>
         </motion.section>
