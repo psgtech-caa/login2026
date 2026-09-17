@@ -266,7 +266,10 @@ const authenticateUser = async (user, res, loginType = 'password', identifier = 
 };
 
 const registerUser = async (req, res) => {
-  return res.status(403).json({ message: "Registration is closed. Please use your existing account to log in." });
+  const isAlumniRegistration = String(req.body?.user_type || '').toUpperCase() === 'ALUMNI';
+  if (!isAlumniRegistration) {
+    return res.status(403).json({ message: "Participant registration is closed. Please use your existing account to log in." });
+  }
 
   const transaction = await sequelize.transaction();
   let registrationStage = "request_received";
