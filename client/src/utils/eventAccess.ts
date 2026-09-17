@@ -1,5 +1,5 @@
 const EVENT_ACCESS_STORAGE_KEY = 'login2026_event_access_overrides';
-const FRONTEND_CLOSED_EVENT_NAMES = ['nostos', 'codexcape', 'hunt your treasure', 'debug arena', 'in the slot'];
+const FRONTEND_CLOSED_EVENT_NAMES = ['nostos', 'codexcape', 'hunt your treasure', 'debug arena', 'in the slot', 'code relay', 'blind coding'];
 //
 
 export type EventAccessStatus = 'open' | 'closed';

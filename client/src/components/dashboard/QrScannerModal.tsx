@@ -66,7 +66,7 @@ export const QrScannerModal: React.FC<QrScannerModalProps> = ({ isOpen, onClose 
 
   const handleMarkAttendance = async (codeToSubmit: string) => {
     const code = codeToSubmit.trim();
-    if (!code) return;
+    if (!code || loading) return;
 
     setLoading(true);
     setMessage(null);

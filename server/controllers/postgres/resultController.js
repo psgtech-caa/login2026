@@ -1,4 +1,5 @@
-const { Result, Event, User } = require("../../models/postgres");
+const { Result, Event, User, Registration } = require("../../models/postgres");
+const { Op } = require("sequelize");
 
 const getAllResults = async (req, res) => {
   try {
@@ -49,7 +50,16 @@ const saveEventResult = async (req, res) => {
       await result.update({ winner_id, runner_id, remarks });
     }
 
-    return res.json({ message: "Result saved", result });
+    const starEvent = await Event.findOne({ where: { name: { [Op.iLike]: "%star of login%" } } });
+    const qualifiedIds = [winner_id, runner_id].map(Number).filter(Number.isInteger);
+    if (starEvent && qualifiedIds.length) {
+      await Promise.all(qualifiedIds.map((student_id) => Registration.findOrCreate({
+        where: { event_id: starEvent.id, student_id },
+        defaults: { event_id: starEvent.id, student_id, status: "registered", team_name: null },
+      })));
+    }
+
+    return res.json({ message: "Result saved and qualifiers added to Star of LOGIN", result });
   } catch (error) {
     return res.status(500).json({ message: "Failed to save result", error: error.message });
   }

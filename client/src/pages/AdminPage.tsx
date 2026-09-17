@@ -44,6 +44,8 @@ export const AdminPage: React.FC = () => {
   const [events, setEvents] = useState<any[]>(STATIC_EVENTS);
   const [allRegistrations, setAllRegistrations] = useState<any[]>([]);
   const [registrationAttendanceSummary, setRegistrationAttendanceSummary] = useState<any[]>([]);
+  const [eventAttendance, setEventAttendance] = useState<any[]>([]);
+  const [dayAttendance, setDayAttendance] = useState<any[]>([]);
   const [showWinnersSetting, setShowWinnersSetting] = useState<boolean>(false);
   const [updatingSetting, setUpdatingSetting] = useState<boolean>(false);
   const [syncingToNeon, setSyncingToNeon] = useState(false);
@@ -218,6 +220,17 @@ export const AdminPage: React.FC = () => {
       );
       const regResults = await Promise.all(regPromises);
       setAllRegistrations(regResults);
+
+      const attendanceResults = await Promise.all(resolvedEvents.map(async (evt: any) => ({
+        eventId: evt.id,
+        eventName: evt.name,
+        records: (await api.attendance.getEventList(evt.id).catch(() => ({ data: [] }))).data || [],
+      })));
+      setEventAttendance(attendanceResults);
+      const dayResults = await Promise.all([18, 19].map(async (day) =>
+        (await api.attendance.getDay(day).catch(() => ({ data: [] }))).data || []
+      ));
+      setDayAttendance([...dayResults[0], ...dayResults[1]]);
     } catch (err) {
       console.error('Failed to load admin data:', err);
       setEvents(STATIC_EVENTS);
@@ -1761,6 +1774,24 @@ export const AdminPage: React.FC = () => {
                   );
                 })}
               </div>
+            </div>
+
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-5">
+              <div>
+                <h3 className="font-display font-bold text-base text-[#F7F2F2]">EVENT-WISE ATTENDANCE LOG</h3>
+                <p className="text-[11px] font-mono text-[#A79798] mt-1">Every marked participant with event, name, login ID and scan time.</p>
+              </div>
+              {eventAttendance.map((event) => (
+                <div key={event.eventId} className="border border-[#2A1A1D] bg-[#0A0607] p-4 rounded-[2px]">
+                  <div className="flex items-center justify-between gap-3 mb-3"><span className="font-bold text-[#E08A17]">{event.eventName}</span><span className="text-[10px] font-mono text-[#1FA971]">{event.records.length} PRESENT</span></div>
+                  {event.records.length ? <div className="overflow-x-auto"><table className="w-full text-left text-[11px] font-mono"><thead className="text-[#6B5A5C]"><tr><th className="py-2 pr-3">NAME</th><th className="py-2 pr-3">LOGIN ID</th><th className="py-2 pr-3">COLLEGE</th><th className="py-2">TIME</th></tr></thead><tbody>{event.records.map((entry: any) => <tr key={entry.id} className="border-t border-[#2A1A1D]"><td className="py-2 pr-3 text-[#F7F2F2]">{entry.student?.name || 'Unknown'}</td><td className="py-2 pr-3 text-[#E08A17]">{entry.student?.login_id || entry.student_id}</td><td className="py-2 pr-3 text-[#A79798]">{entry.student?.college_name || 'N/A'}</td><td className="py-2 text-[#1FA971]">{entry.marked_at ? new Date(entry.marked_at).toLocaleString() : 'N/A'}</td></tr>)}</tbody></table></div> : <p className="text-[11px] font-mono text-[#A79798]">No attendance marked.</p>}
+                </div>
+              ))}
+            </div>
+
+            <div className="bg-[#130C0E] border border-[#2A1A1D] p-6 rounded-[2px] space-y-4">
+              <div><h3 className="font-display font-bold text-base text-[#F7F2F2]">DAY-WISE ATTENDANCE LOG</h3><p className="text-[11px] font-mono text-[#A79798] mt-1">Unique participants marked present across each symposium day.</p></div>
+              {dayAttendance.length ? <div className="overflow-x-auto"><table className="w-full text-left text-[11px] font-mono"><thead className="text-[#E08A17]"><tr><th className="py-2 pr-3">NAME</th><th className="py-2 pr-3">LOGIN ID</th><th className="py-2 pr-3">COLLEGE</th><th className="py-2">TIME</th></tr></thead><tbody>{dayAttendance.map((entry: any) => <tr key={`${entry.event_id}-${entry.student_id}`} className="border-t border-[#2A1A1D]"><td className="py-2 pr-3 text-[#F7F2F2]">{entry.student?.name || 'Unknown'}</td><td className="py-2 pr-3 text-[#E08A17]">{entry.student?.login_id || entry.student_id}</td><td className="py-2 pr-3 text-[#A79798]">{entry.student?.college_name || 'N/A'}</td><td className="py-2 text-[#1FA971]">{entry.marked_at ? new Date(entry.marked_at).toLocaleString() : 'N/A'}</td></tr>)}</tbody></table></div> : <p className="text-[11px] font-mono text-[#A79798]">No day attendance marked.</p>}
             </div>
           </div>
         )}

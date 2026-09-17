@@ -11,7 +11,7 @@ import { ContactPage } from '../pages/ContactPage';
 import { CoordinatorsPage } from '../pages/CoordinatorsPage';
 import { WinnersPage } from '../pages/WinnersPage';
 import { LoginPage } from '../pages/LoginPage';
-import { RegisterPage } from '../pages/RegisterPage';
+import { RegistrationClosedPage } from '../pages/RegisterPage';
 import { ForgotPasswordPage } from '../pages/ForgotPasswordPage';
 import { ResetPasswordPage } from '../pages/ResetPasswordPage';
 import { ChangePasswordPage } from '../pages/ChangePasswordPage';
@@ -62,9 +62,9 @@ export const router = createBrowserRouter([
       { path: 'contact', element: <ContactPage /> },
       { path: 'coordinators', element: <CoordinatorsPage /> },
       { path: 'login', element: <LoginPage /> },
-      { path: 'register', element: <RegisterPage /> },
-      { path: 'alumni-register', element: <RegisterPage /> },
-      { path: 'alumni', element: <RegisterPage /> },
+      { path: 'register', element: <RegistrationClosedPage /> },
+      { path: 'alumni-register', element: <RegistrationClosedPage /> },
+      { path: 'alumni', element: <RegistrationClosedPage /> },
       { path: 'forgot-password', element: <ForgotPasswordPage /> },
       { path: 'reset-password', element: <ResetPasswordPage /> },
       { path: 'change-password', element: <ChangePasswordPage /> },

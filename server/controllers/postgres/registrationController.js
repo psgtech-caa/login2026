@@ -617,6 +617,12 @@ const getEventRegistrations = async (req, res) => {
       return row;
     }));
 
+    const isRegistrationDesk = String(req.user?.role || '').toLowerCase() === 'registration_desk';
+    if (isRegistrationDesk) {
+      const paidStatuses = new Set(['VERIFIED', 'PENDING', 'SUCCESSFUL', 'IN_PROGRESS', 'REVIEW']);
+      return res.json(payload.filter((row) => paidStatuses.has(String(row.payment_status || '').toUpperCase())));
+    }
+
     return res.json(payload);
   } catch (error) {
     return res.status(500).json({

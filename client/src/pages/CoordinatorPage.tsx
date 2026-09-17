@@ -5,6 +5,17 @@ import { Trophy, Users, Search, CheckCircle2, XCircle, Lock, Unlock, Save, Refre
 import { SafeQRCode } from '../components/common/SafeQRCode';
 import { useAuthStore, isRegistrationDeskRole } from '../store/authStore';
 
+const downloadQr = (containerId: string, fileName: string) => {
+  const svg = document.querySelector(`#${containerId} svg`) as SVGElement | null;
+  if (!svg) return;
+  const url = URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml;charset=utf-8' }));
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
+};
+
 export const CoordinatorPage: React.FC = () => {
   const { section } = useParams<{ section?: string }>();
   const { user } = useAuthStore();
@@ -37,11 +48,12 @@ export const CoordinatorPage: React.FC = () => {
   // Results state
   const [firstPlace, setFirstPlace] = useState('');
   const [secondPlace, setSecondPlace] = useState('');
-  const [thirdPlace, setThirdPlace] = useState('');
   const [isLocked, setIsLocked] = useState(false);
   const [resultsMessage, setResultsMessage] = useState<string | null>(null);
   const [resultsError, setResultsError] = useState<string | null>(null);
   const [showFullQR, setShowFullQR] = useState(false);
+  const [dayRoster, setDayRoster] = useState<any[]>([]);
+  const [selectedAttendanceDay, setSelectedAttendanceDay] = useState(18);
 
   // 1. Fetch Events & Global Data based on section
   useEffect(() => {
@@ -122,14 +134,12 @@ export const CoordinatorPage: React.FC = () => {
         }
 
         if (resultRes.status === 'fulfilled' && resultRes.value.data) {
-          setFirstPlace(resultRes.value.data.first_place || '');
-          setSecondPlace(resultRes.value.data.second_place || '');
-          setThirdPlace(resultRes.value.data.third_place || '');
+          setFirstPlace(String(resultRes.value.data.winner_id || ''));
+          setSecondPlace(String(resultRes.value.data.runner_id || ''));
           setIsLocked(resultRes.value.data.is_locked || false);
         } else {
           setFirstPlace('');
           setSecondPlace('');
-          setThirdPlace('');
           setIsLocked(false);
         }
       } catch (err) {
@@ -141,6 +151,13 @@ export const CoordinatorPage: React.FC = () => {
 
     fetchEventData();
   }, [selectedEventId]);
+
+  useEffect(() => {
+    if (!isDesk || activeSection !== 'ATTENDANCE') return;
+    api.attendance.getDayRoster(selectedAttendanceDay)
+      .then((response) => setDayRoster(Array.isArray(response.data) ? response.data : []))
+      .catch(() => setDayRoster([]));
+  }, [activeSection, isDesk, selectedAttendanceDay]);
 
   const flattenRegistrationEntries = (registrations: any[] = []) => {
     const flattened: any[] = [];
@@ -200,6 +217,11 @@ export const CoordinatorPage: React.FC = () => {
         status: newStatus,
       });
 
+      if (isDesk) {
+        const refreshed = await api.attendance.getDayRoster(selectedAttendanceDay);
+        setDayRoster(Array.isArray(refreshed.data) ? refreshed.data : []);
+      }
+
       setRoster((prev) =>
         prev.map((item) =>
           item.user_id === studentId || item.user?.id === studentId
@@ -212,6 +234,16 @@ export const CoordinatorPage: React.FC = () => {
     }
   };
 
+  const handleMarkDayAttendance = async (studentId: number, currentStatus: string) => {
+    try {
+      await api.attendance.markDay(selectedAttendanceDay, { student_id: studentId, status: currentStatus === 'PRESENT' ? 'absent' : 'present' });
+      const refreshed = await api.attendance.getDayRoster(selectedAttendanceDay);
+      setDayRoster(Array.isArray(refreshed.data) ? refreshed.data : []);
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to update day attendance.');
+    }
+  };
+
   const handleSaveResults = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedEventId) return;
@@ -220,9 +252,8 @@ export const CoordinatorPage: React.FC = () => {
 
     try {
       await api.results.saveEventResult(selectedEventId, {
-        first_place: firstPlace,
-        second_place: secondPlace,
-        third_place: thirdPlace,
+        winner_id: firstPlace ? Number(firstPlace) : null,
+        runner_id: secondPlace ? Number(secondPlace) : null,
         is_locked: isLocked,
       });
 
@@ -526,7 +557,7 @@ export const CoordinatorPage: React.FC = () => {
       {activeSection === 'ATTENDANCE' && (
         <div className="space-y-8 animate-fade-in-up">
           {/* Event Selector Dropdown */}
-          <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full bg-[#130C0E] p-4 rounded-[2px] border border-[#2A1A1D]">
+          {!isDesk && <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full bg-[#130C0E] p-4 rounded-[2px] border border-[#2A1A1D]">
             <span className="text-xs font-mono text-[#A79798] uppercase tracking-widest shrink-0">Select Arena:</span>
             {loading ? (
               <div className="text-xs font-mono text-[#A79798] flex items-center gap-2">
@@ -547,10 +578,10 @@ export const CoordinatorPage: React.FC = () => {
             ) : (
               <div className="text-xs font-mono text-[#A79798]">No Events Available</div>
             )}
-          </div>
+          </div>}
 
           {/* Live Attendance QR Code Display Card */}
-          {selectedEventId && (
+          {!isDesk && selectedEventId && (
             <div className="bg-[#130C0E] border border-[#E01B22]/60 p-6 rounded-[2px] shadow-[0_0_20px_rgba(224,27,34,0.15)] flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
               <div className="space-y-3 flex-1 text-center md:text-left">
                 <div className="flex items-center justify-center md:justify-start gap-2">
@@ -620,18 +651,43 @@ export const CoordinatorPage: React.FC = () => {
                         <p className="text-[11px] font-mono text-[#A79798]">{day.date}</p>
                         <span className="text-[10px] font-mono text-[#E08A17]">{qrValue}</span>
                       </div>
-                      <div className="bg-white p-3 rounded-[4px] border-4 border-[#E08A17] shrink-0">
+                      <div className="flex flex-col items-center gap-3 shrink-0">
+                        <div id={`desk-day-qr-${day.dayNumber}`} className="bg-white p-4 rounded-[4px] border-4 border-[#E08A17] shadow-[0_0_24px_rgba(224,138,23,0.35)]">
                         <SafeQRCode value={qrValue} size={150} bgColor="#FFFFFF" fgColor="#000000" />
+                        </div>
+                        <button type="button" onClick={() => downloadQr(`desk-day-qr-${day.dayNumber}`, `LOGIN2K26_${day.label}_ATTENDANCE_QR.svg`)} className="px-3 py-2 bg-[#E08A17] hover:bg-[#FFA500] text-[#0A0607] font-mono text-[10px] font-bold rounded-[2px] inline-flex items-center gap-1.5">
+                          DOWNLOAD QR
+                        </button>
                       </div>
                     </div>
                   );
                 })}
               </div>
+              <div className="bg-[#130C0E] border border-[#2A1A1D] p-5 rounded-[2px] space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div>
+                    <h2 className="text-base font-display font-bold text-[#F7F2F2]">SCANNED ATTENDEES</h2>
+                    <p className="text-[11px] font-mono text-[#A79798] mt-1">Name, login ID, college and scan time by day.</p>
+                  </div>
+                  <select value={selectedAttendanceDay} onChange={(e) => setSelectedAttendanceDay(Number(e.target.value))} className="bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] px-3 py-2 text-xs font-mono rounded-[2px]">
+                    <option value={18}>DAY 01 • 18 SEP</option>
+                    <option value={19}>DAY 02 • 19 SEP</option>
+                  </select>
+                </div>
+                {dayRoster.length ? (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-[11px] font-mono">
+                      <thead className="text-[#E08A17] border-b border-[#2A1A1D]"><tr><th className="py-2 pr-3">NAME</th><th className="py-2 pr-3">LOGIN ID</th><th className="py-2 pr-3">COLLEGE</th><th className="py-2 pr-3">STATUS</th><th className="py-2">ACTION</th></tr></thead>
+                      <tbody>{dayRoster.map((entry: any) => <tr key={entry.student_id} className="border-b border-[#2A1A1D]/60"><td className="py-2 pr-3 text-[#F7F2F2]">{entry.student?.name || 'Unknown'}</td><td className="py-2 pr-3 text-[#E08A17]">{entry.student?.login_id || entry.student_id}</td><td className="py-2 pr-3 text-[#A79798]">{entry.student?.college_name || 'N/A'}</td><td className={`py-2 pr-3 ${entry.status === 'PRESENT' ? 'text-[#1FA971]' : 'text-[#E08A17]'}`}>{entry.status}{entry.marked_at ? ` • ${new Date(entry.marked_at).toLocaleString()}` : ''}</td><td className="py-2"><button type="button" onClick={() => handleMarkDayAttendance(entry.student_id, entry.status)} className="px-2 py-1 bg-[#E01B22] text-white text-[10px] font-bold rounded-[2px]">{entry.status === 'PRESENT' ? 'REVERT' : 'MARK PRESENT'}</button></td></tr>)}</tbody>
+                    </table>
+                  </div>
+                ) : <p className="text-xs font-mono text-[#A79798] py-4">No paid participants registered for this day.</p>}
+              </div>
             </div>
           )}
 
           {/* Fullscreen QR Modal */}
-          {showFullQR && selectedEventId && (
+          {!isDesk && showFullQR && selectedEventId && (
             <div className="fixed inset-0 z-50 bg-black/95 flex flex-col items-center justify-center p-6 space-y-6">
               <button
                 onClick={() => setShowFullQR(false)}
@@ -662,6 +718,7 @@ export const CoordinatorPage: React.FC = () => {
             </div>
           )}
 
+          {!isDesk && (<>
           {/* Telemetry Stats Strip */}
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="bg-[#130C0E] border border-[#2A1A1D] p-4 rounded-[2px] space-y-1">
@@ -855,38 +912,23 @@ export const CoordinatorPage: React.FC = () => {
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                 <div>
                   <label className="block text-[#E08A17] mb-1.5 font-mono font-bold">🥇 1ST PLACE WINNER *</label>
-                  <input
-                    type="text"
-                    value={firstPlace}
-                    onChange={(e) => setFirstPlace(e.target.value)}
-                    disabled={isLocked}
-                    placeholder="Participant / Team Name"
-                    className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] p-3 rounded-[2px] outline-none disabled:opacity-50 font-mono input-glow"
-                  />
+                  <select value={firstPlace} onChange={(e) => setFirstPlace(e.target.value)} disabled={isLocked} className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] p-3 rounded-[2px] outline-none disabled:opacity-50 font-mono input-glow">
+                    <option value="">Select registered participant</option>
+                    {visibleRoster.map((item: any) => <option key={`winner-${item.user_id}`} value={item.user_id}>{item.user?.name || item.student?.name} • {item.user?.college_name || item.student?.college_name || 'College'}</option>)}
+                  </select>
                 </div>
 
                 <div>
                   <label className="block text-[#A79798] mb-1.5 font-mono font-bold">🥈 2ND PLACE WINNER</label>
-                  <input
-                    type="text"
-                    value={secondPlace}
-                    onChange={(e) => setSecondPlace(e.target.value)}
-                    disabled={isLocked}
-                    placeholder="Participant / Team Name"
-                    className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] p-3 rounded-[2px] outline-none disabled:opacity-50 font-mono input-glow"
-                  />
+                  <select value={secondPlace} onChange={(e) => setSecondPlace(e.target.value)} disabled={isLocked} className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] p-3 rounded-[2px] outline-none disabled:opacity-50 font-mono input-glow">
+                    <option value="">Select registered participant</option>
+                    {visibleRoster.map((item: any) => <option key={`runner-${item.user_id}`} value={item.user_id}>{item.user?.name || item.student?.name} • {item.user?.college_name || item.student?.college_name || 'College'}</option>)}
+                  </select>
                 </div>
 
                 <div>
                   <label className="block text-[#A79798] mb-1.5 font-mono font-bold">🥉 3RD PLACE WINNER</label>
-                  <input
-                    type="text"
-                    value={thirdPlace}
-                    onChange={(e) => setThirdPlace(e.target.value)}
-                    disabled={isLocked}
-                    placeholder="Participant / Team Name"
-                    className="w-full bg-[#0A0607] border border-[#2A1A1D] text-[#F7F2F2] p-3 rounded-[2px] outline-none disabled:opacity-50 font-mono input-glow"
-                  />
+                  <p className="text-[11px] font-mono text-[#A79798] border border-[#2A1A1D] p-3">Winner and runner details are taken automatically from the registered participant record.</p>
                 </div>
               </div>
 
@@ -913,6 +955,7 @@ export const CoordinatorPage: React.FC = () => {
               </div>
             </form>
           </div>
+          </>)}
         </div>
       )}
     </div>

@@ -48,6 +48,16 @@ const alumniSchema = z.object({
 type ParticipantForm = z.infer<typeof participantSchema>;
 type AlumniForm = z.infer<typeof alumniSchema>;
 
+export const RegistrationClosedPage: React.FC = () => (
+  <div className="min-h-screen bg-[#0A0607] text-[#F7F2F2] flex items-center justify-center px-4">
+    <div className="max-w-md w-full border border-[#E01B22]/60 bg-[#130C0E] p-8 text-center space-y-5 rounded-[2px]">
+      <h1 className="text-2xl font-display font-bold text-[#E01B22]">REGISTRATION CLOSED</h1>
+      <p className="text-sm font-mono text-[#A79798]">New participant and alumni registrations are no longer being accepted.</p>
+      <Link to="/login" className="inline-flex items-center justify-center px-5 py-3 bg-[#E01B22] text-white font-mono text-xs font-bold rounded-[2px]">GO TO LOGIN</Link>
+    </div>
+  </div>
+);
+
 // ──────────────────────────────────────────────
 // Main Register Page
 // ──────────────────────────────────────────────

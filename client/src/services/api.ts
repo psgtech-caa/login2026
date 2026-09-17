@@ -117,6 +117,9 @@ export const api = {
   // Attendance Module
   attendance: {
     getEventList: async (eventId: number | string) => await axiosInstance.get(`/attendance/event/${eventId}`),
+    getDay: async (day: number | string) => await axiosInstance.get(`/attendance/day/${day}`),
+    getDayRoster: async (day: number | string) => await axiosInstance.get(`/attendance/day/${day}/roster`),
+    markDay: async (day: number | string, data: { student_id: number; status: string }) => await axiosInstance.post(`/attendance/day/${day}/manual`, data),
     mark: async (data: { event_id: number; student_id: number; status: string }) => await axiosInstance.post('/attendance/', data),
     markByQR: async (data: { qr_code: string }) => await axiosInstance.post('/attendance/scan-qr', data),
   },

@@ -14,10 +14,31 @@ router.get(
   attendanceController.getEventAttendance
 );
 
+router.get(
+  "/day/:day",
+  verifyJwt,
+  allowRoles("coordinator", "admin", "registration_desk"),
+  attendanceController.getDayAttendance
+);
+
+router.get(
+  "/day/:day/roster",
+  verifyJwt,
+  allowRoles("admin", "registration_desk"),
+  attendanceController.getDayRoster
+);
+
+router.post(
+  "/day/:day/manual",
+  verifyJwt,
+  allowRoles("admin", "registration_desk"),
+  attendanceController.markDayAttendance
+);
+
 router.post(
   "/",
   verifyJwt,
-  allowRoles("coordinator", "admin"),
+  allowRoles("coordinator", "admin", "registration_desk"),
   verifyEventCoordinatorAccess,
   attendanceController.markAttendance
 );
