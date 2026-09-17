@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { api } from '../../services/api';
 import type { Event } from '../../types/event';
 import { getEffectiveEventStatus } from '../../utils/eventAccess';
+
+const EVENT_REGISTRATIONS_CLOSED = true;
 import { normalizeEvents } from '../../utils/eventFormatting';
 import { Calendar, Users, User, Clock, MapPin, ArrowRight, Search, AlertCircle, CheckCircle2, Shield, Sparkles, AlertTriangle, Trash2, X } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -294,7 +296,6 @@ export const DashboardEventsPage: React.FC = () => {
             const guardian = getEventGuardian(event.name);
             const isRegistered = registeredEventIds.has(String(event.id));
             const isRejected = rejectedEventIds.has(String(event.id));
-            const eventStatus = getEffectiveEventStatus(event).toLowerCase();
 
             return (
               <motion.div
@@ -402,7 +403,7 @@ export const DashboardEventsPage: React.FC = () => {
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
-                  ) : eventStatus !== 'open' ? (
+                  ) : EVENT_REGISTRATIONS_CLOSED ? (
                     <button
                       disabled
                       className="w-full py-2.5 bg-[#1A1114] text-[#A79798] border border-[#2A1A1D] font-mono text-[11px] font-bold rounded-[2px] flex items-center justify-center gap-2 cursor-not-allowed"

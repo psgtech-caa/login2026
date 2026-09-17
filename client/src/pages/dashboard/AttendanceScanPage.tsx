@@ -13,7 +13,7 @@ export const AttendanceScanPage: React.FC = () => {
           <h1 className="text-xl font-display font-bold text-[#F7F2F2]">Attendance Scanner</h1>
         </div>
         <p className="text-xs text-[#A79798] font-mono mt-1">
-          Scan the registration desk Day QR first, then scan the event QR when instructed.
+          Scan the registration desk Day QR to record your attendance for the day.
         </p>
       </div>
 
@@ -24,8 +24,8 @@ export const AttendanceScanPage: React.FC = () => {
             <span className="text-[#A79798]">Scan the Day QR shown by the registration desk.</span>
           </div>
           <div className="border border-[#2A1A1D] bg-[#0A0607] p-4">
-            <strong className="text-[#1FA971] block mb-2">2. EVENT ATTENDANCE</strong>
-            <span className="text-[#A79798]">Scan the selected event QR at the event venue.</span>
+            <strong className="text-[#1FA971] block mb-2">2. ONE SCAN PER DAY</strong>
+            <span className="text-[#A79798]">Your day attendance is recorded once. Duplicate scans are ignored.</span>
           </div>
         </div>
         <button

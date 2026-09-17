@@ -6,7 +6,7 @@ import { useQuery } from '@tanstack/react-query';
 import {
   LayoutDashboard, User, Calendar, ClipboardList, Users, Bell,
   LogOut, ChevronRight, CreditCard, Trophy,
-  UserPlus, Megaphone, Upload, CheckSquare, Shield, GraduationCap, Award, Settings, QrCode
+  UserPlus, Megaphone, Upload, CheckSquare, Shield, GraduationCap, Award, Settings, QrCode, MoreHorizontal
 } from 'lucide-react';
 
 // ── Nav item definitions per role ──────────────────────────────────────────
@@ -41,7 +41,6 @@ const adminNavItems = [
 
 const registrationDeskNavItems = [
   { to: '/dashboard/admin', icon: LayoutDashboard, label: 'Overview', end: true },
-  { to: '/dashboard/coordinator/attendance', icon: CheckSquare, label: 'Event Attendance' },
   { to: '/dashboard/admin/day-attendance', icon: QrCode, label: 'Day Attendance QR' },
   { to: '/dashboard/admin/participants', icon: Users, label: 'Participants' },
   { to: '/dashboard/admin/registrations', icon: ClipboardList, label: 'Registrations' },
@@ -75,6 +74,7 @@ const roleLabel = (role?: string | null) => {
 export const DashboardLayout: React.FC = () => {
   const navigate = useNavigate();
   const { user, resetAuth } = useAuthStore();
+  const [mobileMoreOpen, setMobileMoreOpen] = React.useState(false);
 
   const isAdmin = isAdminRole(user?.role);
   const isDesk = isRegistrationDeskRole(user?.role);
@@ -257,8 +257,8 @@ export const DashboardLayout: React.FC = () => {
       <nav className="md:hidden fixed bottom-0 left-0 right-0 bg-[#0A0607] border-t border-[#2A1A1D] z-50 safe-pb">
         <div className="flex items-center justify-around p-2">
           {navItems
-            .filter((i: any) => ['Dashboard', 'Overview', 'Events', 'My Events', 'E-Certificates', 'My Teams', 'My Profile', 'Registrations'].includes(i.label))
-            .slice(0, 5)
+            .filter((i: any) => ['Dashboard', 'Overview', 'Events', 'My Events', 'Registrations', 'Scan Attendance', 'Attendance'].includes(i.label))
+            .slice(0, 4)
             .map(({ to, icon: Icon, label, end }: any) => (
             <NavLink
               key={to}
@@ -276,7 +276,20 @@ export const DashboardLayout: React.FC = () => {
               </span>
             </NavLink>
           ))}
+          <button type="button" onClick={() => setMobileMoreOpen((open) => !open)} className="flex flex-col items-center justify-center w-full py-1.5 gap-1 text-[#6B5A5C] hover:text-[#A79798]">
+            <MoreHorizontal className="w-5 h-5" />
+            <span className="text-[9px] font-mono font-bold uppercase tracking-wider">More</span>
+          </button>
         </div>
+        {mobileMoreOpen && (
+          <div className="absolute bottom-full right-2 mb-2 w-52 bg-[#130C0E] border border-[#2A1A1D] p-2 shadow-xl">
+            {navItems.filter((item: any) => !['Dashboard', 'Overview', 'Events', 'My Events', 'Registrations', 'Scan Attendance', 'Attendance'].includes(item.label)).map(({ to, icon: Icon, label, end }: any) => (
+              <NavLink key={to} to={to} end={end} onClick={() => setMobileMoreOpen(false)} className="flex items-center gap-3 px-3 py-2.5 text-xs font-mono text-[#A79798] hover:text-white hover:bg-[#1A1114]">
+                <Icon className="w-4 h-4" /> {label}
+              </NavLink>
+            ))}
+          </div>
+        )}
       </nav>
     </div>
   );

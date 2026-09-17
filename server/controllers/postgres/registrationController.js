@@ -114,6 +114,8 @@ const hasUserPaid = async (studentId) => {
 
 const createRegistration = async (req, res) => {
   try {
+    return res.status(403).json({ message: "Event registrations are closed. Existing registrations remain available." });
+
     const student_id = req.user.id;
     const { event_id, team_name, team_members } = req.body;
 

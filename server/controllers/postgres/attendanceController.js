@@ -3,7 +3,17 @@ const eventModel = require("../../models/postgres/eventModel");
 const registrationModel = require("../../models/postgres/registrationModel");
 const userModel = require("../../models/postgres/userModel");
 const paymentModel = require("../../models/postgres/paymentModel");
+const { Op } = require("sequelize");
 const { refreshRegistrationAttendanceSummary } = require("../../services/registrationAttendanceSummaryService");
+const paidStatuses = ["VERIFIED", "PENDING", "successful", "in_progress", "review"];
+
+const refreshSummarySafely = async () => {
+  try {
+    await refreshRegistrationAttendanceSummary();
+  } catch (error) {
+    console.warn("[Attendance] Summary refresh skipped:", error.message);
+  }
+};
 
 const normalizeAttendanceStatus = (status) => {
   if (typeof status !== "string") return null;
@@ -68,8 +78,8 @@ const getDayRoster = async (req, res) => {
       ],
     });
     const studentIds = [...new Set(registrations.map((row) => row.student_id))];
-    const payments = await paymentModel.findAll({ where: { student_id: studentIds } });
-    const paid = new Set(payments.filter((payment) => ["VERIFIED", "PENDING", "successful", "in_progress", "review"].includes(String(payment.status))).map((payment) => payment.student_id));
+    const payments = studentIds.length ? await paymentModel.findAll({ where: { student_id: { [Op.in]: studentIds } } }) : [];
+    const paid = new Set(payments.filter((payment) => paidStatuses.includes(String(payment.status))).map((payment) => payment.student_id));
     const attendances = await attendanceModel.findAll({ where: { student_id: studentIds, status: "present" }, include: [{ model: eventModel, as: "event", where: { day }, required: true }] });
     const attendanceByStudent = new Map();
     attendances.forEach((row) => {
@@ -94,17 +104,34 @@ const markDayAttendance = async (req, res) => {
     const { student_id, status = "present" } = req.body;
     const normalizedStatus = normalizeAttendanceStatus(status);
     if (!Number.isInteger(day) || !student_id || !normalizedStatus) return res.status(400).json({ message: "Valid day, participant and attendance status are required" });
+
+    if (normalizedStatus === "absent") {
+      const dayEvents = await eventModel.findAll({ where: { day }, attributes: ["id"] });
+      const eventIds = dayEvents.map((event) => event.id);
+      if (eventIds.length) {
+        await attendanceModel.update(
+          { status: "absent", marked_by: req.user.id, marked_at: new Date() },
+          { where: { student_id, event_id: { [Op.in]: eventIds } } }
+        );
+      }
+      await refreshSummarySafely();
+      return res.json({ message: `Day ${day} attendance revoked`, student_id, status: "ABSENT" });
+    }
+
     const registrations = await registrationModel.findAll({ where: { student_id, status: "registered" }, include: [{ model: eventModel, as: "event", where: { day }, required: true }] });
     if (!registrations.length) return res.status(404).json({ message: "Participant has no registered event for this day" });
-    const payment = await paymentModel.findOne({ where: { student_id, status: ["VERIFIED", "PENDING", "successful", "in_progress", "review"] } });
+    const payment = await paymentModel.findOne({ where: { student_id, status: { [Op.in]: paidStatuses } } });
     if (!payment) return res.status(403).json({ message: "Only paid participants can receive attendance" });
-    for (const registration of registrations) {
-      const [attendance] = await attendanceModel.findOrCreate({ where: { event_id: registration.event_id, student_id }, defaults: { event_id: registration.event_id, student_id, status: normalizedStatus, marked_by: req.user.id, marked_at: new Date() } });
-      await attendance.update({ status: normalizedStatus, marked_by: req.user.id, marked_at: new Date() });
+    const eventIds = registrations.map((registration) => registration.event_id);
+    const attendanceValues = { status: normalizedStatus, marked_by: req.user.id, marked_at: new Date() };
+
+    for (const eventId of eventIds) {
+      await attendanceModel.upsert({ event_id: eventId, student_id, ...attendanceValues });
     }
-    await refreshRegistrationAttendanceSummary();
+    await refreshSummarySafely();
     return res.json({ message: `Day ${day} attendance updated`, student_id, status: normalizedStatus.toUpperCase() });
   } catch (error) {
+    console.error("[Attendance] Day manual update failed:", error);
     return res.status(500).json({ message: "Failed to update day attendance", error: error.message });
   }
 };
@@ -137,7 +164,7 @@ const markAttendance = async (req, res) => {
       });
     }
 
-    await refreshRegistrationAttendanceSummary();
+    await refreshSummarySafely();
 
     return res.json({ message: "Attendance updated", attendance });
   } catch (error) {
@@ -196,7 +223,7 @@ const markSelfAttendanceByQR = async (req, res) => {
         }
       }
 
-      await refreshRegistrationAttendanceSummary();
+      await refreshSummarySafely();
 
       return res.json({
         message: `Day ${dayNumber} attendance marked for ${registrations.length} registered event${registrations.length === 1 ? "" : "s"}.`,
@@ -239,7 +266,7 @@ const markSelfAttendanceByQR = async (req, res) => {
       });
     }
 
-    await refreshRegistrationAttendanceSummary();
+    await refreshSummarySafely();
 
     return res.json({
       message: `Attendance marked as PRESENT for ${event.name}!`,
